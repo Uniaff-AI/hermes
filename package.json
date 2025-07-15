@@ -19,5 +19,5 @@
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
-  "packageManager": "yarn@4.9.2"
+  "packageManager": "yarn@3.6.4"
 }
