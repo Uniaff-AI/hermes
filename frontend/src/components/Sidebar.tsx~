@@ -1,0 +1,48 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils'; // Если нет этой функции — добавим позже
+
+const menuItems = [
+    { name: 'Дашборд', path: '/dashboard', icon: '🏠' },
+    { name: 'Менеджмент лидов', path: '/leads', icon: '📋' },
+    { name: 'Tracking', path: '/tracking', icon: '📡' },
+    { name: 'Task Tracking', path: '/task-tracking', icon: '✅' },
+    { name: 'Лиды', path: '/leads-list', icon: '👥' },
+    { name: 'Креативы', path: '/creatives', icon: '🎨' },
+    { name: 'Офферы', path: '/offers', icon: '📦' },
+    { name: 'Финансы', path: '/finance', icon: '💰' },
+    { name: 'ПП', path: '/pp', icon: '📁' },
+    { name: 'Пользователи', path: '/users', icon: '👤' },
+    { name: 'Время просмотра', path: '/watchtime', icon: '⏱️' },
+    { name: 'Стата кнопок', path: '/button-stats', icon: '🔘' },
+];
+
+const Sidebar = () => {
+    const pathname = usePathname();
+
+    return (
+        <aside className="w-64 h-screen bg-white border-r p-6 text-sm fixed">
+            <h1 className="text-lg font-semibold mb-6">Меню</h1>
+            <p className="text-gray-500 uppercase text-xs font-semibold mb-4">Навигация</p>
+            <nav className="space-y-2">
+                {menuItems.map(({ name, path, icon }) => (
+                    <Link key={path} href={path}>
+                        <a
+                            className={cn(
+                                'flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 transition',
+                                pathname === path ? 'bg-gray-100 text-black font-medium' : 'text-gray-600'
+                            )}
+                        >
+                            <span className="text-lg">{icon}</span>
+                            {name}
+                        </a>
+                    </Link>
+                ))}
+            </nav>
+        </aside>
+    );
+};
+
+export default Sidebar;
