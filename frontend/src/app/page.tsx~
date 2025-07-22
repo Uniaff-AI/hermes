@@ -3,7 +3,7 @@
 import React from 'react';
 import Head from 'next/head';
 import Layout from '@/components/layout/Layout';
-import Stats from "@/components/dashboard/Stats";
+import DashboardStats from "@/components/dashboard/DashboardStats";
 import OffersDashboardPage from "@/app/dashboard/OffersDashboard/page";
 
 const HomePage: React.FC = () => {
@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
           <title>Offers Dashboard - Hermes</title>
         </Head>
 
-        <Stats/>
+        <DashboardStats/>
           <OffersDashboardPage/>
       </Layout>
   );

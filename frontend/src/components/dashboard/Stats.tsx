@@ -1,0 +1,35 @@
+import { Users, Target, DollarSign, TrendingUp } from 'lucide-react';
+import StatsCard from './StatsCard';
+
+const Stats = () => {
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatsCard
+                title="Total Leads"
+                value="5"
+                change="+12.3%"
+                icon={<Users className="w-6 h-6" />}
+            />
+            <StatsCard
+                title="Active Offers"
+                value="5"
+                change="+2"
+                icon={<Target className="w-6 h-6" />}
+            />
+            <StatsCard
+                title="Sales Count"
+                value="1"
+                change="+0.8%"
+                icon={<TrendingUp className="w-6 h-6" />}
+            />
+            <StatsCard
+                title="Total Revenue"
+                value="$27.00"
+                change="+18.2%"
+                icon={<DollarSign className="w-6 h-6" />}
+            />
+        </div>
+    );
+};
+
+export default Stats;
