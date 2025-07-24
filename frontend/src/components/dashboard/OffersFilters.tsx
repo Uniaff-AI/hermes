@@ -1,7 +1,7 @@
 'use client';
 
-import { FC } from 'react';
 import { Filter, Search } from 'lucide-react';
+import { FC } from 'react';
 
 type OffersFiltersProps = {
     value: string;

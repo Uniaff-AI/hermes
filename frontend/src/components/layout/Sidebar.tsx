@@ -1,9 +1,9 @@
 'use client';
 
 import {
-    Home, Users, Settings, ActivitySquare, ClipboardList, BarChart,
-    Layers, DollarSign, BookOpenCheck, Eye, Terminal
-} from 'lucide-react';
+ActivitySquare, BarChart,
+BookOpenCheck, ClipboardList, DollarSign, Eye,     Home,     Layers, Settings, Terminal,
+Users} from 'lucide-react';
 
 const menuItems = [
     { label: 'Дашборд', icon: <Home className="w-4 h-4" />, href: '/' },

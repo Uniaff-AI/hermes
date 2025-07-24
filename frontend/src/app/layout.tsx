@@ -1,5 +1,6 @@
-import '@/styles/globals.css'; // Import global styles
 import * as React from 'react';
+
+import '@/styles/globals.css'; // Import global styles
 
 const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (

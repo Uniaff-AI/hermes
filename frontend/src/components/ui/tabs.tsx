@@ -1,6 +1,7 @@
 'use client';
 
-import React, { ReactElement } from 'react';
+import React from 'react';
+
 import { cn } from '@/lib/utils';
 
 // === Типы пропсов ===

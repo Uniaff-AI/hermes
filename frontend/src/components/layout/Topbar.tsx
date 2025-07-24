@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { Menu, Settings } from 'lucide-react';
+import * as React from 'react';
 
 const Topbar: React.FC = () => {
     return (
