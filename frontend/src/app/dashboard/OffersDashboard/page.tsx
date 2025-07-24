@@ -1,27 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-
 import OffersFilters from '@/components/dashboard/OffersFilters';
 import OffersTable from '@/components/dashboard/OffersTable';
-import { Button } from '@/components/ui/button';
+import PageHeader from '@/shared/components/PageHeader';
 
 const OffersView = () => {
     const [search, setSearch] = useState('');
 
     return (
         <>
-            <div className="flex items-center justify-between mb-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Offers Dashboard</h1>
-                    <p className="text-sm text-gray-500">Детальная таблица всех офферов и их статистики</p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline">⬇️ Импорт офферов</Button>
-                    <Button>+ Создать оффер</Button>
-                </div>
-            </div>
-
+            <PageHeader
+                title="Офферы"
+                description="Детальная таблица всех офферов и их статистики"
+                firstButtonText="Импорт офферов"
+                secondButtonText="Создать оффер"
+                isSecondButtonIcon={true}
+            />
             <OffersFilters
                 value={search}
                 onChange={setSearch}

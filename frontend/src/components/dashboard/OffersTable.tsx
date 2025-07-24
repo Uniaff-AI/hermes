@@ -1,80 +1,7 @@
 'use client';
 
+import { OffersTableProps, mockOffers } from '@/__mocks__/offers';
 import React, { FC } from 'react';
-
-type Offer = {
-    id: number;
-    title: string;
-    group: string;
-    clicks: number;
-    leads: number;
-    sales: number;
-    cr: string;
-    epc: string;
-    status: string;
-};
-
-type OffersTableProps = {
-    searchQuery: string;
-};
-
-const mockOffers: Offer[] = [
-    {
-        id: 4481,
-        title: '[SPACE-16] (LR-GOVP)',
-        group: 'IN Proman HP',
-        clicks: 0,
-        leads: 0,
-        sales: 0,
-        cr: '0.00%',
-        epc: '0.0000 $',
-        status: 'Активный',
-    },
-    {
-        id: 4492,
-        title: '[CRYPTO-21] (NL-BITCOIN)',
-        group: 'NL Finance Beta',
-        clicks: 24,
-        leads: 2,
-        sales: 1,
-        cr: '8.33%',
-        epc: '0.1300 $',
-        status: 'Отключен',
-    },
-    {
-        id: 4505,
-        title: '[HEALTH-02] (DE-VITA)',
-        group: 'DE Health Main',
-        clicks: 76,
-        leads: 5,
-        sales: 3,
-        cr: '6.58%',
-        epc: '0.2200 $',
-        status: 'Активный',
-    },
-    {
-        id: 4513,
-        title: '[GAMBLE-11] (BR-CASINO)',
-        group: 'BR Gaming Core',
-        clicks: 15,
-        leads: 1,
-        sales: 0,
-        cr: '6.67%',
-        epc: '0.0500 $',
-        status: 'Модерация',
-    },
-    {
-        id: 4527,
-        title: '[SOFT-08] (US-WINDOWS)',
-        group: 'US Software A/B',
-        clicks: 105,
-        leads: 12,
-        sales: 7,
-        cr: '11.43%',
-        epc: '0.3500 $',
-        status: 'Активный',
-    },
-];
 
 const OffersTable: FC<OffersTableProps> = ({ searchQuery }) => {
     const filteredOffers = mockOffers.filter((offer) => {
@@ -90,54 +17,54 @@ const OffersTable: FC<OffersTableProps> = ({ searchQuery }) => {
         <div className="bg-white p-4 rounded shadow">
             <table className="min-w-full text-sm">
                 <thead>
-                <tr className="text-left border-b text-gray-600 font-medium">
-                    <th className="py-2 px-3">ID</th>
-                    <th className="py-2 px-3">Название</th>
-                    <th className="py-2 px-3">Группа</th>
-                    <th className="py-2 px-3">Клики</th>
-                    <th className="py-2 px-3">Лиды</th>
-                    <th className="py-2 px-3">Продажи</th>
-                    <th className="py-2 px-3">CR</th>
-                    <th className="py-2 px-3">EPC</th>
-                    <th className="py-2 px-3">Статус</th>
-                </tr>
+                    <tr className="text-left border-b text-gray-600 font-medium">
+                        <th className="py-2 px-3">ID</th>
+                        <th className="py-2 px-3">Название</th>
+                        <th className="py-2 px-3">Группа</th>
+                        <th className="py-2 px-3">Клики</th>
+                        <th className="py-2 px-3">Лиды</th>
+                        <th className="py-2 px-3">Продажи</th>
+                        <th className="py-2 px-3">CR</th>
+                        <th className="py-2 px-3">EPC</th>
+                        <th className="py-2 px-3">Статус</th>
+                    </tr>
                 </thead>
                 <tbody>
-                {filteredOffers.length > 0 ? (
-                    filteredOffers.map((offer) => (
-                        <tr key={offer.id} className="border-b hover:bg-gray-50 transition">
-                            <td className="py-2 px-3">{offer.id}</td>
-                            <td className="py-2 px-3 text-blue-600 cursor-pointer hover:underline">
-                                {offer.title}
-                            </td>
-                            <td className="py-2 px-3">{offer.group}</td>
-                            <td className="py-2 px-3">{offer.clicks}</td>
-                            <td className="py-2 px-3">{offer.leads}</td>
-                            <td className="py-2 px-3">{offer.sales}</td>
-                            <td className="py-2 px-3">{offer.cr}</td>
-                            <td className="py-2 px-3">{offer.epc}</td>
-                            <td className="py-2 px-3">
-                  <span
-                      className={
-                          offer.status === 'Активный'
-                              ? 'text-green-600 font-medium'
-                              : offer.status === 'Отключен'
-                                  ? 'text-red-500 font-medium'
-                                  : 'text-yellow-600 font-medium'
-                      }
-                  >
-                    {offer.status}
-                  </span>
+                    {filteredOffers.length > 0 ? (
+                        filteredOffers.map((offer) => (
+                            <tr key={offer.id} className="border-b hover:bg-gray-50 transition">
+                                <td className="py-2 px-3">{offer.id}</td>
+                                <td className="py-2 px-3 text-blue-600 cursor-pointer hover:underline">
+                                    {offer.title}
+                                </td>
+                                <td className="py-2 px-3">{offer.group}</td>
+                                <td className="py-2 px-3">{offer.clicks}</td>
+                                <td className="py-2 px-3">{offer.leads}</td>
+                                <td className="py-2 px-3">{offer.sales}</td>
+                                <td className="py-2 px-3">{offer.cr}</td>
+                                <td className="py-2 px-3">{offer.epc}</td>
+                                <td className="py-2 px-3">
+                                    <span
+                                        className={
+                                            offer.status === 'Активный'
+                                                ? 'text-green-600 font-medium'
+                                                : offer.status === 'Отключен'
+                                                    ? 'text-red-500 font-medium'
+                                                    : 'text-yellow-600 font-medium'
+                                        }
+                                    >
+                                        {offer.status}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan={9} className="text-center py-6 text-gray-500">
+                                Офферы не найдены.
                             </td>
                         </tr>
-                    ))
-                ) : (
-                    <tr>
-                        <td colSpan={9} className="text-center py-6 text-gray-500">
-                            Офферы не найдены.
-                        </td>
-                    </tr>
-                )}
+                    )}
                 </tbody>
             </table>
         </div>

@@ -10,14 +10,14 @@ import DashboardPage from "@/app/dashboard/page";
 
 const HomePage: React.FC = () => {
   return (
-      <Layout>
-        <Head>
-          <title>Offers Dashboard - Hermes</title>
-        </Head>
+    <Layout>
+      <Head>
+        <title>Offers Dashboard - Hermes</title>
+      </Head>
 
-        <Stats/>
-          <DashboardPage/>
-      </Layout>
+      <Stats />
+      <DashboardPage />
+    </Layout>
   );
 };
 
