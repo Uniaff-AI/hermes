@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react';
 import Head from 'next/head';
-import Layout from '@/components/layout/Layout';
+import React from 'react';
+
 import Stats from "@/components/dashboard/Stats";
-import OffersDashboardPage from "@/app/dashboard/OffersDashboard/page";
+import Layout from '@/components/layout/Layout';
+
+import DashboardPage from "@/app/dashboard/page";
 
 const HomePage: React.FC = () => {
   return (
@@ -14,7 +16,7 @@ const HomePage: React.FC = () => {
         </Head>
 
         <Stats/>
-          <OffersDashboardPage/>
+          <DashboardPage/>
       </Layout>
   );
 };

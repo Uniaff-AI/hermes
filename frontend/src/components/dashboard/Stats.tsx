@@ -1,4 +1,5 @@
-import { Users, Target, DollarSign, TrendingUp } from 'lucide-react';
+import { DollarSign, Target, TrendingUp,Users } from 'lucide-react';
+
 import StatsCard from './StatsCard';
 
 const Stats = () => {

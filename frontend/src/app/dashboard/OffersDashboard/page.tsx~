@@ -4,41 +4,12 @@ import { useState } from 'react';
 import OffersFilters from '@/components/dashboard/OffersFilters';
 import OffersTable from '@/components/dashboard/OffersTable';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const OffersDashboardPage = () => {
+const OffersView = () => {
     const [search, setSearch] = useState('');
-    const [tab, setTab] = useState('offers');
 
     return (
-        <main className="bg-[#F9FAFB] min-h-screen py-6 px-6">
-            {/* Центрированные табы */}
-            <div className="flex justify-center mb-4">
-                <Tabs value={tab} onValueChange={setTab}>
-                    <TabsList className="bg-white rounded-full shadow p-1 flex space-x-2">
-                        <TabsTrigger
-                            value="offers"
-                            className="px-6 py-2 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-white rounded-full"
-                        >
-                            Offers Dashboard
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="leads"
-                            className="px-6 py-2 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-white rounded-full"
-                        >
-                            Leads Management
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="redirects"
-                            className="px-6 py-2 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-white rounded-full"
-                        >
-                            Redirects
-                        </TabsTrigger>
-                    </TabsList>
-                </Tabs>
-            </div>
-
-            {/* Заголовок и действия — уже под табами */}
+        <>
             <div className="flex items-center justify-between mb-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Offers Dashboard</h1>
@@ -50,27 +21,14 @@ const OffersDashboardPage = () => {
                 </div>
             </div>
 
-            {/* Контент табов */}
-            {tab === 'offers' && (
-                <>
-                    <OffersFilters
-                        value={search}
-                        onChange={setSearch}
-                        onAdvancedClick={() => console.log('Расширенные фильтры')}
-                    />
-                    <OffersTable searchQuery={search} />
-                </>
-            )}
-
-            {tab === 'leads' && (
-                <div className="mt-6 text-gray-500">💡 Leads management coming soon...</div>
-            )}
-
-            {tab === 'redirects' && (
-                <div className="mt-6 text-gray-500">🔁 Redirect management coming soon...</div>
-            )}
-        </main>
+            <OffersFilters
+                value={search}
+                onChange={setSearch}
+                onAdvancedClick={() => console.log('Расширенные фильтры')}
+            />
+            <OffersTable searchQuery={search} />
+        </>
     );
 };
 
-export default OffersDashboardPage;
+export default OffersView;

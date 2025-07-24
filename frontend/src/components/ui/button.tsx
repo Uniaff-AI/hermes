@@ -1,9 +1,10 @@
-import { cn } from '@/lib/utils';
 import { ButtonHTMLAttributes, forwardRef } from 'react';
+
+import { cn } from '@/lib/utils';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'default' | 'outline' | 'ghost' | 'destructive';
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'sm' | 'md' | 'lg' | 'icon'; // ← добавляем "icon"
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -22,6 +23,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             sm: 'text-sm px-3 py-1.5',
             md: 'text-sm px-4 py-2',
             lg: 'text-base px-5 py-2.5',
+            icon: 'p-2 w-8 h-8', // ← добавляем стили для кнопки-иконки
         };
 
         return (
