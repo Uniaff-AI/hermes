@@ -1,22 +1,21 @@
-import type { Config } from 'tailwindcss';
-import defaultTheme from 'tailwindcss/defaultTheme';
+import type { Config } from 'tailwindcss'
+import defaultTheme from 'tailwindcss/defaultTheme'
 
 const config: Config = {
-  content: ['./src/**/*.{js,jsx,ts,tsx}'],
+  content: ['./src/**/*.{ts,tsx,js,jsx}'],
   theme: {
     extend: {
       fontFamily: {
         primary: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       colors: {
-        // Цвета через HSL переменные
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: 'hsl(var(--card))',
         'card-foreground': 'hsl(var(--card-foreground))',
         popover: 'hsl(var(--popover))',
         'popover-foreground': 'hsl(var(--popover-foreground))',
-        brand: 'hsl(var(--primary))', // 👈 если нужно просто hsl
+        brand: 'hsl(var(--primary))',
         'brand-foreground': 'hsl(var(--primary-foreground))',
         secondary: 'hsl(var(--secondary))',
         'secondary-foreground': 'hsl(var(--secondary-foreground))',
@@ -30,7 +29,6 @@ const config: Config = {
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
 
-        // Основная палитра через RGB-переменные
         primary: {
           50: 'rgb(var(--tw-color-primary-50) / <alpha-value>)',
           100: 'rgb(var(--tw-color-primary-100) / <alpha-value>)',
@@ -44,7 +42,6 @@ const config: Config = {
           900: 'rgb(var(--tw-color-primary-900) / <alpha-value>)',
         },
 
-        // Дополнительные
         dark: '#222222',
         'chart-1': 'hsl(var(--chart-1))',
         'chart-2': 'hsl(var(--chart-2))',
@@ -52,6 +49,7 @@ const config: Config = {
         'chart-4': 'hsl(var(--chart-4))',
         'chart-5': 'hsl(var(--chart-5))',
       },
+
       keyframes: {
         flicker: {
           '0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100%': {
@@ -73,6 +71,7 @@ const config: Config = {
           },
         },
       },
+
       animation: {
         flicker: 'flicker 3s linear infinite',
         shimmer: 'shimmer 1.3s linear infinite',
@@ -80,6 +79,6 @@ const config: Config = {
     },
   },
   plugins: [require('@tailwindcss/forms')],
-};
+}
 
-export default config;
+export default config
