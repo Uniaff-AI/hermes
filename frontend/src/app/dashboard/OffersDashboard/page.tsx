@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import OffersFilters from '@/components/dashboard/OffersFilters';
 import OffersTable from '@/components/dashboard/OffersTable';
-import PageHeader from '@/shared/components/PageHeader';
+import PageHeader from '@/shared/ui/PageHeader';
 
 const OffersView = () => {
     const [search, setSearch] = useState('');
