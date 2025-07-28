@@ -19,6 +19,8 @@
     "generate:api:watch": "orval --config src/shared/api/orval.config.ts --watch"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-icons": "^1.3.2",
     "@tanstack/react-query": "^5.83.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.0.0",
