@@ -14,9 +14,12 @@
     "test": "jest",
     "format": "prettier -w ts-nextjs-tailwind-starter-main",
     "format:check": "prettier -c ts-nextjs-tailwind-starter-main",
-    "postbuild": "next-sitemap --config next-sitemap.config.js"
+    "postbuild": "next-sitemap --config next-sitemap.config.js",
+    "generate:api": "orval --config src/shared/api/orval.config.ts",
+    "generate:api:watch": "orval --config src/shared/api/orval.config.ts --watch"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.83.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.0.0",
     "date-fns": "^4.1.0",
@@ -36,6 +39,7 @@
     "@commitlint/config-conventional": "^16.2.4",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/forms": "^0.5.10",
+    "@tanstack/react-query-devtools": "^5.83.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^15.0.7",
     "@types/react": "^18.3.18",
@@ -52,11 +56,12 @@
     "lint-staged": "^12.5.0",
     "next-router-mock": "^0.9.0",
     "next-sitemap": "^2.5.28",
+    "orval": "^7.10.0",
     "postcss": "^8.5.1",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^3.4.17",
-    "typescript": "^4.9.5"
+    "typescript": "^5.8.3"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
@@ -67,5 +72,5 @@
       "prettier -w"
     ]
   },
-  "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac"
+  "packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad"
 }

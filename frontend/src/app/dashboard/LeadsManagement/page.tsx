@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import LeadsFilters from "@/components/leadsManagement/LeadsFilters";
 import LeadsTable from "@/components/leadsManagement/LeadsTable";
-import PageHeader from '@/shared/components/PageHeader';
+import PageHeader from '@/shared/ui/PageHeader';
 
 const LeadsView = () => {
     const [search, setSearch] = useState('');
