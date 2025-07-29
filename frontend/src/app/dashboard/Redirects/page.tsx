@@ -6,6 +6,7 @@ import RedirectRulesView from "@/components/dashboard/RedirectRuleCard";
 import RuleCreationForm from "@/components/dashboard/RuleCreationForm";
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {TemplatesView} from "@/components/dashboard/messages/TemplatesView";
+import AnalyticsView from "@/components/dashboard/AnalyticsView";
 
 const RedirectsView: FC = () => {
     const [subTab, setSubTab] = useState('active');
@@ -44,7 +45,7 @@ const RedirectsView: FC = () => {
                 {subTab === 'active' && <RedirectRulesView/>}
                 {subTab === 'management' && <div>⚙️<RuleCreationForm/></div>}
                 {subTab === 'messages' && <div> <TemplatesView/></div>}
-                {subTab === 'analytics' && <div>📊 Аналитика по редиректам</div>}
+                {subTab === 'analytics' && <div><AnalyticsView/></div>}
             </div>
         </div>
     );

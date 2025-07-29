@@ -1,11 +1,9 @@
 'use client';
 
-import { Filter,Settings } from 'lucide-react';
 import { FC } from 'react';
-
+import { Settings, Filter } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-// Тип правила
 type RedirectRule = {
     id: string;
     name: string;
@@ -18,7 +16,6 @@ type RedirectRule = {
     sendTime: string;
 };
 
-// Статичная демо-правила
 const demoRule: RedirectRule = {
     id: 'rule-1',
     name: 'Forex Premium Rule',
@@ -33,51 +30,55 @@ const demoRule: RedirectRule = {
 
 const RedirectRulesView: FC = () => {
     return (
-        <div className="space-y-4">
-            <div className="bg-white rounded-lg border p-6 shadow-sm">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500" />
-                        <h2 className="text-base font-semibold text-gray-900">{demoRule.name}</h2>
-                        <Badge variant="secondary" className="text-xs px-2 py-0.5">Активно</Badge>
+        <div className="space-y-6">
+            <div className="bg-white rounded-2xl border p-6 shadow">
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                        <span className="w-3 h-3 rounded-full bg-green-500" />
+                        <h2 className="text-lg font-semibold text-gray-900">{demoRule.name}</h2>
+                        <Badge variant="outline" className="text-xs px-2 py-0.5">
+                            {demoRule.status === 'active' ? 'Активно' : 'Неактивно'}
+                        </Badge>
                     </div>
-                    <div className="flex gap-2">
-                        <button><Settings className="w-4 h-4 text-gray-500" /></button>
-                        <button><Filter className="w-4 h-4 text-gray-500" /></button>
+                    <div className="flex items-center gap-3">
+                        <button className="p-2 hover:bg-gray-100 rounded">
+                            <Settings className="w-5 h-5 text-gray-500" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 rounded">
+                            <Filter className="w-5 h-5 text-gray-500" />
+                        </button>
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-x-8 gap-y-4 text-sm text-gray-600">
                     <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wide">Оффер</div>
-                        <div className="text-sm text-gray-900">{demoRule.offer}</div>
+                        <div className="uppercase text-xs mb-1">Оффер</div>
+                        <div className="font-medium text-gray-900">{demoRule.offer}</div>
                     </div>
                     <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wide">ПП</div>
-                        <div className="text-sm text-gray-900">{demoRule.partner}</div>
+                        <div className="uppercase text-xs mb-1">ПП</div>
+                        <div className="font-medium text-gray-900">{demoRule.partner}</div>
                     </div>
                     <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wide">Период</div>
-                        <div className="text-sm text-gray-900">{demoRule.period}</div>
+                        <div className="uppercase text-xs mb-1">Период</div>
+                        <div className="font-medium text-gray-900">{demoRule.period}</div>
                     </div>
                     <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-wide">Частота</div>
-                        <div className="text-sm text-gray-900">{demoRule.frequency}</div>
+                        <div className="uppercase text-xs mb-1">Частота</div>
+                        <div className="font-medium text-gray-900">{demoRule.frequency}</div>
                     </div>
-                    <div className="flex flex-col justify-center">
-                        <div className="text-xs text-gray-500 uppercase tracking-wide">Лимит в день</div>
-                        <div className="text-sm font-semibold bg-gray-100 px-2 py-0.5 rounded w-fit">
+                    <div>
+                        <div className="uppercase text-xs mb-1">Лимит в день</div>
+                        <div className="inline-block bg-gray-100 px-3 py-1 rounded-full font-semibold text-gray-900">
                             {demoRule.dailyLimit} лидов
                         </div>
                     </div>
                 </div>
 
-                {/* Sending Time */}
-                <div className="mt-4 text-xs text-gray-500 flex items-center gap-1">
-                    <span>🕒 Время отправки:</span>
-                    <span className="text-sm text-gray-900 font-medium">{demoRule.sendTime}</span>
+                <div className="mt-6 flex items-center text-xs text-gray-500">
+                    <span className="mr-1">🕒</span>
+                    <span>Время отправки:</span>
+                    <span className="ml-2 font-medium text-gray-900">{demoRule.sendTime}</span>
                 </div>
             </div>
         </div>
