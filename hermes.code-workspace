@@ -1,0 +1,152 @@
+{
+  "folders": [
+    {
+      "name": "Root",
+      "path": ".",
+    },
+    {
+      "name": "Backend",
+      "path": "./backend",
+    },
+    {
+      "name": "Frontend",
+      "path": "./frontend",
+    },
+    {
+      "name": "Docs",
+      "path": "./docs",
+    },
+  ],
+  "settings": {
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "typescript.suggest.autoImports": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+    },
+    "eslint.workingDirectories": [
+      {
+        "directory": "./backend",
+        "changeProcessCWD": true,
+      },
+      {
+        "directory": "./frontend",
+        "changeProcessCWD": true,
+      },
+    ],
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.next": true,
+      "**/coverage": true,
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.next": true,
+      "**/coverage": true,
+      "**/pnpm-lock.yaml": true,
+    },
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "bradlc.vscode-tailwindcss",
+      "prisma.prisma",
+      "ms-vscode.vscode-json",
+    ],
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Install Dependencies",
+        "type": "shell",
+        "command": "pnpm install",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "Start Development",
+        "type": "shell",
+        "command": "pnpm dev",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "Backend Dev",
+        "type": "shell",
+        "command": "pnpm backend:dev",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "Frontend Dev",
+        "type": "shell",
+        "command": "pnpm frontend:dev",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "Run Tests",
+        "type": "shell",
+        "command": "pnpm test",
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "Lint",
+        "type": "shell",
+        "command": "pnpm lint",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "Format",
+        "type": "shell",
+        "command": "pnpm format",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+    ],
+  },
+}

@@ -42,7 +42,7 @@ export const getUsersResponseItem = zod.object({
             'trends',
             'cleaner',
             'dashboard',
-          ]),
+          ])
         )
         .optional(),
       offers_access_type: zod
@@ -173,7 +173,7 @@ export const getUsersResponseItem = zod.object({
           .optional()
           .describe('Allowed resources'),
         reports: zod.array(zod.string()).optional().describe('Allowed reports'),
-      }),
+      })
     )
     .optional(),
   preferences: zod
@@ -238,7 +238,7 @@ export const postUsersResponse = zod.object({
             'trends',
             'cleaner',
             'dashboard',
-          ]),
+          ])
         )
         .optional(),
       offers_access_type: zod
@@ -369,7 +369,7 @@ export const postUsersResponse = zod.object({
           .optional()
           .describe('Allowed resources'),
         reports: zod.array(zod.string()).optional().describe('Allowed reports'),
-      }),
+      })
     )
     .optional(),
   preferences: zod
@@ -421,7 +421,7 @@ export const getUsersIdResponse = zod.object({
             'trends',
             'cleaner',
             'dashboard',
-          ]),
+          ])
         )
         .optional(),
       offers_access_type: zod
@@ -552,7 +552,7 @@ export const getUsersIdResponse = zod.object({
           .optional()
           .describe('Allowed resources'),
         reports: zod.array(zod.string()).optional().describe('Allowed reports'),
-      }),
+      })
     )
     .optional(),
   preferences: zod
@@ -624,7 +624,7 @@ export const putUsersIdResponse = zod.object({
             'trends',
             'cleaner',
             'dashboard',
-          ]),
+          ])
         )
         .optional(),
       offers_access_type: zod
@@ -755,7 +755,7 @@ export const putUsersIdResponse = zod.object({
           .optional()
           .describe('Allowed resources'),
         reports: zod.array(zod.string()).optional().describe('Allowed reports'),
-      }),
+      })
     )
     .optional(),
   preferences: zod
@@ -812,7 +812,7 @@ export const putUsersIdAccessBody = zod.object({
             'trends',
             'cleaner',
             'dashboard',
-          ]),
+          ])
         )
         .optional(),
       offers_access_type: zod
@@ -939,7 +939,7 @@ export const putUsersIdAccessBody = zod.object({
           .optional()
           .describe('Available resources'),
         reports: zod.array(zod.string()).optional().describe('Allowed reports'),
-      }),
+      })
     )
     .optional(),
 });
@@ -974,7 +974,7 @@ export const putUsersIdAccessResponse = zod.object({
             'trends',
             'cleaner',
             'dashboard',
-          ]),
+          ])
         )
         .optional(),
       offers_access_type: zod
@@ -1105,7 +1105,7 @@ export const putUsersIdAccessResponse = zod.object({
           .optional()
           .describe('Allowed resources'),
         reports: zod.array(zod.string()).optional().describe('Allowed reports'),
-      }),
+      })
     )
     .optional(),
   preferences: zod

@@ -30,7 +30,7 @@ export const getAffiliateNetworksResponseItem = zod.object({
   offers: zod.number().optional(),
 });
 export const getAffiliateNetworksResponse = zod.array(
-  getAffiliateNetworksResponseItem,
+  getAffiliateNetworksResponseItem
 );
 
 /**
@@ -48,7 +48,7 @@ export const postAffiliateNetworksBody = zod
       .string()
       .optional()
       .describe(
-        'These params are appends to offer URLs. Example, \"sub1={subid}&sub2={campaign_name}\"',
+        'These params are appends to offer URLs. Example, \"sub1={subid}&sub2={campaign_name}\"'
       ),
     notes: zod
       .string()
@@ -119,7 +119,7 @@ export const putAffiliateNetworksIdBody = zod.object({
     .string()
     .optional()
     .describe(
-      'These params are appends to offer URLs. Example, \"sub1={subid}&sub2={campaign_name}\"',
+      'These params are appends to offer URLs. Example, \"sub1={subid}&sub2={campaign_name}\"'
     ),
   notes: zod
     .string()
@@ -227,5 +227,5 @@ export const getAffiliateNetworksDeletedResponseItem = zod.object({
   offers: zod.number().optional(),
 });
 export const getAffiliateNetworksDeletedResponse = zod.array(
-  getAffiliateNetworksDeletedResponseItem,
+  getAffiliateNetworksDeletedResponseItem
 );

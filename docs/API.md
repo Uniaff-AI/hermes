@@ -19,6 +19,7 @@ Content-Type: application/json
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -47,6 +48,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ## Общие форматы ответов
 
 ### Успешный ответ
+
 ```json
 {
   "success": true,
@@ -56,6 +58,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### Ответ с ошибкой
+
 ```json
 {
   "success": false,
@@ -68,6 +71,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### Пагинированный ответ
+
 ```json
 {
   "success": true,
@@ -86,9 +90,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Аутентификация
 
 #### POST /api/auth/login
+
 Вход в систему.
 
 **Тело запроса:**
+
 ```json
 {
   "email": "string",
@@ -97,9 +103,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 #### POST /api/auth/refresh
+
 Обновление токена доступа.
 
 **Тело запроса:**
+
 ```json
 {
   "refreshToken": "string"
@@ -107,14 +115,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 #### GET /api/auth/me
+
 Получение профиля текущего пользователя.
 
 ### Лиды
 
 #### GET /api/leads
+
 Получение списка лидов с фильтрацией и пагинацией.
 
 **Параметры запроса:**
+
 - `page` (number) - номер страницы (по умолчанию: 1)
 - `limit` (number) - количество элементов на странице (по умолчанию: 20)
 - `status` (string) - фильтр по статусу
@@ -124,14 +135,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 - `dateTo` (string) - дата окончания (ISO 8601)
 
 **Пример:**
+
 ```http
 GET /api/leads?page=1&limit=20&status=NEW&search=john
 ```
 
 #### POST /api/leads
+
 Создание нового лида.
 
 **Тело запроса:**
+
 ```json
 {
   "firstName": "John",
@@ -145,12 +159,15 @@ GET /api/leads?page=1&limit=20&status=NEW&search=john
 ```
 
 #### GET /api/leads/:id
+
 Получение лида по ID.
 
 #### PUT /api/leads/:id
+
 Обновление лида.
 
 **Тело запроса:**
+
 ```json
 {
   "firstName": "John",
@@ -161,14 +178,17 @@ GET /api/leads?page=1&limit=20&status=NEW&search=john
 ```
 
 #### DELETE /api/leads/:id
+
 Удаление лида.
 
 ### Офферы
 
 #### GET /api/offers
+
 Получение списка офферов.
 
 **Параметры запроса:**
+
 - `page` (number) - номер страницы
 - `limit` (number) - количество элементов
 - `status` (string) - фильтр по статусу
@@ -176,9 +196,11 @@ GET /api/leads?page=1&limit=20&status=NEW&search=john
 - `search` (string) - поиск по названию
 
 #### POST /api/offers
+
 Создание нового оффера.
 
 **Тело запроса:**
+
 ```json
 {
   "name": "Premium Package",
@@ -192,23 +214,29 @@ GET /api/leads?page=1&limit=20&status=NEW&search=john
 ```
 
 #### GET /api/offers/:id
+
 Получение оффера по ID.
 
 #### PUT /api/offers/:id
+
 Обновление оффера.
 
 #### DELETE /api/offers/:id
+
 Удаление оффера.
 
 ### Редиректы
 
 #### GET /api/redirects
+
 Получение списка редиректов.
 
 #### POST /api/redirects
+
 Создание нового редиректа.
 
 **Тело запроса:**
+
 ```json
 {
   "name": "US Traffic Redirect",
@@ -237,9 +265,11 @@ GET /api/leads?page=1&limit=20&status=NEW&search=john
 ```
 
 #### POST /api/redirects/apply
+
 Применение правил редиректа.
 
 **Тело запроса:**
+
 ```json
 {
   "url": "https://example.com/landing",
@@ -258,25 +288,31 @@ GET /api/leads?page=1&limit=20&status=NEW&search=john
 ### Аналитика
 
 #### GET /api/analytics/redirects
+
 Получение аналитики редиректов.
 
 **Параметры запроса:**
+
 - `period` (string) - период (day, week, month)
 - `dateFrom` (string) - дата начала
 - `dateTo` (string) - дата окончания
 
 #### GET /api/analytics/leads
+
 Получение аналитики лидов.
 
 #### GET /api/analytics/offers
+
 Получение аналитики офферов.
 
 ### Дашборд
 
 #### GET /api/dashboard/stats
+
 Получение общей статистики для дашборда.
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -287,27 +323,30 @@ GET /api/leads?page=1&limit=20&status=NEW&search=john
     "activeOffers": 18,
     "totalRedirects": 15,
     "conversions": 89,
-    "revenue": 12500.50
+    "revenue": 12500.5
   }
 }
 ```
 
 #### GET /api/dashboard/charts
+
 Получение данных для графиков.
 
 ### Keitaro интеграция
 
 #### POST /api/keitaro/webhook
+
 Вебхук от Keitaro для обработки конверсий.
 
 **Тело запроса:**
+
 ```json
 {
   "click_id": "click-123",
   "campaign_id": "campaign-456",
   "offer_id": "offer-789",
   "sub_id": "lead-123",
-  "payout": 25.50,
+  "payout": 25.5,
   "currency": "USD",
   "status": "approved",
   "timestamp": 1640995200
@@ -315,33 +354,33 @@ GET /api/leads?page=1&limit=20&status=NEW&search=john
 ```
 
 #### GET /api/keitaro/stats
+
 Получение статистики из Keitaro.
 
 ## Коды ошибок
 
-| Код | Описание |
-|-----|----------|
-| `VALIDATION_ERROR` | Ошибка валидации данных |
-| `UNAUTHORIZED` | Не авторизован |
-| `FORBIDDEN` | Доступ запрещен |
-| `NOT_FOUND` | Ресурс не найден |
-| `CONFLICT` | Конфликт данных |
-| `INTERNAL_ERROR` | Внутренняя ошибка сервера |
+| Код                | Описание                  |
+| ------------------ | ------------------------- |
+| `VALIDATION_ERROR` | Ошибка валидации данных   |
+| `UNAUTHORIZED`     | Не авторизован            |
+| `FORBIDDEN`        | Доступ запрещен           |
+| `NOT_FOUND`        | Ресурс не найден          |
+| `CONFLICT`         | Конфликт данных           |
+| `INTERNAL_ERROR`   | Внутренняя ошибка сервера |
 
 ## Статусы HTTP
 
-| Код | Описание |
-|-----|----------|
-| 200 | Успешный запрос |
-| 201 | Ресурс создан |
-| 400 | Неверный запрос |
-| 401 | Не авторизован |
-| 403 | Доступ запрещен |
-| 404 | Не найден |
-| 409 | Конфликт |
-| 422 | Ошибка валидации |
+| Код | Описание                  |
+| --- | ------------------------- |
+| 200 | Успешный запрос           |
+| 201 | Ресурс создан             |
+| 400 | Неверный запрос           |
+| 401 | Не авторизован            |
+| 403 | Доступ запрещен           |
+| 404 | Не найден                 |
+| 409 | Конфликт                  |
+| 422 | Ошибка валидации          |
 | 500 | Внутренняя ошибка сервера |
-
 
 ## Версионирование
 

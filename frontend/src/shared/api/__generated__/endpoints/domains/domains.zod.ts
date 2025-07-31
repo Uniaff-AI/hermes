@@ -315,7 +315,7 @@ export const getDomainsDeletedResponseItem = zod.object({
   status: zod.string().optional(),
 });
 export const getDomainsDeletedResponse = zod.array(
-  getDomainsDeletedResponseItem,
+  getDomainsDeletedResponseItem
 );
 
 /**
@@ -395,5 +395,5 @@ export const postDomainsRegisterResponse = zod
     zod.object({
       registrar: zod.string().optional(),
       external_id: zod.number().optional(),
-    }),
+    })
   );

@@ -405,7 +405,7 @@ export const postReportBuildBody = zod.object({
         .any()
         .optional()
         .describe(
-          'One of the intervals can be used: today, yesterday, 7_days_ago, first_day_of_this_week, 1_month_ago, first_day_of_this_month, 1_year_ago, first_day_of_this_year, all_time\n',
+          'One of the intervals can be used: today, yesterday, 7_days_ago, first_day_of_this_week, 1_month_ago, first_day_of_this_month, 1_year_ago, first_day_of_this_year, all_time\n'
         ),
     })
     .optional(),
@@ -418,14 +418,14 @@ export const postReportBuildBody = zod.object({
         operator: zod
           .string()
           .describe(
-            'One of the available operators (<a href=\"#operators\">operators</a>)\n',
+            'One of the available operators (<a href=\"#operators\">operators</a>)\n'
           ),
         expression: zod
           .string()
           .or(zod.number())
           .optional()
           .describe('Expression for the filter'),
-      }),
+      })
     )
     .optional()
     .describe('Filters can contain OR and AND logical operators.'),
@@ -434,7 +434,7 @@ export const postReportBuildBody = zod.object({
       zod.object({
         name: zod.string().describe('Column or metric name'),
         order: zod.enum(['ASC', 'DESC']).describe('Order'),
-      }),
+      })
     )
     .optional(),
 });
@@ -455,7 +455,7 @@ export const getReportLabelsQueryParams = zod.object({
   ref_name: zod
     .string()
     .describe(
-      '<style>\n  .list-flex {\n    display: flex;\n    list-style: none;\n    flex-wrap: wrap;\n  }\n  .list-flex li {\n    width: 200px;\n  }\n</style>\nList of Available Ref Names:\n<ul class=\"list-flex\">\n<li class=\"level1\"><div class=\"li\"> ip</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> source</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> ad_campaign_id</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> creative_id</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> keyword</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> ad_campaign_idn</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> sub_id_1..10</div>\n</li>\n</ul>\n',
+      '<style>\n  .list-flex {\n    display: flex;\n    list-style: none;\n    flex-wrap: wrap;\n  }\n  .list-flex li {\n    width: 200px;\n  }\n</style>\nList of Available Ref Names:\n<ul class=\"list-flex\">\n<li class=\"level1\"><div class=\"li\"> ip</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> source</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> ad_campaign_id</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> creative_id</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> keyword</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> ad_campaign_idn</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> sub_id_1..10</div>\n</li>\n</ul>\n'
     ),
 });
 
@@ -470,7 +470,7 @@ export const postReportLabelsBody = zod.object({
   ref_name: zod
     .string()
     .describe(
-      '<style>\n  .list-flex {\n    display: flex;\n    list-style: none;\n    flex-wrap: wrap;\n  }\n  .list-flex li {\n    width: 200px;\n  }\n</style>\nList of available ref names:\n<ul class=\"list-flex\">\n<li class=\"level1\"><div class=\"li\"> ip</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> source</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> ad_campaign_id</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> creative_id</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> keyword</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> ad_campaign_idn</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> sub_id_1..10</div>\n</li>\n</ul>\n',
+      '<style>\n  .list-flex {\n    display: flex;\n    list-style: none;\n    flex-wrap: wrap;\n  }\n  .list-flex li {\n    width: 200px;\n  }\n</style>\nList of available ref names:\n<ul class=\"list-flex\">\n<li class=\"level1\"><div class=\"li\"> ip</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> source</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> ad_campaign_id</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> creative_id</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> keyword</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> ad_campaign_idn</div>\n</li>\n<li class=\"level1\"><div class=\"li\"> sub_id_1..10</div>\n</li>\n</ul>\n'
     ),
   items: zod.object({
     value: zod

@@ -1,0 +1,54 @@
+{
+  "name": "hermes-monorepo",
+  "version": "1.0.0",
+  "description": "Hermes CRM Monorepo - Full-stack application with Next.js frontend and NestJS backend",
+  "private": true,
+  "packageManager": "pnpm@10.13.1",
+  "scripts": {
+    "dev": "pnpm --parallel --recursive run dev",
+    "build": "pnpm --recursive run build",
+    "start": "pnpm --recursive run start",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "pnpm --recursive run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "pnpm --recursive run clean",
+    "install:all": "pnpm install",
+    "backend:dev": "pnpm --filter hermes-backend run start:dev",
+    "frontend:dev": "pnpm --filter hermes-frontend run dev",
+    "backend:build": "pnpm --filter hermes-backend run build",
+    "frontend:build": "pnpm --filter hermes-frontend run build",
+    "backend:lint": "eslint backend --fix",
+    "frontend:lint": "eslint frontend --fix",
+    "prisma:generate": "pnpm --filter hermes-backend run prisma:generate",
+    "prisma:migrate": "pnpm --filter hermes-backend run prisma:migrate",
+    "prisma:studio": "pnpm --filter hermes-backend run prisma:studio",
+    "generate:api": "pnpm --filter hermes-frontend run generate:api"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "3.3.1",
+    "@eslint/js": "9.32.0",
+    "@types/node": "^20.3.1",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.42.0",
+    "eslint-config-next": "^15.4.3",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "globals": "16.3.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}

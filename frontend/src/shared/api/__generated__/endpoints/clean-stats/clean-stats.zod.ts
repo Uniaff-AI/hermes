@@ -16,12 +16,12 @@ export const postClicksCleanBody = zod.object({
   start_date: zod
     .string()
     .describe(
-      'The date and the time for the period to delete, e.g. 2017-04-01 10:10',
+      'The date and the time for the period to delete, e.g. 2017-04-01 10:10'
     ),
   end_date: zod
     .string()
     .describe(
-      'The date and the time for the period to delete, e.g. 2017-04-01 10:10',
+      'The date and the time for the period to delete, e.g. 2017-04-01 10:10'
     ),
   campaign_id: zod.number().optional().describe('Campaign ID'),
   timezone: zod

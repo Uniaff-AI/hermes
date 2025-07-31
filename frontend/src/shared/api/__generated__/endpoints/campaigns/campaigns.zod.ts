@@ -17,7 +17,7 @@ export const getCampaignsQueryParams = zod.object({
     .number()
     .optional()
     .describe(
-      'The number of campaigns to skip before starting to collect the result set.',
+      'The number of campaigns to skip before starting to collect the result set.'
     ),
   limit: zod
     .number()
@@ -61,7 +61,7 @@ export const getCampaignsResponseItem = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -235,7 +235,7 @@ export const getCampaignsResponseItem = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -282,7 +282,7 @@ export const postCampaignsBody = zod
       .string()
       .optional()
       .describe(
-        "Currency Value EUR/USD/RUB/UAH/GBP. Default Value is Taken from the Tracker's Settings.",
+        "Currency Value EUR/USD/RUB/UAH/GBP. Default Value is Taken from the Tracker's Settings."
       ),
     cost_auto: zod
       .boolean()
@@ -293,7 +293,7 @@ export const postCampaignsBody = zod
       .string()
       .optional()
       .describe(
-        'Bind Visitors Feature (null - disabled/ s - only to streams/ sl - to streams and LPs/ slo — to streams, LPs and offers)',
+        'Bind Visitors Feature (null - disabled/ s - only to streams/ sl - to streams and LPs/ slo — to streams, LPs and offers)'
       ),
     traffic_source_id: zod.number().optional().describe('Traffic source ID'),
     parameters: zod
@@ -473,7 +473,7 @@ export const postCampaignsBody = zod
             .optional()
             .describe('Conversion status'),
           url: zod.string().optional().describe('Postback URL'),
-        }),
+        })
       )
       .optional()
       .describe('Campaign S2S postback'),
@@ -517,7 +517,7 @@ export const postCampaignsResponse = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -691,7 +691,7 @@ export const postCampaignsResponse = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -743,7 +743,7 @@ export const getCampaignsIdResponse = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -917,7 +917,7 @@ export const getCampaignsIdResponse = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -966,7 +966,7 @@ export const putCampaignsIdBody = zod.object({
     .string()
     .optional()
     .describe(
-      "Currency Value EUR/USD/RUB/UAH/GBP. Default Value is Taken from the Tracker's Settings.",
+      "Currency Value EUR/USD/RUB/UAH/GBP. Default Value is Taken from the Tracker's Settings."
     ),
   cost_auto: zod.boolean().optional().describe('Enable Automatic Costs (0/1)'),
   group_id: zod.string().optional().describe('Campaign Group ID'),
@@ -974,7 +974,7 @@ export const putCampaignsIdBody = zod.object({
     .string()
     .optional()
     .describe(
-      'Bind Visitors Feature (null - disabled/ s - only to streams/ sl - to streams and LPs/ slo — to streams, LPs and offers)',
+      'Bind Visitors Feature (null - disabled/ s - only to streams/ sl - to streams and LPs/ slo — to streams, LPs and offers)'
     ),
   traffic_source_id: zod.number().optional().describe('Traffic source ID'),
   parameters: zod
@@ -1148,7 +1148,7 @@ export const putCampaignsIdBody = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional()
     .describe('Campaign S2S postback'),
@@ -1191,7 +1191,7 @@ export const putCampaignsIdResponse = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -1365,7 +1365,7 @@ export const putCampaignsIdResponse = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -1427,7 +1427,7 @@ export const postCampaignsIdCloneResponse = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -1601,7 +1601,7 @@ export const postCampaignsIdCloneResponse = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -1655,7 +1655,7 @@ export const postCampaignsIdDisableResponse = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -1829,7 +1829,7 @@ export const postCampaignsIdDisableResponse = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -1883,7 +1883,7 @@ export const postCampaignsIdEnableResponse = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -2057,7 +2057,7 @@ export const postCampaignsIdEnableResponse = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -2111,7 +2111,7 @@ export const postCampaignsIdRestoreResponse = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -2285,7 +2285,7 @@ export const postCampaignsIdRestoreResponse = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -2359,7 +2359,7 @@ export const postCampaignsIdUpdateCostsBody = zod.object({
     })
     .optional()
     .describe(
-      'Send a key-value object to apply filters to clicks. For example, {\"sub_id_1\": \"1,2,3\", \"source\": \"site.ru\"}.',
+      'Send a key-value object to apply filters to clicks. For example, {\"sub_id_1\": \"1,2,3\", \"source\": \"site.ru\"}.'
     ),
 });
 
@@ -2405,7 +2405,7 @@ export const getCampaignsDeletedResponseItem = zod.object({
     .enum(['s', 'sl', 'slo'])
     .optional()
     .describe(
-      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers.",
+      "'s' for flows. 'sl' for flows and landing pages. 'slo' for flows, landing pages and offers."
     ),
   traffic_source_id: zod.number().optional(),
   token: zod.string().optional(),
@@ -2579,7 +2579,7 @@ export const getCampaignsDeletedResponseItem = zod.object({
           .optional()
           .describe('Conversion status'),
         url: zod.string().optional().describe('Postback URL'),
-      }),
+      })
     )
     .optional(),
   notes: zod.string().optional(),
@@ -2587,5 +2587,5 @@ export const getCampaignsDeletedResponseItem = zod.object({
   updated_at: zod.string().optional(),
 });
 export const getCampaignsDeletedResponse = zod.array(
-  getCampaignsDeletedResponseItem,
+  getCampaignsDeletedResponseItem
 );

@@ -343,5 +343,5 @@ export const getLandingPagesDeletedResponseItem = zod.object({
   preview_path: zod.string().optional(),
 });
 export const getLandingPagesDeletedResponse = zod.array(
-  getLandingPagesDeletedResponseItem,
+  getLandingPagesDeletedResponseItem
 );

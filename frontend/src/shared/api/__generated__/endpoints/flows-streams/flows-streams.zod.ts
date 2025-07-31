@@ -44,7 +44,7 @@ export const getCampaignsIdStreamsResponseItem = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -66,7 +66,7 @@ export const getCampaignsIdStreamsResponseItem = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -79,7 +79,7 @@ export const getCampaignsIdStreamsResponseItem = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -92,7 +92,7 @@ export const getCampaignsIdStreamsResponseItem = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -100,7 +100,7 @@ export const getCampaignsIdStreamsResponseItem = zod.object({
     .default(getCampaignsIdStreamsResponseOfferSelectionDefault),
 });
 export const getCampaignsIdStreamsResponse = zod.array(
-  getCampaignsIdStreamsResponseItem,
+  getCampaignsIdStreamsResponseItem
 );
 
 /**
@@ -120,19 +120,19 @@ export const getStreamFiltersResponseItem = zod.object({
     .string()
     .optional()
     .describe(
-      "Group ID. It's used to group filters in a filters dropdown menu.",
+      "Group ID. It's used to group filters in a filters dropdown menu."
     ),
   template: zod
     .string()
     .optional()
     .describe(
-      'HTML code for rendering filter body view (Not recommended to use)',
+      'HTML code for rendering filter body view (Not recommended to use)'
     ),
   header_template: zod
     .string()
     .optional()
     .describe(
-      'HTML code for rendering filter body view (Not recommended to use)',
+      'HTML code for rendering filter body view (Not recommended to use)'
     ),
   defaults: zod.string().optional().describe('Default values'),
 });
@@ -199,7 +199,7 @@ export const getStreamIdEventsResponse = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -221,7 +221,7 @@ export const getStreamIdEventsResponse = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -234,7 +234,7 @@ export const getStreamIdEventsResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -247,7 +247,7 @@ export const getStreamIdEventsResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -267,7 +267,7 @@ export const getStreamsActionsResponseItem = zod.object({
   description: zod.string().optional(),
 });
 export const getStreamsActionsResponse = zod.array(
-  getStreamsActionsResponseItem,
+  getStreamsActionsResponseItem
 );
 
 /**
@@ -304,7 +304,7 @@ export const postStreamsBody = zod
       .string()
       .optional()
       .describe(
-        "Action to perform (see 'Retrieve available flow action types')",
+        "Action to perform (see 'Retrieve available flow action types')"
       ),
     schema: zod.enum(['landings', 'redirect', 'action']).optional(),
     collect_clicks: zod
@@ -330,9 +330,9 @@ export const postStreamsBody = zod
             .array(zod.string())
             .optional()
             .describe(
-              'Flow payload. This field contains values for filters. For example, for a \"keyword\" Filter an Array [\"value1\", \"value2\"] must be provided',
+              'Flow payload. This field contains values for filters. For example, for a \"keyword\" Filter an Array [\"value1\", \"value2\"] must be provided'
             ),
-        }),
+        })
       )
       .optional(),
     triggers: zod
@@ -375,7 +375,7 @@ export const postStreamsBody = zod
             .boolean()
             .optional()
             .describe('Tell AV scanner to scan the page content'),
-        }),
+        })
       )
       .optional(),
     landings: zod
@@ -384,7 +384,7 @@ export const postStreamsBody = zod
           landing_id: zod.number().describe('Landing Page ID'),
           share: zod.number().describe('Share among others'),
           state: zod.enum(['active', 'disabled']).optional(),
-        }),
+        })
       )
       .optional(),
     offers: zod
@@ -395,7 +395,7 @@ export const postStreamsBody = zod
             .number()
             .describe('Percentage of Traffic Sent to This Offer'),
           state: zod.enum(['active', 'disabled']).optional(),
-        }),
+        })
       )
       .optional(),
   })
@@ -428,7 +428,7 @@ export const postStreamsResponse = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -450,7 +450,7 @@ export const postStreamsResponse = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -463,7 +463,7 @@ export const postStreamsResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -476,7 +476,7 @@ export const postStreamsResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -519,7 +519,7 @@ export const getStreamsIdResponse = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -541,7 +541,7 @@ export const getStreamsIdResponse = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -554,7 +554,7 @@ export const getStreamsIdResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -567,7 +567,7 @@ export const getStreamsIdResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -633,9 +633,9 @@ export const putStreamsIdBody = zod.object({
           .array(zod.string())
           .optional()
           .describe(
-            'Flow payload. This field contains values for filters. For example, for a \"keyword\" Filter an Array [\"value1\", \"value2\"] must be provided',
+            'Flow payload. This field contains values for filters. For example, for a \"keyword\" Filter an Array [\"value1\", \"value2\"] must be provided'
           ),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -678,7 +678,7 @@ export const putStreamsIdBody = zod.object({
           .boolean()
           .optional()
           .describe('Tell AV scanner to scan the page content'),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -687,7 +687,7 @@ export const putStreamsIdBody = zod.object({
         landing_id: zod.number().describe('Landing Page ID'),
         share: zod.number().describe('Share among others'),
         state: zod.enum(['active', 'disabled']).optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -698,7 +698,7 @@ export const putStreamsIdBody = zod.object({
           .number()
           .describe('Percentage of Traffic Sent to This Offer'),
         state: zod.enum(['active', 'disabled']).optional(),
-      }),
+      })
     )
     .optional(),
 });
@@ -730,7 +730,7 @@ export const putStreamsIdResponse = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -752,7 +752,7 @@ export const putStreamsIdResponse = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -765,7 +765,7 @@ export const putStreamsIdResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -778,7 +778,7 @@ export const putStreamsIdResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -821,7 +821,7 @@ export const deleteStreamsIdResponse = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -843,7 +843,7 @@ export const deleteStreamsIdResponse = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -856,7 +856,7 @@ export const deleteStreamsIdResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -869,7 +869,7 @@ export const deleteStreamsIdResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -912,7 +912,7 @@ export const postStreamsIdDisableResponse = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -934,7 +934,7 @@ export const postStreamsIdDisableResponse = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -947,7 +947,7 @@ export const postStreamsIdDisableResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -960,7 +960,7 @@ export const postStreamsIdDisableResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -1003,7 +1003,7 @@ export const postStreamsIdEnableResponse = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -1025,7 +1025,7 @@ export const postStreamsIdEnableResponse = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -1038,7 +1038,7 @@ export const postStreamsIdEnableResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -1051,7 +1051,7 @@ export const postStreamsIdEnableResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -1094,7 +1094,7 @@ export const postStreamsIdRestoreResponse = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -1116,7 +1116,7 @@ export const postStreamsIdRestoreResponse = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -1129,7 +1129,7 @@ export const postStreamsIdRestoreResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -1142,7 +1142,7 @@ export const postStreamsIdRestoreResponse = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -1181,7 +1181,7 @@ export const getStreamsDeletedResponseItem = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -1203,7 +1203,7 @@ export const getStreamsDeletedResponseItem = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -1216,7 +1216,7 @@ export const getStreamsDeletedResponseItem = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -1229,7 +1229,7 @@ export const getStreamsDeletedResponseItem = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod
@@ -1237,7 +1237,7 @@ export const getStreamsDeletedResponseItem = zod.object({
     .default(getStreamsDeletedResponseOfferSelectionDefault),
 });
 export const getStreamsDeletedResponse = zod.array(
-  getStreamsDeletedResponseItem,
+  getStreamsDeletedResponseItem
 );
 
 /**
@@ -1275,7 +1275,7 @@ export const getStreamsSearchResponseItem = zod.object({
         mode: zod.string().optional(),
         payload: zod.string().optional(),
         oid: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   triggers: zod
@@ -1297,7 +1297,7 @@ export const getStreamsSearchResponseItem = zod.object({
         reverse: zod.boolean().optional(),
         enabled: zod.boolean().optional(),
         scan_page: zod.boolean().optional(),
-      }),
+      })
     )
     .optional(),
   landings: zod
@@ -1310,7 +1310,7 @@ export const getStreamsSearchResponseItem = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offers: zod
@@ -1323,7 +1323,7 @@ export const getStreamsSearchResponseItem = zod.object({
         share: zod.number().optional(),
         created_at: zod.string().optional(),
         updated_at: zod.string().optional(),
-      }),
+      })
     )
     .optional(),
   offer_selection: zod

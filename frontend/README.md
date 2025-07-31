@@ -1,81 +1,193 @@
-# Next.js + Tailwind CSS + TypeScript 
+# Hermes CRM - Frontend
 
-<div align="center">
-  <h2>🔋 ts-nextjs-Hermes-UI</h2>
-  <p>Next.js + Tailwind CSS + TypeScript starter packed with useful development features.</p>
-  
+The frontend application for Hermes CRM, built with Next.js 14, React 18, and TypeScript. This application provides the user interface for managing leads, offers, and business rules.
 
+## 🏗️ Architecture
 
-</div>
+### **Technology Stack**
 
-## Features
+- **Next.js 14** - React framework with App Router
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Utility-first CSS framework
+- **TanStack Query** - Data fetching and caching
+- **Zod** - Schema validation
+- **Orval** - API client generation
 
-This repository is 🔋 battery packed with:
+### **Project Structure**
 
-- ⚡️ Next.js 14 with App Router
-- ⚛️ React 18
-- ✨ TypeScript
-- 💨 Tailwind CSS 3 — Configured with CSS Variables to extend the **primary** color
-- 🃏 Jest — Configured for unit testing
-- 📈 Absolute Import and Path Alias — Import components using `@/` prefix
-- 📏 ESLint — Find and fix problems in your code, also will **auto sort** your imports
-- 💖 Prettier — Format your code consistently
-- 🐶 Husky & Lint Staged — Run scripts on your staged files before they are committed
-- 🤖 Conventional Commit Lint — Make sure you & your teammates follow conventional commit
-- 👷 Github Actions — Lint your code on PR
-- 🚘 Automatic Branch and Issue Autolink — Branch will be automatically created on issue **assign**, and auto linked on PR
-- 🔥 Snippets — A collection of useful snippets
-- 🗺 Site Map — Automatically generate sitemap.xml
-- 📦 Expansion Pack — Easily install common libraries, additional components, and configs.
-
-See the 👉 [feature details and changelog](https://github.com/theodorusclarence/ts-nextjs-tailwind-starter/blob/main/CHANGELOG.md) 👈 for more.
-
-You can also check all of the **details and demos** on my blog post:
-
-- [One-stop Starter to Maximize Efficiency on Next.js & Tailwind CSS Projects](https://theodorusclarence.com/blog/one-stop-starter)
-
-
-### 2. Install dependencies
-
-It is encouraged to use **pnpm** so the husky hooks can work properly.
-
-```bash
-pnpm install
+```
+src/
+├── app/                 # Next.js App Router pages
+├── components/          # Reusable UI components
+├── shared/             # Shared utilities and API
+│   └── api/            # Generated API client
+├── lib/                # Utility functions
+└── styles/             # Global styles
 ```
 
-### 3. Run the development server
+## 🚀 Quick Start
 
-You can start the server using this command:
+### Prerequisites
+
+- Node.js >= 18.0.0
+- PNPM >= 8.0.0
+
+### Development
 
 ```bash
+# Install dependencies (from root)
+pnpm install
+
+# Start development server
+pnpm frontend:dev
+
+# Or from frontend directory
+cd frontend
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. You can start editing the page by modifying `src/pages/index.tsx`.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-### 4. Change defaults
+### Building
 
-There are some things you need to change including title, urls, favicons, etc.
+```bash
+# Build for production
+pnpm frontend:build
 
-Find all comments with !STARTERCONF, then follow the guide.
+# Start production server
+pnpm frontend:start
+```
 
-Don't forget to change the package name in package.json
+## 🔧 Available Scripts
 
-### 5. Commit Message Convention
+```bash
+# Development
+pnpm dev                 # Start development server
+pnpm build              # Build for production
+pnpm start              # Start production server
 
-This starter is using [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/), it is mandatory to use it to commit changes.
+# Code Quality
+pnpm lint               # Run ESLint
+pnpm lint:fix           # Fix linting issues
+pnpm typecheck          # Type check TypeScript
+pnpm format             # Format code with Prettier
 
-## Projects using ts-nextjs-tailwind-starter
+# Testing
+pnpm test               # Run tests
+pnpm test:watch         # Run tests in watch mode
 
-<!--
-TEMPLATE
-- [sitename](https://sitelink.com) ([Source](https://github.com/githublink))
-- [sitename](https://sitelink.com)
--->
+# API Generation
+pnpm generate:api       # Generate API client from OpenAPI spec
+```
 
-- [theodorusclarence.com](https://theodorusclarence.com) ([Source](https://github.com/theodorusclarence/theodorusclarence.com))
-- [Notiolink](https://notiolink.thcl.dev/) ([Source](https://github.com/theodorusclarence/notiolink))
-- [NextJs + Materia UI + Typescript](https://github.com/AlexStack/nextjs-materia-mui-typescript-hook-form-scaffold-boilerplate-starter)
+## 🔌 API Integration
 
-Are you using this starter? Please add your page (and repo) to the end of the list via a [Pull Request](https://github.com/theodorusclarence/ts-nextjs-tailwind-starter/edit/main/README.md). 😃
+The frontend automatically generates TypeScript API clients from the backend OpenAPI specification using Orval.
 
+### **Generated API Client**
+
+- **Location**: `src/shared/api/__generated__/`
+- **Generation**: Run `pnpm generate:api` after backend changes
+- **Usage**: Import from `src/shared/api/endpoints/`
+
+### **Example Usage**
+
+```typescript
+import { useGetLeads } from '@/shared/api/endpoints/leads';
+
+function LeadsList() {
+  const { data: leads, isLoading } = useGetLeads();
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      {leads?.map(lead => (
+        <div key={lead.id}>{lead.name}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+## 🎨 UI Components
+
+The application uses a component library built with:
+
+- **Radix UI** - Accessible primitives
+- **Tailwind CSS** - Styling
+- **Class Variance Authority** - Component variants
+- **Lucide React** - Icons
+
+### **Component Structure**
+
+```
+components/
+├── ui/                 # Base UI components
+├── dashboard/          # Dashboard-specific components
+├── layout/            # Layout components
+└── leadsManagement/   # Feature-specific components
+```
+
+## 🔧 Configuration
+
+### **Environment Variables**
+
+Create a `.env.local` file in the frontend directory:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_APP_NAME=Hermes CRM
+```
+
+### **Tailwind Configuration**
+
+- **Config**: `tailwind.config.ts`
+- **Customization**: CSS variables for theming
+- **Plugins**: Forms, typography
+
+## 🧪 Testing
+
+The application uses Jest and React Testing Library for testing:
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with coverage
+pnpm test:coverage
+```
+
+## 📦 Deployment
+
+### **Vercel (Recommended)**
+
+The application is configured for Vercel deployment with:
+
+- **Build Command**: `pnpm build`
+- **Output Directory**: `.next`
+- **Node Version**: 18.x
+
+### **Other Platforms**
+
+The application can be deployed to any platform that supports Next.js:
+
+- **Netlify**
+- **Railway**
+- **Docker**
+
+## 🤝 Contributing
+
+1. Follow the established component patterns
+2. Use TypeScript for all new code
+3. Add proper error handling and loading states
+4. Write tests for new components
+5. Update API client when backend changes
+
+## 📝 License
+
+MIT License - see LICENSE file for details.
