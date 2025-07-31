@@ -39,7 +39,7 @@ export const getIntegrationsFacebookResponse = zod.object({
             password: zod.string().optional().describe('Proxy password'),
           })
           .optional(),
-      }),
+      })
     )
     .optional(),
 });
@@ -213,7 +213,7 @@ export const getIntegrationsFacebookIdCampaignResponseItem = zod.object({
   value: zod.number(),
 });
 export const getIntegrationsFacebookIdCampaignResponse = zod.array(
-  getIntegrationsFacebookIdCampaignResponseItem,
+  getIntegrationsFacebookIdCampaignResponseItem
 );
 
 /**

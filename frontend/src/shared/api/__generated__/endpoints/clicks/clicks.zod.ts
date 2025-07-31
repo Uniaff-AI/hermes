@@ -22,7 +22,7 @@ export const postClicksLogBody = zod.object({
         .any()
         .optional()
         .describe(
-          'One of the intervals can be used: today, yesterday, 7_days_ago, first_day_of_this_week, 1_month_ago, first_day_of_this_month, 1_year_ago, first_day_of_this_year, all_time\n',
+          'One of the intervals can be used: today, yesterday, 7_days_ago, first_day_of_this_week, 1_month_ago, first_day_of_this_month, 1_year_ago, first_day_of_this_year, all_time\n'
         ),
     })
     .optional(),
@@ -30,7 +30,7 @@ export const postClicksLogBody = zod.object({
     .number()
     .optional()
     .describe(
-      "Clicks Request Limit. Either 'limit' or 'range' Parameters are a Must.",
+      "Clicks Request Limit. Either 'limit' or 'range' Parameters are a Must."
     ),
   offset: zod.number().optional().describe('Offset rows'),
   columns: zod.array(zod.string()).optional(),
@@ -41,14 +41,14 @@ export const postClicksLogBody = zod.object({
         operator: zod
           .string()
           .describe(
-            'One of the available operators (<a href=\"#operators\">operators</a>)\n',
+            'One of the available operators (<a href=\"#operators\">operators</a>)\n'
           ),
         expression: zod
           .string()
           .or(zod.number())
           .optional()
           .describe('Expression for the filter'),
-      }),
+      })
     )
     .optional(),
   sort: zod
@@ -56,7 +56,7 @@ export const postClicksLogBody = zod.object({
       zod.object({
         name: zod.string().describe('Column or metric name'),
         order: zod.enum(['ASC', 'DESC']).describe('Order'),
-      }),
+      })
     )
     .optional(),
 });
@@ -122,9 +122,9 @@ export const postClicksUpdateCostsBody = zod.object({
         })
         .optional()
         .describe(
-          'Send a key-value object to apply filters to clicks. For example, {\"sub_id_1\": \"1,2,3\", \"source\": \"site.ru\"}.',
+          'Send a key-value object to apply filters to clicks. For example, {\"sub_id_1\": \"1,2,3\", \"source\": \"site.ru\"}.'
         ),
-    }),
+    })
   ),
   timezone: zod.string().optional().describe('Timezone, e.g., Europe/Madrid'),
   currency: zod.string().optional().describe('Currency, e.g., EUR'),

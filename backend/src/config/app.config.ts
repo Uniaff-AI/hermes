@@ -1,70 +1,51 @@
-import { registerAs } from '@nestjs/config';
-import { AppConfig } from './app-config.type';
-import validateConfig from '../utils/validate-config';
-import {
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  IsUrl,
-  Max,
-  Min,
-} from 'class-validator';
-
-enum Environment {
-  Development = 'development',
-  Production = 'production',
-  Test = 'test',
-}
-
-class EnvironmentVariablesValidator {
-  @IsEnum(Environment)
-  @IsOptional()
-  NODE_ENV: Environment;
-
-  @IsInt()
-  @Min(0)
-  @Max(65535)
-  @IsOptional()
-  APP_PORT: number;
-
-  @IsUrl({ require_tld: false })
-  @IsOptional()
-  FRONTEND_DOMAIN: string;
-
-  @IsUrl({ require_tld: false })
-  @IsOptional()
-  BACKEND_DOMAIN: string;
-
-  @IsString()
-  @IsOptional()
-  API_PREFIX: string;
-
-  @IsString()
-  @IsOptional()
-  APP_FALLBACK_LANGUAGE: string;
-
-  @IsString()
-  @IsOptional()
-  APP_HEADER_LANGUAGE: string;
-}
-
-export default registerAs<AppConfig>('app', () => {
-  validateConfig(process.env, EnvironmentVariablesValidator);
-
-  return {
-    nodeEnv: process.env.NODE_ENV || 'development',
-    name: process.env.APP_NAME || 'app',
-    workingDirectory: process.env.PWD || process.cwd(),
-    frontendDomain: process.env.FRONTEND_DOMAIN,
-    backendDomain: process.env.BACKEND_DOMAIN ?? 'http://localhost',
-    port: process.env.APP_PORT
-      ? parseInt(process.env.APP_PORT, 10)
-      : process.env.PORT
-        ? parseInt(process.env.PORT, 10)
-        : 3000,
-    apiPrefix: process.env.API_PREFIX || 'api',
-    fallbackLanguage: process.env.APP_FALLBACK_LANGUAGE || 'en',
-    headerLanguage: process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',
-  };
+export default () => ({
+  app: {
+    port: parseInt(process.env.PORT || '3000', 10),
+    environment: process.env.NODE_ENV || 'development',
+    name: 'Hermes CRM Backend',
+  },
+  database: {
+    url:
+      process.env.DATABASE_URL ||
+      'postgresql://postgres:password@localhost:5432/hermes_crm',
+  },
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+    ttl: parseInt(process.env.REDIS_TTL || '300', 10), // 5 minutes default
+    password: process.env.REDIS_PASSWORD,
+  },
+  phpBackend: {
+    baseUrl: process.env.PHP_BACKEND_URL || 'http://localhost:8000',
+    apiToken: process.env.PHP_API_TOKEN || '',
+    timeout: parseInt(process.env.PHP_API_TIMEOUT || '5000', 10),
+    retries: parseInt(process.env.PHP_API_RETRIES || '3', 10),
+  },
+  externalApis: {
+    leadsApi: {
+      baseUrl:
+        process.env.LEADS_API_URL || 'http://185.190.250.122/hermes_api/v1',
+      timeout: parseInt(process.env.LEADS_API_TIMEOUT || '5000', 10),
+    },
+    affiliateApi: {
+      baseUrl:
+        process.env.AFFILIATE_API_URL || 'http://185.62.0.70/hermes_api/v1',
+      timeout: parseInt(process.env.AFFILIATE_API_TIMEOUT || '5000', 10),
+    },
+  },
+  queue: {
+    redis: {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      password: process.env.REDIS_PASSWORD,
+    },
+    defaultJobOptions: {
+      removeOnComplete: 100,
+      removeOnFail: 50,
+    },
+  },
+  cors: {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+  },
 });

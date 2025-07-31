@@ -1,97 +1,59 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
-import { FilesModule } from './files/files.module';
-import { AuthModule } from './auth/auth.module';
-import databaseConfig from './database/config/database.config';
-import authConfig from './auth/config/auth.config';
-import appConfig from './config/app.config';
-import mailConfig from './mail/config/mail.config';
-import fileConfig from './files/config/file.config';
-import facebookConfig from './auth-facebook/config/facebook.config';
-import googleConfig from './auth-google/config/google.config';
-import appleConfig from './auth-apple/config/apple.config';
-import path from 'path';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthAppleModule } from './auth-apple/auth-apple.module';
-import { AuthFacebookModule } from './auth-facebook/auth-facebook.module';
-import { AuthGoogleModule } from './auth-google/auth-google.module';
-import { HeaderResolver, I18nModule } from 'nestjs-i18n';
-import { TypeOrmConfigService } from './database/typeorm-config.service';
-import { MailModule } from './mail/mail.module';
-import { HomeModule } from './home/home.module';
-import { DataSource, DataSourceOptions } from 'typeorm';
-import { AllConfigType } from './config/config.type';
-import { SessionModule } from './session/session.module';
-import { MailerModule } from './mailer/mailer.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import { MongooseConfigService } from './database/mongoose-config.service';
-import { DatabaseConfig } from './database/config/database-config.type';
+import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { BullModule } from '@nestjs/bull';
+import { HttpModule } from '@nestjs/axios';
+import * as redisStore from 'cache-manager-redis-store';
 
-// <database-block>
-const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
-  .isDocumentDatabase
-  ? MongooseModule.forRootAsync({
-      useClass: MongooseConfigService,
-    })
-  : TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) => {
-        return new DataSource(options).initialize();
-      },
-    });
-// </database-block>
+import AppConfig from './config/app.config';
+import { PrismaModule } from './database/database.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { OffersModule } from './modules/offers/offers.module';
+import { RulesModule } from './modules/rules/rules.module';
 
 @Module({
   imports: [
+    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [
-        databaseConfig,
-        authConfig,
-        appConfig,
-        mailConfig,
-        fileConfig,
-        facebookConfig,
-        googleConfig,
-        appleConfig,
-      ],
-      envFilePath: ['.env'],
+      load: [AppConfig],
     }),
-    infrastructureDatabaseModule,
-    I18nModule.forRootAsync({
-      useFactory: (configService: ConfigService<AllConfigType>) => ({
-        fallbackLanguage: configService.getOrThrow('app.fallbackLanguage', {
-          infer: true,
-        }),
-        loaderOptions: { path: path.join(__dirname, '/i18n/'), watch: true },
-      }),
-      resolvers: [
-        {
-          use: HeaderResolver,
-          useFactory: (configService: ConfigService<AllConfigType>) => {
-            return [
-              configService.get('app.headerLanguage', {
-                infer: true,
-              }),
-            ];
-          },
-          inject: [ConfigService],
-        },
-      ],
-      imports: [ConfigModule],
-      inject: [ConfigService],
+
+    // Database
+    PrismaModule,
+
+    // Cache with Redis
+    CacheModule.register({
+      isGlobal: true,
+      store: redisStore as any,
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      ttl: parseInt(process.env.REDIS_TTL || '300', 10),
+      password: process.env.REDIS_PASSWORD,
     }),
-    UsersModule,
-    FilesModule,
-    AuthModule,
-    AuthFacebookModule,
-    AuthGoogleModule,
-    AuthAppleModule,
-    SessionModule,
-    MailModule,
-    MailerModule,
-    HomeModule,
+
+    // Queue with BullMQ
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+        password: process.env.REDIS_PASSWORD,
+      },
+      defaultJobOptions: {
+        removeOnComplete: 100,
+        removeOnFail: 50,
+      },
+    }),
+
+    // HTTP client for external API calls
+    HttpModule,
+
+    // Feature modules
+    LeadsModule,
+    OffersModule,
+    RulesModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

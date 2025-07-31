@@ -185,7 +185,7 @@ export const getTrafficSourcesResponseItem = zod.object({
   update_in_campaigns: zod.string().optional(),
 });
 export const getTrafficSourcesResponse = zod.array(
-  getTrafficSourcesResponseItem,
+  getTrafficSourcesResponseItem
 );
 
 /**

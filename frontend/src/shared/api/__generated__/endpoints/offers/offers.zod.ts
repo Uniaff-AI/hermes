@@ -94,13 +94,13 @@ export const postOffersBody = zod
       .number()
       .optional()
       .describe(
-        'Daily limit of conversions, after which the tracker will send traffic to another offer',
+        'Daily limit of conversions, after which the tracker will send traffic to another offer'
       ),
     conversion_timezone: zod
       .string()
       .optional()
       .describe(
-        'Which timezone is being used by the Affiliate network for calculating conversions, e.g. UTC or Europe/Madrid',
+        'Which timezone is being used by the Affiliate network for calculating conversions, e.g. UTC or Europe/Madrid'
       ),
     alternative_offer_id: zod
       .number()
@@ -226,13 +226,13 @@ export const putOffersIdBody = zod.object({
     .number()
     .optional()
     .describe(
-      'Daily limit of conversions, after which the tracker will send traffic to another offer',
+      'Daily limit of conversions, after which the tracker will send traffic to another offer'
     ),
   conversion_timezone: zod
     .string()
     .optional()
     .describe(
-      'Which timezone is being used by the Affiliate network for calculating conversions, e.g. UTC or Europe/Madrid',
+      'Which timezone is being used by the Affiliate network for calculating conversions, e.g. UTC or Europe/Madrid'
     ),
   alternative_offer_id: zod
     .number()

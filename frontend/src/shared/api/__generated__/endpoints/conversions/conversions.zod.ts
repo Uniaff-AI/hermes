@@ -22,7 +22,7 @@ export const postConversionsLogBody = zod.object({
         .any()
         .optional()
         .describe(
-          'One of the intervals can be used: today, yesterday, 7_days_ago, first_day_of_this_week, 1_month_ago, first_day_of_this_month, 1_year_ago, first_day_of_this_year, all_time\n',
+          'One of the intervals can be used: today, yesterday, 7_days_ago, first_day_of_this_week, 1_month_ago, first_day_of_this_month, 1_year_ago, first_day_of_this_year, all_time\n'
         ),
     })
     .optional(),
@@ -36,14 +36,14 @@ export const postConversionsLogBody = zod.object({
         operator: zod
           .string()
           .describe(
-            'One of the available operators (<a href=\"#operators\">operators</a>)\n',
+            'One of the available operators (<a href=\"#operators\">operators</a>)\n'
           ),
         expression: zod
           .string()
           .or(zod.number())
           .optional()
           .describe('Expression for the filter'),
-      }),
+      })
     )
     .optional(),
   sort: zod
@@ -51,7 +51,7 @@ export const postConversionsLogBody = zod.object({
       zod.object({
         name: zod.string().describe('Column or metric name'),
         order: zod.enum(['ASC', 'DESC']).describe('Order'),
-      }),
+      })
     )
     .optional(),
 });
