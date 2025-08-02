@@ -1,59 +1,54 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { CacheModule } from '@nestjs/cache-manager';
-import { BullModule } from '@nestjs/bull';
-import { HttpModule } from '@nestjs/axios';
-import * as redisStore from 'cache-manager-redis-store';
+// src/app.module.ts
 
-import AppConfig from './config/app.config';
-import { PrismaModule } from './database/database.module';
-import { LeadsModule } from './modules/leads/leads.module';
-import { OffersModule } from './modules/offers/offers.module';
-import { RulesModule } from './modules/rules/rules.module';
+import { Module } from '@nestjs/common';
+import { FilesModule } from './files/files.module';
+import databaseConfig from './database/config/database.config';
+import appConfig from './config/app.config';
+import fileConfig from './files/config/file.config';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmConfigService } from './database/typeorm-config.service';
+import { DataSource, DataSourceOptions } from 'typeorm';
+import { AllConfigType } from './config/config.type';
+import { MongooseModule } from '@nestjs/mongoose';
+import { MongooseConfigService } from './database/mongoose-config.service';
+import { DatabaseConfig } from './database/config/database-config.type';
+import { RulesModule } from './rules/rules.module';
+
+// Выбираем модуль для подключения БД (Mongo или Postgres)
+const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
+    .isDocumentDatabase
+    ? MongooseModule.forRootAsync({
+      useClass: MongooseConfigService,
+    })
+    : TypeOrmModule.forRootAsync({
+      useClass: TypeOrmConfigService,
+      dataSourceFactory: async (options: DataSourceOptions) => {
+        return new DataSource(options).initialize();
+      },
+    });
 
 @Module({
   imports: [
-    // Configuration
+    // Конфигурируем глобально @nestjs/config
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [AppConfig],
+      load: [
+        databaseConfig,
+        appConfig,
+        fileConfig,
+      ],
+      envFilePath: ['.env'],
     }),
 
-    // Database
-    PrismaModule,
+    // Подключаем БД
+    infrastructureDatabaseModule,
 
-    // Cache with Redis
-    CacheModule.register({
-      isGlobal: true,
-      store: redisStore as any,
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379', 10),
-      ttl: parseInt(process.env.REDIS_TTL || '300', 10),
-      password: process.env.REDIS_PASSWORD,
-    }),
+    // Модуль работы с файлами
+    FilesModule,
 
-    // Queue with BullMQ
-    BullModule.forRoot({
-      redis: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379', 10),
-        password: process.env.REDIS_PASSWORD,
-      },
-      defaultJobOptions: {
-        removeOnComplete: 100,
-        removeOnFail: 50,
-      },
-    }),
-
-    // HTTP client for external API calls
-    HttpModule,
-
-    // Feature modules
-    LeadsModule,
-    OffersModule,
+    // Наш модуль правил (Rule → CRUD + расписание рассылок)
     RulesModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
