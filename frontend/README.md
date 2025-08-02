@@ -12,16 +12,29 @@ The frontend application for Hermes CRM, built with Next.js 14, React 18, and Ty
 - **Tailwind CSS** - Utility-first CSS framework
 - **TanStack Query** - Data fetching and caching
 - **Zod** - Schema validation
-- **Orval** - API client generation
+- **Framer Motion** - Animations
 
 ### **Project Structure**
 
 ```
 src/
-├── app/                 # Next.js App Router pages
-├── components/          # Reusable UI components
-├── shared/             # Shared utilities and API
-│   └── api/            # Generated API client
+├── app/                 # Next.js App Router pages & API routes
+│   └── api/            # API proxy routes
+├── features/           # Feature-based modules
+│   ├── offers/
+│   │   ├── api/        # Offers-specific API hooks & schemas
+│   │   ├── components/ # Offers UI components
+│   │   └── types/      # Offers type definitions
+│   └── leads/
+│       ├── api/        # Leads-specific API hooks & schemas
+│       ├── components/ # Leads UI components
+│       └── types/      # Leads type definitions
+├── shared/             # Shared utilities
+│   ├── api/           # Common API utilities & config
+│   ├── model/         # HTTP client
+│   ├── providers/     # React providers
+│   ├── types/         # Global type definitions
+│   └── ui/            # Reusable UI components
 ├── lib/                # Utility functions
 └── styles/             # Global styles
 ```
@@ -72,39 +85,60 @@ pnpm lint               # Run ESLint
 pnpm lint:fix           # Fix linting issues
 pnpm typecheck          # Type check TypeScript
 pnpm format             # Format code with Prettier
-
-# Testing
-pnpm test               # Run tests
-pnpm test:watch         # Run tests in watch mode
-
-# API Generation
-pnpm generate:api       # Generate API client from OpenAPI spec
 ```
 
 ## 🔌 API Integration
 
-The frontend automatically generates TypeScript API clients from the backend OpenAPI specification using Orval.
+The frontend uses a modular API architecture with feature-specific API modules and shared utilities.
 
-### **Generated API Client**
+### **API Architecture**
 
-- **Location**: `src/shared/api/__generated__/`
-- **Generation**: Run `pnpm generate:api` after backend changes
-- **Usage**: Import from `src/shared/api/endpoints/`
+- **Shared API Config**: Common configuration and utilities
+- **Feature-specific APIs**: Each feature has its own API module
+- **React Query Integration**: Automatic caching and error handling
+- **Zod Validation**: Runtime type checking for API responses
+
+### **API Proxy Pattern**
+
+External API calls are proxied through Next.js API routes:
+
+```
+Frontend -> /api/get_products/ -> External API
+Frontend -> /api/get_leads/ -> External API
+```
 
 ### **Example Usage**
 
 ```typescript
-import { useGetLeads } from '@/shared/api/endpoints/leads';
+// Offers feature
+import { useProducts } from '@/features/offers/api/hooks';
+
+function OffersList() {
+  const { data: products, isLoading } = useProducts();
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      {products?.map(product => (
+        <div key={product.productId}>{product.productName}</div>
+      ))}
+    </div>
+  );
+}
+
+// Leads feature
+import { useLeads } from '@/features/leads/api/hooks';
 
 function LeadsList() {
-  const { data: leads, isLoading } = useGetLeads();
+  const { data: leads, isLoading } = useLeads({ status: 'New' });
 
   if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
       {leads?.map(lead => (
-        <div key={lead.id}>{lead.name}</div>
+        <div key={lead.subid}>{lead.name}</div>
       ))}
     </div>
   );
@@ -119,6 +153,7 @@ The application uses a component library built with:
 - **Tailwind CSS** - Styling
 - **Class Variance Authority** - Component variants
 - **Lucide React** - Icons
+- **Framer Motion** - Animations
 
 ### **Component Structure**
 
@@ -134,59 +169,62 @@ components/
 
 ### **Environment Variables**
 
-Create a `.env.local` file in the frontend directory:
+Create a `.env.development` file in the frontend directory:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXT_PUBLIC_APP_NAME=Hermes CRM
+API_SCHEME_URL=https://api.hermes.uniaffcrm.com
+API_KEY=your_api_key_here
+
+NEXT_PUBLIC_BASE_URL=/api
+NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
+NEXT_PUBLIC_API_ENDPOINT=https://api.hermes.uniaffcrm.com
 ```
 
-### **Tailwind Configuration**
+### **React Query Setup**
 
-- **Config**: `tailwind.config.ts`
-- **Customization**: CSS variables for theming
-- **Plugins**: Forms, typography
+The application uses React Query for data fetching. Wrap your app with the QueryProvider:
 
-## 🧪 Testing
+```typescript
+import { QueryProvider } from '@/shared/providers/QueryProvider';
 
-The application uses Jest and React Testing Library for testing:
-
-```bash
-# Run all tests
-pnpm test
-
-# Run tests in watch mode
-pnpm test:watch
-
-# Run tests with coverage
-pnpm test:coverage
+export default function RootLayout({ children }) {
+  return (
+    <QueryProvider>
+      {children}
+    </QueryProvider>
+  );
+}
 ```
 
-## 📦 Deployment
+## 📂 Feature Modules
 
-### **Vercel (Recommended)**
+Each feature is organized as a self-contained module:
 
-The application is configured for Vercel deployment with:
+```
+features/[feature]/
+├── api/
+│   ├── schemas.ts     # Zod schemas & types
+│   ├── hooks.ts       # React Query hooks
+│   └── index.ts       # API exports
+├── components/        # Feature components
+├── types/             # Type definitions
+└── index.ts          # Feature exports
+```
 
-- **Build Command**: `pnpm build`
-- **Output Directory**: `.next`
-- **Node Version**: 18.x
+### **Benefits of Modular Structure**
 
-### **Other Platforms**
-
-The application can be deployed to any platform that supports Next.js:
-
-- **Netlify**
-- **Railway**
-- **Docker**
+- **Separation of Concerns**: Each feature manages its own API logic
+- **Type Safety**: Feature-specific types and validation
+- **Reusability**: Shared utilities for common patterns
+- **Maintainability**: Clear boundaries between features
 
 ## 🤝 Contributing
 
-1. Follow the established component patterns
+1. Follow the modular architecture patterns
 2. Use TypeScript for all new code
 3. Add proper error handling and loading states
-4. Write tests for new components
-5. Update API client when backend changes
+4. Create feature-specific API modules for new features
+5. Use Zod schemas for API validation
 
 ## 📝 License
 

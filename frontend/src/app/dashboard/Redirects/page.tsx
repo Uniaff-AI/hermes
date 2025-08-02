@@ -1,12 +1,12 @@
 'use client';
 
-import {FC, useState} from 'react';
+import { FC, useState } from 'react';
 
-import RedirectRulesView from "@/components/dashboard/RedirectRuleCard";
-import RuleCreationForm from "@/components/dashboard/RuleCreationForm";
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {TemplatesView} from "@/components/dashboard/messages/TemplatesView";
-import AnalyticsView from "@/components/dashboard/AnalyticsView";
+import RedirectRulesView from "@/features/rules/components/RulesManagement/RedirectRuleCard";
+import RuleCreationForm from "@/features/rules/components/RulesManagement/RuleCreationForm";
+import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs';
+import { TemplatesView } from "@/features/dashboard/messages/TemplatesView";
+import AnalyticsView from "@/features/dashboard/AnalyticsView";
 
 const RedirectsView: FC = () => {
     const [subTab, setSubTab] = useState('active');
@@ -42,10 +42,10 @@ const RedirectsView: FC = () => {
             </Tabs>
 
             <div className="mt-6">
-                {subTab === 'active' && <RedirectRulesView/>}
-                {subTab === 'management' && <div>⚙️<RuleCreationForm/></div>}
-                {subTab === 'messages' && <div> <TemplatesView/></div>}
-                {subTab === 'analytics' && <div><AnalyticsView/></div>}
+                {subTab === 'active' && <RedirectRulesView />}
+                {subTab === 'management' && <div>⚙️<RuleCreationForm /></div>}
+                {subTab === 'messages' && <div> <TemplatesView /></div>}
+                {subTab === 'analytics' && <div><AnalyticsView /></div>}
             </div>
         </div>
     );
