@@ -18,17 +18,17 @@ import { parseTimeHM, getTodayTimestamp } from '../utils/time.util';
 import { randomInRange }                  from '../utils/random.util';
 
 interface Lead {
-    subid:       string;
-    productId:   string;
-    productName: string;
-    aff:         string;
-    offer:       string;
-    offer_name:  string;
-    leadName:    string;
-    country:     string;
-    phone:       string;
-    ua:          string;
-    ip:          string;
+    subid:        string;
+    productId:    string;
+    productName:  string;   // новое поле для названия продукта
+    aff:          string;
+    offer:        string;
+    offer_name:   string;
+    country:      string;
+    name:         string;
+    phone:        string;
+    ua:           string;
+    ip:           string;
 }
 
 @Injectable()
@@ -130,22 +130,21 @@ export class RulesService {
 
         // 3) Нормализация структуры под интерфейс Lead
         const leads: Lead[] = validRaw.map(r => {
-            const rawSid  = (r.subid      ?? r.subId      ?? r.sub_id)!      as string;
-            const rawPid  = (r.productId  ?? r.product_id ?? r.product)!     as string;
-            const rawPnm  = (r.productName ?? r.product_name ?? r.offerName ?? r.offer_name ?? r.product)! as string;
-            const rawName = (r.leadName   ?? r.name       ?? '').trim();
+            const rawSid = (r.subid      ?? r.subId      ?? r.sub_id)!      as string;
+            const rawPid = (r.productId  ?? r.product_id ?? r.product)!     as string;
+            const rawPnm = (r.productName ?? r.product_name ?? r.offerName ?? r.offer_name ?? r.product)! as string;
             return {
-                subid:       rawSid.trim(),
-                productId:   rawPid.trim(),
-                productName: rawPnm.trim(),
-                aff:         (r.aff        ?? '').trim(),
-                offer:       (r.offer      ?? '').trim(),
-                offer_name:  (r.offer_name ?? r.offerName ?? '').trim(),
-                leadName:    rawName !== '' ? rawName : 'Unknown',  // подставляем дефолт, если пустая
-                country:     (r.country    ?? '').trim(),
-                phone:       (r.phone      ?? '').trim(),
-                ua:          (r.ua         ?? '').trim(),
-                ip:          (r.ip         ?? '').trim(),
+                subid:        rawSid.trim(),
+                productId:    rawPid.trim(),
+                productName:  rawPnm.trim(),
+                aff:          (r.aff        ?? '').trim(),
+                offer:        (r.offer      ?? '').trim(),
+                offer_name:   (r.offer_name ?? r.offerName ?? '').trim(),
+                name:         (r.leadName   ?? r.name       ?? '').trim(),
+                country:      (r.country    ?? '').trim(),
+                phone:        (r.phone      ?? '').trim(),
+                ua:           (r.ua         ?? '').trim(),
+                ip:           (r.ip         ?? '').trim(),
             };
         });
 
@@ -199,7 +198,7 @@ export class RulesService {
             timeout: this.timeoutMs,
         };
 
-        // Логируем полный payload (включая productId, productName и leadName)
+        // Логируем полный payload (включая productId и productName)
         this.logger.debug(`Payload to affiliate for rule ${ruleId}: ${JSON.stringify(lead)}`);
 
         try {

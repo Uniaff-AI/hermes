@@ -28,32 +28,35 @@ The main reason for using Hexagonal Architecture is to separate the business log
 ## Description of the module structure
 
 ```txt
-src/
-├─ app.module.ts
-├─ main.ts
-├─ config/
-│ └─ app.config.ts
-├─ database/
-│ ├─ config/database.config.ts
-│ ├─ typeorm-config.service.ts
-│ └─ mongoose-config.service.ts
-├─ files/
-│ └─ config/file.config.ts
-├─ rules/
-│ ├─ domain/rule.entity.ts
-│ ├─ dto/
-│ │ ├─ create-rule.dto.ts
-│ │ └─ rule.dto.ts
-│ ├─ rules.repository.ts
-│ ├─ rules.module.ts
-│ ├─ rules.service.ts
-│ ├─ rules.controller.ts
-│ └─ lead-scheduler.processor.ts
-├─ utils/
-│ ├─ random.util.ts
-│ └─ time.util.ts
-└─ test/
-└─ rules.service.spec.ts
+.
+├── domain
+│   └── [DOMAIN_ENTITY].ts
+├── dto
+│   ├── create.dto.ts
+│   ├── find-all.dto.ts
+│   └── update.dto.ts
+├── infrastructure
+│   └── persistence
+│       ├── document
+│       │   ├── document-persistence.module.ts
+│       │   ├── entities
+│       │   │   └── [SCHEMA].ts
+│       │   ├── mappers
+│       │   │   └── [MAPPER].ts
+│       │   └── repositories
+│       │       └── [ADAPTER].repository.ts
+│       ├── relational
+│       │   ├── entities
+│       │   │   └── [ENTITY].ts
+│       │   ├── mappers
+│       │   │   └── [MAPPER].ts
+│       │   ├── relational-persistence.module.ts
+│       │   └── repositories
+│       │       └── [ADAPTER].repository.ts
+│       └── [PORT].repository.ts
+├── controller.ts
+├── module.ts
+└── service.ts
 ```
 README.md
 md

@@ -17,6 +17,7 @@ import { DatabaseConfig } from './database/config/database-config.type';
 import { FilesModule } from './files/files.module';
 import { RulesModule } from './rules/rules.module';
 
+// В зависимости от флага выбираем Mongo или Postgres
 const infrastructureDatabaseModule =
     (databaseConfig() as DatabaseConfig).isDocumentDatabase
         ? MongooseModule.forRootAsync({
@@ -24,6 +25,7 @@ const infrastructureDatabaseModule =
         })
         : TypeOrmModule.forRootAsync({
           useClass: TypeOrmConfigService,
+          // Явно аннотируем options как DataSourceOptions, чтобы TS не ругался
           dataSourceFactory: async (options: DataSourceOptions) => {
             return new DataSource(options).initialize();
           },
@@ -31,12 +33,14 @@ const infrastructureDatabaseModule =
 
 @Module({
   imports: [
+    // 1) Загрузка .env и валидация конфигов
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
       load: [databaseConfig, appConfig, fileConfig],
     }),
 
+    // 2) Подключение базы (Mongo или Postgres)
     infrastructureDatabaseModule,
 
     // 3) Очередь Bull для фоновых задач (Redis)
@@ -47,7 +51,11 @@ const infrastructureDatabaseModule =
         password: process.env.REDIS_PASSWORD || undefined,
       },
     }),
+
+    // 4) Модуль работы с файлами
     FilesModule,
+
+    // 5) Модуль правил
     RulesModule,
   ],
 })

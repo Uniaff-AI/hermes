@@ -1,5 +1,3 @@
-// src/rules/domain/rule.entity.ts
-
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity({ name: 'rules' })
@@ -16,25 +14,21 @@ export class Rule {
     @Column()
     offerName: string;
 
-    @Column('int')
+    @Column()
     periodMinutes: number;
 
-    @Column('int')
+    @Column()
     minInterval: number;
 
-    @Column('int')
+    @Column()
     maxInterval: number;
 
-    @Column('int')
+    @Column()
     dailyLimit: number;
 
     @Column()
-    sendWindowStart: string; // формат "HH:MM"
+    sendWindowStart: string; // "HH:MM"
 
     @Column()
-    sendWindowEnd: string;   // формат "HH:MM"
-
-    // новое поле, default = true
-    @Column({ default: true })
-    isActive: boolean;
+    sendWindowEnd: string;   // "HH:MM"
 }

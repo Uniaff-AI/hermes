@@ -12,7 +12,7 @@ import { LeadSchedulerProcessor } from './lead-scheduler.processor';
     imports: [
         TypeOrmModule.forFeature([Rule]),
         BullModule.registerQueue({ name: 'lead-scheduler' }),
-        HttpModule,
+        HttpModule, 
     ],
     controllers: [RulesController],
     providers: [RulesService, LeadSchedulerProcessor],
