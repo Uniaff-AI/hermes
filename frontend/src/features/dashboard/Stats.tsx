@@ -5,11 +5,11 @@ import { useProducts } from '@/features/offers/model/hooks';
 import StatsCard from './StatsCard';
 
 const Stats = () => {
-  const { data: leads = [], isLoading: leadsLoading } = useLeads();
-  const { data: products = [], isLoading: productsLoading } = useProducts();
+  const { data: leads, isLoading: leadsLoading } = useLeads();
+  const { data: products, isLoading: productsLoading } = useProducts();
 
-  const activeOffers = products.length;
-  const totalLeads = leads.length;
+  const activeOffers = Array.isArray(products) ? products.length : 0;
+  const totalLeads = Array.isArray(leads) ? leads.length : 0;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -32,18 +32,18 @@ const Stats = () => {
         value="1"
         change="+0.8%"
         icon={<TrendingUp className="w-6 h-6" />}
-        // TODO: Implement backend API for sales count
-        // Need to create API endpoint that returns total sales/conversions
-        // This should count leads with status 'converted' or similar
+      // TODO: Implement backend API for sales count
+      // Need to create API endpoint that returns total sales/conversions
+      // This should count leads with status 'converted' or similar
       />
       <StatsCard
         title="Total Revenue"
         value="$27.00"
         change="+18.2%"
         icon={<DollarSign className="w-6 h-6" />}
-        // TODO: Implement backend API for revenue calculation
-        // Need to create API endpoint that calculates total revenue
-        // This should sum up revenue from all converted leads
+      // TODO: Implement backend API for revenue calculation
+      // Need to create API endpoint that calculates total revenue
+      // This should sum up revenue from all converted leads
       />
     </div>
   );

@@ -13,36 +13,48 @@ export const useLeads = (filters?: LeadsFilters) => {
   return useQuery({
     queryKey: [...LEADS_QUERY_KEYS.LEADS, filters] as const,
     queryFn: async (): Promise<Lead[]> => {
-      const cleanFilters = filters
-        ? Object.fromEntries(
-            Object.entries(filters).filter(
-              ([_, value]) => value !== undefined && value !== ''
+      try {
+        const cleanFilters = filters
+          ? Object.fromEntries(
+              Object.entries(filters).filter(
+                ([_, value]) => value !== undefined && value !== ''
+              )
             )
-          )
-        : {};
+          : {};
 
-      const response = await client.post('/get_leads/', cleanFilters);
-      const parsed = LeadsResponseSchema.parse(response.data);
-      return parsed.data;
+        const response = await client.post('/get_leads/', cleanFilters);
+        const parsed = LeadsResponseSchema.parse(response.data);
+        return parsed.data || [];
+      } catch (error) {
+        console.error('Error fetching leads:', error);
+        return [];
+      }
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
     enabled: true, // Always enabled, empty filters = get all
+    retry: 1, // Only retry once
+    retryDelay: 1000, // Wait 1 second before retry
   });
 };
 
 export const useLeadsMutation = () => {
   return useMutation({
     mutationFn: async (filters: LeadsFilters): Promise<Lead[]> => {
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(
-          ([_, value]) => value !== undefined && value !== ''
-        )
-      );
+      try {
+        const cleanFilters = Object.fromEntries(
+          Object.entries(filters).filter(
+            ([_, value]) => value !== undefined && value !== ''
+          )
+        );
 
-      const response = await client.post('/get_leads/', cleanFilters);
-      const parsed = LeadsResponseSchema.parse(response.data);
-      return parsed.data;
+        const response = await client.post('/get_leads/', cleanFilters);
+        const parsed = LeadsResponseSchema.parse(response.data);
+        return parsed.data || [];
+      } catch (error) {
+        console.error('Error in leads mutation:', error);
+        throw error;
+      }
     },
   });
 };
