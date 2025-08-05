@@ -1,0 +1,25 @@
+# Generated files that shouldn't be formatted
+*.tsbuildinfo
+dist/
+build/
+.next/
+out/
+
+# Lock files (shouldn't be formatted)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Cache directories
+.cache/
+.parcel-cache/
+.swc/
+
+# Coverage reports
+coverage/
+
+# Database migrations (auto-generated)
+src/database/migrations/*.ts
+
+# Node modules
+node_modules/ 

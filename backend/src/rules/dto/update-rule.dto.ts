@@ -8,48 +8,49 @@ import {
   Matches,
 } from 'class-validator';
 
-export class CreateRuleDto {
+export class UpdateRuleDto {
   @IsString()
-  name: string;
+  @IsOptional()
+  name?: string;
 
   @IsString()
-  offerId: string;
-
-  @IsString()
-  offerName: string;
+  @IsOptional()
+  offerName?: string;
 
   @IsInt()
   @Min(1)
   @Max(1440, { message: 'periodMinutes must be between 1 and 1440' })
-  periodMinutes: number;
+  @IsOptional()
+  periodMinutes?: number;
 
   @IsInt()
   @Min(0)
-  minInterval: number;
+  @IsOptional()
+  minInterval?: number;
 
   @IsInt()
   @Min(0)
-  maxInterval: number;
+  @IsOptional()
+  maxInterval?: number;
 
   @IsInt()
   @Min(1)
   @Max(10_000, { message: 'dailyLimit seems too large' })
-  dailyLimit: number;
+  @IsOptional()
+  dailyLimit?: number;
 
   @Matches(/^\d{2}:\d{2}$/, {
     message: 'sendWindowStart must be in format HH:MM',
   })
-  sendWindowStart: string;
+  @IsOptional()
+  sendWindowStart?: string;
 
   @Matches(/^\d{2}:\d{2}$/, {
     message: 'sendWindowEnd must be in format HH:MM',
   })
-  sendWindowEnd: string;
+  @IsOptional()
+  sendWindowEnd?: string;
 
-  /**
-   * Опционально: если клиент не присылает isActive,
-   * в базе по умолчанию запишется true
-   */
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;

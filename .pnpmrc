@@ -1,4 +1,23 @@
 # PNPM Workspace Configuration
 link-workspace-packages=true
 prefer-workspace-packages=true
-shared-workspace-lockfile=true 
+shared-workspace-lockfile=true
+
+# Auto install peer dependencies
+auto-install-peers=true
+dedupe-peer-dependents=true
+
+# Scripts configuration
+enable-pre-post-scripts=true
+
+# Hoisting patterns for common tools
+hoist-pattern[]=*eslint*
+hoist-pattern[]=*prettier*
+hoist-pattern[]=*typescript*
+hoist-pattern[]=*jest*
+hoist-pattern[]=*@types*
+
+# Security and dependencies
+shamefully-hoist=false
+strict-peer-dependencies=false
+save-workspace-protocol=false 

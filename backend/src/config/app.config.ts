@@ -1,7 +1,6 @@
-// src/config/app.config.ts
 import { registerAs } from '@nestjs/config';
-import { AppConfig }  from './app-config.type';
-import validateConfig  from '../utils/validate-config';
+import { AppConfig } from './app-config.type';
+import validateConfig from '../utils/validate-config';
 import {
   IsEnum,
   IsInt,
@@ -10,12 +9,12 @@ import {
   IsUrl,
   Max,
   Min,
-}                     from 'class-validator';
+} from 'class-validator';
 
 enum Environment {
   Development = 'development',
-  Production  = 'production',
-  Test        = 'test',
+  Production = 'production',
+  Test = 'test',
 }
 
 class EnvValidator {
@@ -29,19 +28,24 @@ class EnvValidator {
   @IsOptional()
   APP_PORT: number;
 
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   FRONTEND_DOMAIN: string;
 
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   BACKEND_DOMAIN: string;
 
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   API_PREFIX: string;
 
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   APP_FALLBACK_LANGUAGE: string;
 
-  @IsString() @IsOptional()
+  @IsString()
+  @IsOptional()
   APP_HEADER_LANGUAGE: string;
 
   // ——— new vars ———
@@ -57,15 +61,18 @@ class EnvValidator {
   @IsString()
   EXTERNAL_API_KEY: string;
 
-  @IsInt() @Min(0) @IsOptional()
+  @IsInt()
+  @Min(0)
+  @IsOptional()
   EXTERNAL_API_TIMEOUT: number;
 
-  @IsInt() @Min(0) @IsOptional()
+  @IsInt()
+  @Min(0)
+  @IsOptional()
   AFFILIATE_API_TIMEOUT: number;
 }
 
 export default registerAs<AppConfig>('app', () => {
-  // валидируем process.env
   validateConfig(process.env, EnvValidator);
 
   return {
@@ -75,35 +82,35 @@ export default registerAs<AppConfig>('app', () => {
     frontendDomain: process.env.FRONTEND_DOMAIN,
     backendDomain: process.env.BACKEND_DOMAIN || 'http://localhost',
     port: process.env.APP_PORT
-        ? +process.env.APP_PORT
-        : process.env.PORT
-            ? +process.env.PORT
-            : 3000,
+      ? +process.env.APP_PORT
+      : process.env.PORT
+        ? +process.env.PORT
+        : 3000,
     apiPrefix: process.env.API_PREFIX || 'api',
     fallbackLanguage: process.env.APP_FALLBACK_LANGUAGE || 'en',
     headerLanguage: process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',
 
     externalApis: {
       leads: {
-        url:     process.env.GET_LEADS_URL!,
-        apiKey:  process.env.EXTERNAL_API_KEY!,
+        url: process.env.GET_LEADS_URL!,
+        apiKey: process.env.EXTERNAL_API_KEY!,
         timeout: process.env.EXTERNAL_API_TIMEOUT
-            ? +process.env.EXTERNAL_API_TIMEOUT
-            : 5000,
+          ? +process.env.EXTERNAL_API_TIMEOUT
+          : 5000,
       },
       products: {
-        url:     process.env.GET_PRODUCTS_URL!,
-        apiKey:  process.env.EXTERNAL_API_KEY!,
+        url: process.env.GET_PRODUCTS_URL!,
+        apiKey: process.env.EXTERNAL_API_KEY!,
         timeout: process.env.EXTERNAL_API_TIMEOUT
-            ? +process.env.EXTERNAL_API_TIMEOUT
-            : 5000,
+          ? +process.env.EXTERNAL_API_TIMEOUT
+          : 5000,
       },
       affiliate: {
-        url:     process.env.ADD_LEAD_URL!,
-        apiKey:  process.env.EXTERNAL_API_KEY!,
+        url: process.env.ADD_LEAD_URL!,
+        apiKey: process.env.EXTERNAL_API_KEY!,
         timeout: process.env.AFFILIATE_API_TIMEOUT
-            ? +process.env.AFFILIATE_API_TIMEOUT
-            : 5000,
+          ? +process.env.AFFILIATE_API_TIMEOUT
+          : 5000,
       },
     },
   };
