@@ -1,6 +1,4 @@
 import { registerAs } from '@nestjs/config';
-import { AppConfig } from './app-config.type';
-import validateConfig from '../utils/validate-config';
 import {
   IsEnum,
   IsInt,
@@ -10,8 +8,11 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import validateConfig from '../utils/validate-config';
+import { AppConfig } from './app-config.type';
 
-enum Environment {
+export enum Environment {
   Development = 'development',
   Production = 'production',
   Test = 'test',
@@ -20,56 +21,58 @@ enum Environment {
 class EnvValidator {
   @IsEnum(Environment)
   @IsOptional()
-  NODE_ENV: Environment;
+  NODE_ENV!: Environment;
 
   @IsInt()
-  @Min(1)
+  @Min(0)
   @Max(65535)
   @IsOptional()
-  APP_PORT: number;
-
-  @IsString()
-  @IsOptional()
-  FRONTEND_DOMAIN: string;
-
-  @IsString()
-  @IsOptional()
-  BACKEND_DOMAIN: string;
-
-  @IsString()
-  @IsOptional()
-  API_PREFIX: string;
-
-  @IsString()
-  @IsOptional()
-  APP_FALLBACK_LANGUAGE: string;
-
-  @IsString()
-  @IsOptional()
-  APP_HEADER_LANGUAGE: string;
-
-  // ——— new vars ———
-  @IsUrl({ require_tld: false })
-  GET_LEADS_URL: string;
+  @Type(() => Number)
+  APP_PORT!: number;
 
   @IsUrl({ require_tld: false })
-  GET_PRODUCTS_URL: string;
+  @IsOptional()
+  FRONTEND_DOMAIN!: string;
 
   @IsUrl({ require_tld: false })
-  ADD_LEAD_URL: string;
+  @IsOptional()
+  BACKEND_DOMAIN!: string;
 
   @IsString()
-  EXTERNAL_API_KEY: string;
+  @IsOptional()
+  API_PREFIX!: string;
+
+  @IsString()
+  @IsOptional()
+  APP_FALLBACK_LANGUAGE!: string;
+
+  @IsString()
+  @IsOptional()
+  APP_HEADER_LANGUAGE!: string;
+
+  @IsUrl({ require_tld: false })
+  GET_LEADS_URL!: string;
+
+  @IsUrl({ require_tld: false })
+  GET_PRODUCTS_URL!: string;
+
+  @IsUrl({ require_tld: false })
+  ADD_LEAD_URL!: string;
+
+  @IsString()
+  EXTERNAL_API_KEY!: string;
 
   @IsInt()
   @Min(0)
   @IsOptional()
-  EXTERNAL_API_TIMEOUT: number;
+  @Type(() => Number)
+  EXTERNAL_API_TIMEOUT!: number;
 
   @IsInt()
   @Min(0)
   @IsOptional()
-  AFFILIATE_API_TIMEOUT: number;
+  @Type(() => Number)
+  AFFILIATE_API_TIMEOUT!: number;
 }
 
 export default registerAs<AppConfig>('app', () => {

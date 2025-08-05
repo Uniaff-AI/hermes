@@ -5,10 +5,10 @@ export class FileResponseDto {
   @ApiProperty({
     type: () => FileType,
   })
-  file: FileType;
+  file!: FileType;
 
   @ApiProperty({
     type: String,
   })
-  uploadSignedUrl: string;
+  uploadSignedUrl!: string;
 }

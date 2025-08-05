@@ -1,11 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { FileType } from '../domain/file';
 
 export class FileDto {
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  id: string;
+  @ApiProperty({
+    type: String,
+  })
+  id!: string;
 
-  path: string;
+  @ApiProperty({
+    type: String,
+  })
+  path!: string;
+
+  constructor(file: FileType) {
+    this.id = file.id;
+    this.path = file.path;
+  }
 }

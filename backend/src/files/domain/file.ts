@@ -15,7 +15,7 @@ export class FileType {
     example: 'cbcfa8b8-3a25-4adb-a9c6-e325f0d0f3ae',
   })
   @Allow()
-  id: string;
+  id!: string;
 
   @ApiProperty({
     type: String,
@@ -31,15 +31,15 @@ export class FileType {
         )
       ) {
         const s3 = new S3Client({
-          region: (fileConfig() as FileConfig).awsS3Region ?? '',
+          region: (fileConfig() as FileConfig).awsS3Region,
           credentials: {
-            accessKeyId: (fileConfig() as FileConfig).accessKeyId ?? '',
-            secretAccessKey: (fileConfig() as FileConfig).secretAccessKey ?? '',
+            accessKeyId: (fileConfig() as FileConfig).accessKeyId!,
+            secretAccessKey: (fileConfig() as FileConfig).secretAccessKey!,
           },
         });
 
         const command = new GetObjectCommand({
-          Bucket: (fileConfig() as FileConfig).awsDefaultS3Bucket ?? '',
+          Bucket: (fileConfig() as FileConfig).awsDefaultS3Bucket,
           Key: value,
         });
 
@@ -48,9 +48,7 @@ export class FileType {
 
       return value;
     },
-    {
-      toPlainOnly: true,
-    },
+    { toPlainOnly: true },
   )
-  path: string;
+  path!: string;
 }

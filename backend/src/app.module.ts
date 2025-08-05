@@ -17,17 +17,20 @@ import { DatabaseConfig } from './database/config/database-config.type';
 import { FilesModule } from './files/files.module';
 import { RulesModule } from './rules/rules.module';
 
-const infrastructureDatabaseModule =
-    (databaseConfig() as DatabaseConfig).isDocumentDatabase
-        ? MongooseModule.forRootAsync({
-          useClass: MongooseConfigService,
-        })
-        : TypeOrmModule.forRootAsync({
-          useClass: TypeOrmConfigService,
-          dataSourceFactory: async (options: DataSourceOptions) => {
-            return new DataSource(options).initialize();
-          },
-        });
+const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
+  .isDocumentDatabase
+  ? MongooseModule.forRootAsync({
+      useClass: MongooseConfigService,
+    })
+  : TypeOrmModule.forRootAsync({
+      useClass: TypeOrmConfigService,
+      dataSourceFactory: async (options?: DataSourceOptions) => {
+        if (!options) {
+          throw new Error('Database options are required');
+        }
+        return new DataSource(options).initialize();
+      },
+    });
 
 @Module({
   imports: [

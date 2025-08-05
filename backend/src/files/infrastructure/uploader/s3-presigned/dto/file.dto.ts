@@ -4,9 +4,9 @@ import { IsNumber, IsString } from 'class-validator';
 export class FileUploadDto {
   @ApiProperty({ example: 'image.jpg' })
   @IsString()
-  fileName: string;
+  fileName!: string;
 
   @ApiProperty({ example: 138723 })
   @IsNumber()
-  fileSize: number;
+  fileSize!: number;
 }

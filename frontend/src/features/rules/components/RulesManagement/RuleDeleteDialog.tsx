@@ -3,7 +3,12 @@
 import { FC } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog';
 
 interface RuleDeleteDialogProps {
   ruleName: string;
@@ -18,7 +23,7 @@ const RuleDeleteDialog: FC<RuleDeleteDialogProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  isLoading = false
+  isLoading = false,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -34,7 +39,8 @@ const RuleDeleteDialog: FC<RuleDeleteDialogProps> = ({
 
         <div className="text-center">
           <p className="text-sm text-gray-600 mb-6">
-            Вы уверены, что хотите удалить правило <span className="font-medium text-gray-900">"{ruleName}"</span>?
+            Вы уверены, что хотите удалить правило{' '}
+            <span className="font-medium text-gray-900">"{ruleName}"</span>?
           </p>
           <p className="text-xs text-gray-500 mb-6">
             Это действие нельзя отменить.
@@ -44,11 +50,7 @@ const RuleDeleteDialog: FC<RuleDeleteDialogProps> = ({
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Отмена
           </Button>
           <Button

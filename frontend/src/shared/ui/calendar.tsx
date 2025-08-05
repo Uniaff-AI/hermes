@@ -37,15 +37,35 @@ const CustomHeader = ({
 
   // Create month names manually since toLocaleString might behave differently in date-fns v4
   const monthNames = [
-    'янв', 'фев', 'мар', 'апр', 'май', 'июн',
-    'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'
+    'янв',
+    'фев',
+    'мар',
+    'апр',
+    'май',
+    'июн',
+    'июл',
+    'авг',
+    'сен',
+    'окт',
+    'ноя',
+    'дек',
   ];
 
   // Format the date manually for the header
   const formatDateHeader = (date: Date) => {
     const monthName = [
-      'январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
-      'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'
+      'январь',
+      'февраль',
+      'март',
+      'апрель',
+      'май',
+      'июнь',
+      'июль',
+      'август',
+      'сентябрь',
+      'октябрь',
+      'ноябрь',
+      'декабрь',
     ][date.getMonth()];
     return `${monthName} ${date.getFullYear()}`;
   };
@@ -100,17 +120,20 @@ const CustomHeader = ({
             exit={{ height: 0, opacity: 0 }}
             className="absolute top-full left-0 right-0 z-10 bg-white shadow-lg rounded-b-lg p-4"
           >
-            <div className="text-center font-semibold mb-2">{date.getFullYear()}</div>
+            <div className="text-center font-semibold mb-2">
+              {date.getFullYear()}
+            </div>
             <div className="grid grid-cols-4 gap-2 mb-4">
               {monthNames.map((month, index) => (
                 <button
                   key={month}
                   type="button"
                   onClick={() => handleMonthSelect(index)}
-                  className={`p-2 text-sm rounded-md ${index === date.getMonth()
-                    ? 'bg-blue-600 text-white'
-                    : 'hover:bg-gray-100'
-                    }`}
+                  className={`p-2 text-sm rounded-md ${
+                    index === date.getMonth()
+                      ? 'bg-blue-600 text-white'
+                      : 'hover:bg-gray-100'
+                  }`}
                 >
                   {month}
                 </button>
@@ -122,10 +145,11 @@ const CustomHeader = ({
                   key={year}
                   type="button"
                   onClick={() => handleYearSelect(year)}
-                  className={`w-full p-1 text-center text-sm rounded-md ${year === date.getFullYear()
-                    ? 'bg-gray-200 font-semibold'
-                    : 'hover:bg-gray-100'
-                    }`}
+                  className={`w-full p-1 text-center text-sm rounded-md ${
+                    year === date.getFullYear()
+                      ? 'bg-gray-200 font-semibold'
+                      : 'hover:bg-gray-100'
+                  }`}
                 >
                   {year}
                 </button>

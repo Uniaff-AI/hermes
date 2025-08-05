@@ -12,10 +12,6 @@
       "name": "Frontend",
       "path": "./frontend",
     },
-    {
-      "name": "Docs",
-      "path": "./docs",
-    },
   ],
   "settings": {
     "typescript.preferences.includePackageJsonAutoImports": "on",

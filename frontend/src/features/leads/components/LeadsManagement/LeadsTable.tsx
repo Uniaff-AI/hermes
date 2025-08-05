@@ -21,29 +21,33 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     if (!searchQuery.trim()) return leads;
 
     const query = searchQuery.toLowerCase();
-    return leads.filter(lead =>
-      lead.leadName.toLowerCase().includes(query) ||
-      lead.phone.toLowerCase().includes(query) ||
-      (lead.email && lead.email.toLowerCase().includes(query)) ||
-      lead.subid.toLowerCase().includes(query)
+    return leads.filter(
+      (lead) =>
+        lead.leadName.toLowerCase().includes(query) ||
+        lead.phone.toLowerCase().includes(query) ||
+        (lead.email && lead.email.toLowerCase().includes(query)) ||
+        lead.subid.toLowerCase().includes(query)
     );
   }, [leads, searchQuery]);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
-      setSelectedLeads(filteredLeads.map(lead => lead.subid));
+      setSelectedLeads(filteredLeads.map((lead) => lead.subid));
     } else {
       setSelectedLeads([]);
     }
   };
 
-  const handleSelectLead = (leadId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectLead = (
+    leadId: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const checked = e.target.checked;
     if (checked) {
-      setSelectedLeads(prev => [...prev, leadId]);
+      setSelectedLeads((prev) => [...prev, leadId]);
     } else {
-      setSelectedLeads(prev => prev.filter(id => id !== leadId));
+      setSelectedLeads((prev) => prev.filter((id) => id !== leadId));
     }
   };
 
@@ -54,7 +58,11 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
 
     switch (status) {
       case 'New':
-        return <Badge variant="default" className="bg-blue-100 text-blue-800">Новый</Badge>;
+        return (
+          <Badge variant="default" className="bg-blue-100 text-blue-800">
+            Новый
+          </Badge>
+        );
       case 'Sale':
         return <Badge variant="success">Продажа</Badge>;
       case 'Reject':
@@ -78,7 +86,8 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
         <div className="text-center text-red-500">
-          Ошибка загрузки лидов: {error instanceof Error ? error.message : 'Неизвестная ошибка'}
+          Ошибка загрузки лидов:{' '}
+          {error instanceof Error ? error.message : 'Неизвестная ошибка'}
         </div>
       </div>
     );
@@ -122,7 +131,10 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
             <tr>
               <th className="px-6 py-3 text-left">
                 <Checkbox
-                  checked={selectedLeads.length === filteredLeads.length && filteredLeads.length > 0}
+                  checked={
+                    selectedLeads.length === filteredLeads.length &&
+                    filteredLeads.length > 0
+                  }
                   onChange={handleSelectAll}
                 />
               </th>
@@ -187,7 +199,10 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
                     {lead.vertical || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <Badge variant="secondary" className="bg-gray-100 text-gray-800">
+                    <Badge
+                      variant="secondary"
+                      className="bg-gray-100 text-gray-800"
+                    >
                       {lead.aff}
                     </Badge>
                   </td>
@@ -211,10 +226,18 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-800">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-blue-600 hover:text-blue-800"
+                      >
                         <RotateCcw className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-800">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-600 hover:text-red-800"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -224,7 +247,8 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
             ) : (
               <tr>
                 <td colSpan={13} className="text-center py-6 text-gray-500">
-                  {searchQuery || Object.values(filters).some(f => f && f !== '')
+                  {searchQuery ||
+                  Object.values(filters).some((f) => f && f !== '')
                     ? 'Лиды не найдены по вашему запросу.'
                     : 'Лиды не найдены.'}
                 </td>

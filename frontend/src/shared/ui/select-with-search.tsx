@@ -39,14 +39,19 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
 
   const selectedOption = options.find((opt) => opt.value === value);
 
-  const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    option.value.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (option.description && option.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredOptions = options.filter(
+    (option) =>
+      option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      option.value.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (option.description &&
+        option.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleClickOutside = (e: MouseEvent) => {
-    if (containerRef.current && !containerRef.current?.contains(e.target as Node)) {
+    if (
+      containerRef.current &&
+      !containerRef.current?.contains(e.target as Node)
+    ) {
       setIsOpen(false);
       setSearchTerm('');
     }
@@ -94,7 +99,9 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
 
   useEffect(() => {
     if (selectedOption) {
-      setInputValue(displayMode === 'value' ? selectedOption.value : selectedOption.label);
+      setInputValue(
+        displayMode === 'value' ? selectedOption.value : selectedOption.label
+      );
     } else {
       setInputValue('');
     }
@@ -128,7 +135,9 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
             className="p-2 text-gray-400 hover:text-gray-600 border-l border-gray-300"
             aria-label="Открыть список опций"
           >
-            <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            />
           </button>
         </div>
       </div>
@@ -147,11 +156,17 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
                   onClick={() => handleSelect(option)}
                   className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
                 >
-                  <div className="font-medium text-gray-900">{option.label}</div>
+                  <div className="font-medium text-gray-900">
+                    {option.label}
+                  </div>
                   {option.description && (
-                    <div className="text-xs text-gray-500 mt-1">{option.description}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {option.description}
+                    </div>
                   )}
-                  <div className="text-xs text-gray-400 font-mono">{option.value}</div>
+                  <div className="text-xs text-gray-400 font-mono">
+                    {option.value}
+                  </div>
                 </div>
               ))}
             </div>
@@ -160,4 +175,4 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
       )}
     </div>
   );
-}; 
+};

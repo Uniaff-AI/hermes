@@ -3,7 +3,12 @@
 import { FC } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog';
 
 interface AlertDialogProps {
   title?: string;
@@ -16,7 +21,7 @@ const AlertDialog: FC<AlertDialogProps> = ({
   title = 'Внимание',
   message,
   isOpen,
-  onClose
+  onClose,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -31,9 +36,7 @@ const AlertDialog: FC<AlertDialogProps> = ({
         </DialogHeader>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600 mb-3">
-            {message}
-          </p>
+          <p className="text-sm text-gray-600 mb-3">{message}</p>
         </div>
 
         <div className="flex justify-center">
@@ -49,4 +52,4 @@ const AlertDialog: FC<AlertDialogProps> = ({
   );
 };
 
-export default AlertDialog; 
+export default AlertDialog;

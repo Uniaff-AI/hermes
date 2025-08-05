@@ -11,191 +11,203 @@ import RuleEditModal from './RuleEditModal';
 import RuleDeleteDialog from './RuleDeleteDialog';
 
 const formatFrequency = (minInterval: number, maxInterval: number) => {
-    return `${minInterval}–${maxInterval} минут`;
+  return `${minInterval}–${maxInterval} минут`;
 };
 
 const formatPeriod = (periodMinutes: number) => {
-    return `${periodMinutes} минут`;
+  return `${periodMinutes} минут`;
 };
 
 const AllRulesView: FC = () => {
-    const { data: rules = [], isLoading, error } = useRules();
-    const deleteRuleMutation = useDeleteRule();
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-    const [ruleToDelete, setRuleToDelete] = useState<Rule | null>(null);
+  const { data: rules = [], isLoading, error } = useRules();
+  const deleteRuleMutation = useDeleteRule();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [ruleToDelete, setRuleToDelete] = useState<Rule | null>(null);
 
-    const handleDeleteRule = async (rule: Rule) => {
-        setRuleToDelete(rule);
-        setIsDeleteDialogOpen(true);
-    };
+  const handleDeleteRule = async (rule: Rule) => {
+    setRuleToDelete(rule);
+    setIsDeleteDialogOpen(true);
+  };
 
-    const handleConfirmDelete = async () => {
-        if (!ruleToDelete) return;
+  const handleConfirmDelete = async () => {
+    if (!ruleToDelete) return;
 
-        try {
-            await deleteRuleMutation.mutateAsync(ruleToDelete.id);
-        } catch (error) {
-            // Ошибка обрабатывается в хуке через toast
-            console.error('Ошибка при удалении правила:', error);
-        } finally {
-            setIsDeleteDialogOpen(false);
-            setRuleToDelete(null);
-        }
-    };
-
-    const handleCloseDeleteDialog = () => {
-        setIsDeleteDialogOpen(false);
-        setRuleToDelete(null);
-    };
-
-    const handleEditRule = (rule: Rule) => {
-        setSelectedRule(rule);
-        setIsEditModalOpen(true);
-    };
-
-    const handleCloseEditModal = () => {
-        setIsEditModalOpen(false);
-        setSelectedRule(null);
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin" />
-                <span className="ml-2">Загрузка правил...</span>
-            </div>
-        );
+    try {
+      await deleteRuleMutation.mutateAsync(ruleToDelete.id);
+    } catch (error) {
+      // Ошибка обрабатывается в хуке через toast
+      console.error('Ошибка при удалении правила:', error);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setRuleToDelete(null);
     }
+  };
 
-    if (error) {
-        return (
-            <div className="text-center py-8">
-                <p className="text-red-600">Ошибка при загрузке правил</p>
-                <p className="text-sm text-gray-500">
-                    {error instanceof Error ? error.message : 'Неизвестная ошибка'}
-                </p>
-            </div>
-        );
-    }
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setRuleToDelete(null);
+  };
 
-    if (rules.length === 0) {
-        return (
-            <div className="text-center py-8">
-                <p className="text-gray-600">Правила не найдены</p>
-                <p className="text-sm text-gray-500">Создайте первое правило для начала работы</p>
-            </div>
-        );
-    }
+  const handleEditRule = (rule: Rule) => {
+    setSelectedRule(rule);
+    setIsEditModalOpen(true);
+  };
 
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedRule(null);
+  };
+
+  if (isLoading) {
     return (
-        <div className="space-y-6">
-            <div className="space-y-1">
-                <h2 className="text-lg font-semibold text-gray-900">Все Правила</h2>
-                <p className="text-sm text-muted-foreground">
-                    Полный список созданных правил перенаправления
-                </p>
-            </div>
-            <div className="space-y-4">
-                {rules.map((rule: Rule) => (
-                    <Card key={rule.id} className="p-6 relative bg-white rounded-2xl border">
-                        <div className="absolute top-4 right-4 flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                className="p-2 hover:bg-gray-100 rounded"
-                                onClick={() => handleEditRule(rule)}
-                            >
-                                <Edit2 className="w-4 h-4 text-gray-500" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="p-2 hover:bg-gray-100 rounded"
-                            >
-                                <Copy className="w-4 h-4 text-gray-500" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="p-2 hover:bg-gray-100 rounded"
-                                onClick={() => handleDeleteRule(rule)}
-                                disabled={deleteRuleMutation.isPending}
-                            >
-                                {deleteRuleMutation.isPending ? (
-                                    <Loader2 className="w-4 h-4 text-red-500 animate-spin" />
-                                ) : (
-                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                )}
-                            </Button>
-                        </div>
-                        <div className="flex items-center gap-3 mb-4">
-                            <span
-                                className={`w-3 h-3 rounded-full ${rule.isActive ? 'bg-green-500' : 'bg-yellow-500'
-                                    }`}
-                            />
-                            <h3 className="text-base font-medium text-gray-900">{rule.name}</h3>
-                            <Badge variant="outline" className="text-xs px-2 py-0.5">
-                                {rule.isActive ? 'Активно' : 'Пауза'}
-                            </Badge>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 text-sm text-gray-600">
-                            <div>
-                                <div className="uppercase text-xs mb-1">Оффер</div>
-                                <div className="font-medium text-gray-900">{rule.offerName}</div>
-                            </div>
-                            <div>
-                                <div className="uppercase text-xs mb-1">ID Оффера</div>
-                                <div className="font-medium text-gray-900 font-mono text-xs">
-                                    {rule.offerId.slice(0, 8)}...
-                                </div>
-                            </div>
-                            <div>
-                                <div className="uppercase text-xs mb-1">Период</div>
-                                <div className="font-medium text-gray-900">{formatPeriod(rule.periodMinutes)}</div>
-                            </div>
-                            <div>
-                                <div className="uppercase text-xs mb-1">Частота</div>
-                                <div className="font-medium text-gray-900">
-                                    {formatFrequency(rule.minInterval, rule.maxInterval)}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-6 text-sm text-gray-600">
-                            <div className="flex items-center gap-2">
-                                <Shield className="w-4 h-4 text-gray-400" />
-                                <span>Лимит в день:</span>
-                                <Badge variant="outline" className="text-xs px-2 py-0.5">
-                                    {rule.dailyLimit} лидов
-                                </Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-gray-400" />
-                                <span>Время отправки:</span>
-                                <span className="inline-block bg-gray-100 text-xs px-2 py-0.5 rounded">
-                                    {rule.sendWindowStart}–{rule.sendWindowEnd}
-                                </span>
-                            </div>
-                        </div>
-                    </Card>
-                ))}
-            </div>
-
-            {/* Модальное окно редактирования */}
-            <RuleEditModal
-                rule={selectedRule}
-                isOpen={isEditModalOpen}
-                onClose={handleCloseEditModal}
-            />
-
-            {/* Диалог удаления */}
-            <RuleDeleteDialog
-                ruleName={ruleToDelete?.name || ''}
-                isOpen={isDeleteDialogOpen}
-                onClose={handleCloseDeleteDialog}
-                onConfirm={handleConfirmDelete}
-                isLoading={deleteRuleMutation.isPending}
-            />
-        </div>
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin" />
+        <span className="ml-2">Загрузка правил...</span>
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">Ошибка при загрузке правил</p>
+        <p className="text-sm text-gray-500">
+          {error instanceof Error ? error.message : 'Неизвестная ошибка'}
+        </p>
+      </div>
+    );
+  }
+
+  if (rules.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Правила не найдены</p>
+        <p className="text-sm text-gray-500">
+          Создайте первое правило для начала работы
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold text-gray-900">Все Правила</h2>
+        <p className="text-sm text-muted-foreground">
+          Полный список созданных правил перенаправления
+        </p>
+      </div>
+      <div className="space-y-4">
+        {rules.map((rule: Rule) => (
+          <Card
+            key={rule.id}
+            className="p-6 relative bg-white rounded-2xl border"
+          >
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="p-2 hover:bg-gray-100 rounded"
+                onClick={() => handleEditRule(rule)}
+              >
+                <Edit2 className="w-4 h-4 text-gray-500" />
+              </Button>
+              <Button
+                variant="outline"
+                className="p-2 hover:bg-gray-100 rounded"
+              >
+                <Copy className="w-4 h-4 text-gray-500" />
+              </Button>
+              <Button
+                variant="outline"
+                className="p-2 hover:bg-gray-100 rounded"
+                onClick={() => handleDeleteRule(rule)}
+                disabled={deleteRuleMutation.isPending}
+              >
+                {deleteRuleMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 text-red-500 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                )}
+              </Button>
+            </div>
+            <div className="flex items-center gap-3 mb-4">
+              <span
+                className={`w-3 h-3 rounded-full ${
+                  rule.isActive ? 'bg-green-500' : 'bg-yellow-500'
+                }`}
+              />
+              <h3 className="text-base font-medium text-gray-900">
+                {rule.name}
+              </h3>
+              <Badge variant="outline" className="text-xs px-2 py-0.5">
+                {rule.isActive ? 'Активно' : 'Пауза'}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 text-sm text-gray-600">
+              <div>
+                <div className="uppercase text-xs mb-1">Оффер</div>
+                <div className="font-medium text-gray-900">
+                  {rule.offerName}
+                </div>
+              </div>
+              <div>
+                <div className="uppercase text-xs mb-1">ID Оффера</div>
+                <div className="font-medium text-gray-900 font-mono text-xs">
+                  {rule.offerId.slice(0, 8)}...
+                </div>
+              </div>
+              <div>
+                <div className="uppercase text-xs mb-1">Период</div>
+                <div className="font-medium text-gray-900">
+                  {formatPeriod(rule.periodMinutes)}
+                </div>
+              </div>
+              <div>
+                <div className="uppercase text-xs mb-1">Частота</div>
+                <div className="font-medium text-gray-900">
+                  {formatFrequency(rule.minInterval, rule.maxInterval)}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-6 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-gray-400" />
+                <span>Лимит в день:</span>
+                <Badge variant="outline" className="text-xs px-2 py-0.5">
+                  {rule.dailyLimit} лидов
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span>Время отправки:</span>
+                <span className="inline-block bg-gray-100 text-xs px-2 py-0.5 rounded">
+                  {rule.sendWindowStart}–{rule.sendWindowEnd}
+                </span>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Модальное окно редактирования */}
+      <RuleEditModal
+        rule={selectedRule}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+      />
+
+      {/* Диалог удаления */}
+      <RuleDeleteDialog
+        ruleName={ruleToDelete?.name || ''}
+        isOpen={isDeleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        isLoading={deleteRuleMutation.isPending}
+      />
+    </div>
+  );
 };
 
 export default AllRulesView;

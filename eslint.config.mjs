@@ -18,7 +18,7 @@ export default [
   // Base configuration for all files
   ...compat.extends(
     'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
+    'plugin:prettier/recommended'
   ),
   {
     plugins: {
@@ -68,6 +68,12 @@ export default [
   // Root-level files
   {
     files: ['*.{js,mjs,ts}'],
-    ignores: ['node_modules/**', 'dist/**', 'build/**', '.next/**', 'coverage/**'],
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'build/**',
+      '.next/**',
+      'coverage/**',
+    ],
   },
 ];

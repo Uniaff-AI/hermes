@@ -16,7 +16,10 @@ import appConfig from '../../../config/app.config';
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) => {
+      dataSourceFactory: async (options: DataSourceOptions | undefined) => {
+        if (!options) {
+          throw new Error('Database options are required');
+        }
         return new DataSource(options).initialize();
       },
     }),

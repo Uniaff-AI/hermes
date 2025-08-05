@@ -1,13 +1,27 @@
 'use client';
 
 import { FC, useState, useEffect } from 'react';
-import { X, Filter, Settings, MessageSquare, Shield, Mail, Phone, Loader2 } from 'lucide-react';
+import {
+  X,
+  Filter,
+  Settings,
+  MessageSquare,
+  Shield,
+  Mail,
+  Phone,
+  Loader2,
+} from 'lucide-react';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { Select } from '@/shared/ui/select';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { Button } from '@/shared/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog';
 import { Rule, UpdateRule } from '@/features/rules/model/schemas';
 import { useUpdateRule } from '@/features/rules/model/hooks';
 
@@ -40,7 +54,7 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
   }, [rule]);
 
   const handleInputChange = (field: keyof UpdateRule, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
@@ -98,25 +112,17 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                 <Label>Название правила</Label>
                 <Input
                   value={formData.name || ''}
-                  onChange={e => handleInputChange('name', e.target.value)}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="Введите название правила"
                 />
               </div>
               <div>
                 <Label>ID Оффера</Label>
-                <Input
-                  value={rule.offerId}
-                  readOnly
-                  className="bg-gray-50"
-                />
+                <Input value={rule.offerId} readOnly className="bg-gray-50" />
               </div>
               <div>
                 <Label>Название оффера</Label>
-                <Input
-                  value={rule.offerName}
-                  readOnly
-                  className="bg-gray-50"
-                />
+                <Input value={rule.offerName} readOnly className="bg-gray-50" />
               </div>
               <div>
                 <Label>ПП (Партнёрская программа)</Label>
@@ -130,7 +136,9 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                 <Label>Статус</Label>
                 <Select
                   value={formData.isActive ? 'active' : 'inactive'}
-                  onChange={value => handleInputChange('isActive', value === 'active')}
+                  onChange={(value) =>
+                    handleInputChange('isActive', value === 'active')
+                  }
                   options={[
                     { label: 'Активно', value: 'active' },
                     { label: 'Неактивно', value: 'inactive' },
@@ -141,7 +149,9 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                 <Label>За какой период</Label>
                 <Select
                   value={getPeriodValue(formData.periodMinutes || 1440)}
-                  onChange={value => handleInputChange('periodMinutes', parseInt(value) * 60)}
+                  onChange={(value) =>
+                    handleInputChange('periodMinutes', parseInt(value) * 60)
+                  }
                   options={[
                     { label: '1 час', value: '1' },
                     { label: '6 часов', value: '6' },
@@ -166,7 +176,9 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                   <Input
                     type="number"
                     value={formData.minInterval || 5}
-                    onChange={e => handleInputChange('minInterval', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleInputChange('minInterval', parseInt(e.target.value))
+                    }
                     min="0"
                   />
                 </div>
@@ -175,20 +187,25 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                   <Input
                     type="number"
                     value={formData.maxInterval || 15}
-                    onChange={e => handleInputChange('maxInterval', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleInputChange('maxInterval', parseInt(e.target.value))
+                    }
                     min="0"
                   />
                 </div>
               </div>
               <div className="text-sm text-gray-600 mt-2">
-                Система будет отправлять лиды в случайном интервале между указанными значениями
+                Система будет отправлять лиды в случайном интервале между
+                указанными значениями
               </div>
               <div>
                 <Label>Кап фильтр (лидов в день)</Label>
                 <Input
                   type="number"
                   value={formData.dailyLimit || 100}
-                  onChange={e => handleInputChange('dailyLimit', parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleInputChange('dailyLimit', parseInt(e.target.value))
+                  }
                   min="1"
                   max="10000"
                 />
@@ -198,7 +215,9 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                 <Input
                   type="time"
                   value={formData.sendWindowStart || '09:00'}
-                  onChange={e => handleInputChange('sendWindowStart', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('sendWindowStart', e.target.value)
+                  }
                 />
               </div>
               <div>
@@ -206,7 +225,9 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                 <Input
                   type="time"
                   value={formData.sendWindowEnd || '18:00'}
-                  onChange={e => handleInputChange('sendWindowEnd', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('sendWindowEnd', e.target.value)
+                  }
                 />
               </div>
               <div className="lg:col-span-3">
@@ -238,7 +259,7 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                 <Label>Тип сообщения</Label>
                 <Select
                   value="template"
-                  onChange={() => { }}
+                  onChange={() => {}}
                   options={[
                     { label: 'Из готовых шаблонов', value: 'template' },
                     { label: 'Кастомное сообщение', value: 'custom' },
@@ -270,17 +291,23 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
               <div className="flex items-start gap-4">
                 <Shield className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
                 <div className="flex-1">
-                  <div className="font-medium text-blue-700 mb-2">Учет основного трафика</div>
+                  <div className="font-medium text-blue-700 mb-2">
+                    Учет основного трафика
+                  </div>
                   <p className="text-sm text-blue-900 mb-4">
-                    Система автоматически учитывает объем основного трафика из Keitaro и догружает лиды в соответствии с установленными лимитами.
+                    Система автоматически учитывает объем основного трафика из
+                    Keitaro и догружает лиды в соответствии с установленными
+                    лимитами.
                   </p>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-sm text-blue-700">Группа офферов в Keitaro</Label>
+                      <Label className="text-sm text-blue-700">
+                        Группа офферов в Keitaro
+                      </Label>
                       <Select
                         placeholder="Выберите группу"
                         value=""
-                        onChange={() => { }}
+                        onChange={() => {}}
                         options={[
                           { label: 'Forex Group', value: 'forex' },
                           { label: 'Crypto Group', value: 'crypto' },
@@ -288,12 +315,10 @@ const RuleEditModal: FC<RuleEditModalProps> = ({ rule, isOpen, onClose }) => {
                       />
                     </div>
                     <div>
-                      <Label className="text-sm text-blue-700">Текущий объем (сегодня)</Label>
-                      <Input
-                        value="47"
-                        readOnly
-                        className="bg-gray-50"
-                      />
+                      <Label className="text-sm text-blue-700">
+                        Текущий объем (сегодня)
+                      </Label>
+                      <Input value="47" readOnly className="bg-gray-50" />
                     </div>
                   </div>
                 </div>

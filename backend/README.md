@@ -59,3 +59,4 @@ DATABASE_NAME=hermes_db
 JWT_SECRET=my_super_secret
 
 docker-compose up --build
+```

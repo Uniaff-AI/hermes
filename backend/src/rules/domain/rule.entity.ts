@@ -1,40 +1,37 @@
-// src/rules/domain/rule.entity.ts
-
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity({ name: 'rules' })
+@Entity('rules')
 export class Rule {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name!: string;
 
-    @Column()
-    offerId: string;
+  @Column()
+  offerId!: string;
 
-    @Column()
-    offerName: string;
+  @Column()
+  offerName!: string;
 
-    @Column('int')
-    periodMinutes: number;
+  @Column()
+  periodMinutes!: number;
 
-    @Column('int')
-    minInterval: number;
+  @Column()
+  minInterval!: number;
 
-    @Column('int')
-    maxInterval: number;
+  @Column()
+  maxInterval!: number;
 
-    @Column('int')
-    dailyLimit: number;
+  @Column()
+  dailyLimit!: number;
 
-    @Column()
-    sendWindowStart: string; // формат "HH:MM"
+  @Column()
+  sendWindowStart!: string; // формат "HH:MM"
 
-    @Column()
-    sendWindowEnd: string;   // формат "HH:MM"
+  @Column()
+  sendWindowEnd!: string; // формат "HH:MM"
 
-    // новое поле, default = true
-    @Column({ default: true })
-    isActive: boolean;
+  @Column({ default: true })
+  isActive!: boolean;
 }

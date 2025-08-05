@@ -1,12 +1,23 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Calendar as CalendarIcon, ChevronDown, Filter, Search, X } from 'lucide-react';
+import {
+  Calendar as CalendarIcon,
+  ChevronDown,
+  Filter,
+  Search,
+  X,
+} from 'lucide-react';
 import { FC, useEffect, useRef, useState } from 'react';
 import { Calendar } from '@/shared/ui/calendar';
 import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
-import { CountryEnum, VerticalEnum, AffEnum, StatusEnum } from '@/shared/utilities/enums';
+import {
+  CountryEnum,
+  VerticalEnum,
+  AffEnum,
+  StatusEnum,
+} from '@/shared/utilities/enums';
 import { LeadsFilters } from '../../model/schemas';
 
 type LeadsFiltersProps = {
@@ -22,25 +33,32 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
   onSearchChange,
   filters,
   onFiltersChange,
-  onClearFilters
+  onClearFilters,
 }) => {
   const [isAdvancedVisible, setAdvancedVisible] = useState(false);
 
-  const handleFilterChange = (key: keyof LeadsFilters, value: string | undefined) => {
+  const handleFilterChange = (
+    key: keyof LeadsFilters,
+    value: string | undefined
+  ) => {
     onFiltersChange({
       ...filters,
       [key]: value || undefined,
     });
   };
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== undefined && value !== '');
+  const hasActiveFilters = Object.values(filters).some(
+    (value) => value !== undefined && value !== ''
+  );
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4" />
-          <h2 className="text-lg font-semibold text-gray-800">Фильтры по лидам</h2>
+          <h2 className="text-lg font-semibold text-gray-800">
+            Фильтры по лидам
+          </h2>
         </div>
         {hasActiveFilters && (
           <Button
@@ -186,7 +204,9 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 <input
                   type="text"
                   value={filters.productName || ''}
-                  onChange={(e) => handleFilterChange('productName', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange('productName', e.target.value)
+                  }
                   placeholder="Введите название продукта"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -198,7 +218,9 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                   label="Период"
                   fromDate={filters.dateFrom}
                   toDate={filters.dateTo}
-                  onFromDateChange={(date) => handleFilterChange('dateFrom', date)}
+                  onFromDateChange={(date) =>
+                    handleFilterChange('dateFrom', date)
+                  }
                   onToDateChange={(date) => handleFilterChange('dateTo', date)}
                 />
               </div>
@@ -295,7 +317,9 @@ const FilterDateRange: FC<{
   onFromDateChange: (date: string) => void;
   onToDateChange: (date: string) => void;
 }> = ({ label, fromDate, toDate, onFromDateChange, onToDateChange }) => {
-  const [isCalendarOpen, setCalendarOpen] = useState<null | 'from' | 'to'>(null);
+  const [isCalendarOpen, setCalendarOpen] = useState<null | 'from' | 'to'>(
+    null
+  );
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -333,11 +357,15 @@ const FilterDateRange: FC<{
 
   return (
     <div ref={ref}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+      </label>
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <button
-            onClick={() => setCalendarOpen(isCalendarOpen === 'from' ? null : 'from')}
+            onClick={() =>
+              setCalendarOpen(isCalendarOpen === 'from' ? null : 'from')
+            }
             className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center"
             type="button"
           >
@@ -359,7 +387,9 @@ const FilterDateRange: FC<{
         <span className="text-gray-400">-</span>
         <div className="relative flex-1">
           <button
-            onClick={() => setCalendarOpen(isCalendarOpen === 'to' ? null : 'to')}
+            onClick={() =>
+              setCalendarOpen(isCalendarOpen === 'to' ? null : 'to')
+            }
             className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center"
             type="button"
           >

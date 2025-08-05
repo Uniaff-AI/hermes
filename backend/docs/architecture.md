@@ -17,7 +17,7 @@
 
 ## Hexagonal Architecture
 
-NestJS Boilerplate is based on [Hexagonal Architecture](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)). This architecture is also known as Ports and Adapters.
+NestJS Boilerplate is based on [Hexagonal Architecture](<https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)>). This architecture is also known as Ports and Adapters.
 
 ![Hexagonal Architecture Diagram](https://github.com/brocoders/nestjs-boilerplate/assets/6001723/6a6a763e-d1c9-43cc-910a-617cda3a71db)
 
@@ -55,13 +55,16 @@ src/
 └─ test/
 └─ rules.service.spec.ts
 ```
+
 README.md
 md
 Copy
 Edit
+
 # Lead Scheduler Service
 
 Сервис для плановой рассылки лидов через внешнее API:
+
 - Сохраняет Rules (правила отправки) в PostgreSQL или MongoDB.
 - По созданию правила сразу ставит в Bull-очередь задачу на сбор и расписание лидов.
 - Рассылает лидов равномерно в окне “HH:MM” с рандомизацией интервала.
@@ -69,8 +72,6 @@ Edit
 - Полностью конфигурируется через `.env`.
 
 ## Структура
-
-
 
 `[DOMAIN ENTITY].ts` represents an entity used in the business logic. Domain entity has no dependencies on the database or any other infrastructure.
 
@@ -107,11 +108,11 @@ export class UsersRelationalRepository implements UserRepository {
   async findByEmail(email: string): Promise<User> {
     // ...
   }
-  
+
   async findByRoles(roles: string[]): Promise<User> {
     // ...
   }
-  
+
   async findByIds(ids: string[]): Promise<User> {
     // ...
   }

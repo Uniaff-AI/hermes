@@ -16,23 +16,23 @@ export enum LeadSendingStatus {
 @Entity({ name: 'lead_sendings' })
 export class LeadSending {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column('uuid')
-  ruleId: string;
+  ruleId!: string;
 
   @ManyToOne(() => Rule, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'ruleId' })
-  rule: Rule;
+  rule!: Rule;
 
   @Column()
-  subid: string;
+  subid!: string;
 
   @Column()
-  leadName: string;
+  leadName!: string;
 
   @Column()
-  phone: string;
+  phone!: string;
 
   @Column({ nullable: true })
   email?: string;
@@ -44,7 +44,7 @@ export class LeadSending {
     type: 'enum',
     enum: LeadSendingStatus,
   })
-  status: LeadSendingStatus;
+  status!: LeadSendingStatus;
 
   @Column({ type: 'text', nullable: true })
   errorDetails?: string;
@@ -53,5 +53,5 @@ export class LeadSending {
   responseStatus?: number;
 
   @CreateDateColumn()
-  sentAt: Date;
+  sentAt!: Date;
 }
