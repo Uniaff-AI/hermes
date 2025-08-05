@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, Filter, Search } from 'lucide-react';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { CountryEnum, VerticalEnum, AffEnum } from '@/shared/types/enums';
+import { CountryEnum, VerticalEnum, AffEnum } from '@/shared/utilities/enums';
 import type { OffersFilters } from '../../model/schemas';
 
 type OffersFiltersProps = {
@@ -36,7 +36,6 @@ const OffersFilters: FC<OffersFiltersProps> = ({
         if (value === 'Все') {
             delete newFilters[filterType];
         } else {
-            // Ensure the value is a valid enum value
             const enumValues = filterOptions[filterType];
             if (enumValues.includes(value)) {
                 newFilters[filterType] = value as any;
@@ -120,7 +119,6 @@ const OffersFilters: FC<OffersFiltersProps> = ({
     );
 };
 
-// Custom Dropdown Component
 const FilterSelect: FC<{
     label: string;
     color: string;

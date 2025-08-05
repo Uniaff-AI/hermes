@@ -1,4 +1,4 @@
-import { envConfig } from '@/config/envConfig';
+import { ENV_CONFIG, isDevelopment } from '@/config/envConfig';
 
 export interface RequestConfig {
   url?: string;
@@ -20,7 +20,7 @@ export interface Response<T = unknown> {
   config: RequestConfig;
 }
 
-const basePath = envConfig.isDev ? '/api' : envConfig.apiEndpoint;
+const basePath = isDevelopment ? '/api' : ENV_CONFIG.API_ENDPOINT;
 
 export const client = {
   async request<T = unknown>(config: RequestConfig): Promise<Response<T>> {

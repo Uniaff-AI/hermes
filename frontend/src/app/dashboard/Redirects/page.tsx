@@ -43,9 +43,9 @@ const RedirectsView: FC = () => {
 
             <div className="mt-6">
                 {subTab === 'active' && <RedirectRulesView />}
-                {subTab === 'management' && <div>⚙️<RuleCreationForm /></div>}
-                {subTab === 'messages' && <div> <TemplatesView /></div>}
-                {subTab === 'analytics' && <div><AnalyticsView /></div>}
+                {subTab === 'management' && <RuleCreationForm />}
+                {subTab === 'messages' && <TemplatesView />}
+                {subTab === 'analytics' && <AnalyticsView />}
             </div>
         </div>
     );

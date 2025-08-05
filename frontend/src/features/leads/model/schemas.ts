@@ -4,26 +4,24 @@ import {
   VerticalEnum,
   AffEnum,
   StatusEnum,
-} from '@/shared/types/enums';
+} from '@/shared/utilities/enums';
 
-// Lead schema (from get_leads endpoint)
 export const LeadSchema = z.object({
   date: z.string(),
-  productName: z.string(), // API returns productName, not jarName
+  productName: z.string(),
   country: z.nativeEnum(CountryEnum),
-  vertical: z.nativeEnum(VerticalEnum).nullable(), // Some records have null vertical
+  vertical: z.nativeEnum(VerticalEnum).nullable(),
   aff: z.nativeEnum(AffEnum),
-  status: z.nativeEnum(StatusEnum).nullable(), // Some records have null status
+  status: z.nativeEnum(StatusEnum).nullable(),
   subid: z.string(),
-  leadName: z.string(), // API returns leadName, not name
+  leadName: z.string(),
   phone: z.string(),
-  email: z.string().nullable(), // API can return null for email
+  email: z.string().nullable(),
   ip: z.string(),
   ua: z.string(),
-  productId: z.string(), // API also returns productId
+  productId: z.string(),
 });
 
-// Request schemas
 export const LeadsFiltersSchema = z.object({
   vertical: z.nativeEnum(VerticalEnum).optional(),
   country: z.nativeEnum(CountryEnum).optional(),

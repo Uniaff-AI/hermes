@@ -6,7 +6,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { Calendar } from '@/shared/ui/calendar';
 import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
-import { CountryEnum, VerticalEnum, AffEnum, StatusEnum } from '@/shared/types/enums';
+import { CountryEnum, VerticalEnum, AffEnum, StatusEnum } from '@/shared/utilities/enums';
 import { LeadsFilters } from '../../model/schemas';
 
 type LeadsFiltersProps = {
@@ -210,7 +210,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
   );
 };
 
-// Filter Select Component
 const FilterSelect: FC<{
   label: string;
   value?: string;
@@ -289,7 +288,6 @@ const FilterSelect: FC<{
   );
 };
 
-// Date Range Filter Component
 const FilterDateRange: FC<{
   label: string;
   fromDate?: string;

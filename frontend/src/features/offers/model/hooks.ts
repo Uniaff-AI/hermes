@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { client } from '@/shared/model/client';
-import { ApiResponseSchema } from '@/shared/api/schemas';
+import { ApiResponseSchema } from '@/shared/api/apiSchema';
 import { ProductSchema, Product } from './schemas';
 
 export const OFFERS_QUERY_KEYS = {
