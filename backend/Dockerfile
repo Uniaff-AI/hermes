@@ -76,9 +76,9 @@ npm run migration:run || echo "Migrations completed or no migrations to run"
 # Start application
 echo "Starting application..."
 if [ "\$NODE_ENV" = "production" ]; then
-  npm run start:prod
+  pnpm run start:prod
 else
-  npm run start:dev
+  pnpm run start:dev
 fi
 EOF
 
