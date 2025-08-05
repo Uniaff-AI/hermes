@@ -1,4 +1,3 @@
-// src/config/config.type.ts
 export type AppConfig = {
   nodeEnv: string;
   name: string;
@@ -10,7 +9,6 @@ export type AppConfig = {
   fallbackLanguage: string;
   headerLanguage: string;
 
-  // добавляем сюда externalApis
   externalApis: {
     leads: {
       url: string;
