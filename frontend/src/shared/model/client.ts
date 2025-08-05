@@ -19,8 +19,7 @@ export interface Response<T = unknown> {
   headers: Record<string, string>;
   config: RequestConfig;
 }
-
-const basePath = isDevelopment ? '/api' : ENV_CONFIG.API_ENDPOINT;
+const basePath = isDevelopment ? '/api' : process.env.API_ENDPOINT;
 
 export const client = {
   async request<T = unknown>(config: RequestConfig): Promise<Response<T>> {
@@ -84,9 +83,9 @@ export const client = {
 
     if (!response.ok) {
       const error = new Error(
-        `Request failed with status ${response.status}`
-      ) as Error & { response: Response<T> };
-      error.response = clientResponse;
+        `HTTP ${response.status}: ${response.statusText}`
+      );
+      (error as any).response = clientResponse;
       throw error;
     }
 
@@ -95,7 +94,7 @@ export const client = {
 
   async get<T = unknown>(
     url: string,
-    config: RequestConfig = {}
+    config?: Omit<RequestConfig, 'url' | 'method'>
   ): Promise<Response<T>> {
     return this.request<T>({ ...config, url, method: 'GET' });
   },
@@ -103,7 +102,7 @@ export const client = {
   async post<T = unknown>(
     url: string,
     data?: unknown,
-    config: RequestConfig = {}
+    config?: Omit<RequestConfig, 'url' | 'method' | 'data'>
   ): Promise<Response<T>> {
     return this.request<T>({ ...config, url, method: 'POST', data });
   },
@@ -111,7 +110,7 @@ export const client = {
   async put<T = unknown>(
     url: string,
     data?: unknown,
-    config: RequestConfig = {}
+    config?: Omit<RequestConfig, 'url' | 'method' | 'data'>
   ): Promise<Response<T>> {
     return this.request<T>({ ...config, url, method: 'PUT', data });
   },
@@ -119,14 +118,14 @@ export const client = {
   async patch<T = unknown>(
     url: string,
     data?: unknown,
-    config: RequestConfig = {}
+    config?: Omit<RequestConfig, 'url' | 'method' | 'data'>
   ): Promise<Response<T>> {
     return this.request<T>({ ...config, url, method: 'PATCH', data });
   },
 
   async delete<T = unknown>(
     url: string,
-    config: RequestConfig = {}
+    config?: Omit<RequestConfig, 'url' | 'method'>
   ): Promise<Response<T>> {
     return this.request<T>({ ...config, url, method: 'DELETE' });
   },

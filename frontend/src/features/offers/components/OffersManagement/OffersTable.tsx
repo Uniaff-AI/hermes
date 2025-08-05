@@ -14,22 +14,24 @@ const OffersTable: FC<OffersTableProps> = ({ searchQuery, filters = {} }) => {
   const { data: offers = [], isLoading, error } = useProducts();
 
   const filteredOffers = useMemo(() => {
+    if (!Array.isArray(offers) || offers.length === 0) {
+      return [];
+    }
+
     let filtered = offers;
 
-    // Apply search filter
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (offer) =>
-          offer.productName.toLowerCase().includes(lowerQuery) ||
-          offer.productId.toLowerCase().includes(lowerQuery) ||
-          offer.country.toLowerCase().includes(lowerQuery) ||
-          offer.vertical.toLowerCase().includes(lowerQuery) ||
-          offer.aff.toLowerCase().includes(lowerQuery)
+          offer.productName?.toLowerCase().includes(lowerQuery) ||
+          offer.productId?.toLowerCase().includes(lowerQuery) ||
+          offer.country?.toLowerCase().includes(lowerQuery) ||
+          offer.vertical?.toLowerCase().includes(lowerQuery) ||
+          offer.aff?.toLowerCase().includes(lowerQuery)
       );
     }
 
-    // Apply advanced filters
     if (filters.country) {
       filtered = filtered.filter((offer) => offer.country === filters.country);
     }
@@ -61,6 +63,16 @@ const OffersTable: FC<OffersTableProps> = ({ searchQuery, filters = {} }) => {
         <div className="text-center text-red-500">
           Ошибка загрузки офферов:{' '}
           {error instanceof Error ? error.message : 'Неизвестная ошибка'}
+        </div>
+      </div>
+    );
+  }
+
+  if (!Array.isArray(offers) || offers.length === 0) {
+    return (
+      <div className="bg-white p-8 rounded shadow">
+        <div className="text-center text-gray-500">
+          Нет доступных офферов
         </div>
       </div>
     );

@@ -14,6 +14,11 @@ services:
     networks:
       - hermes-network
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Redis Cache
   redis:
@@ -26,6 +31,11 @@ services:
     networks:
       - hermes-network
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # pgAdmin for PostgreSQL monitoring
   pgadmin:
@@ -42,7 +52,8 @@ services:
     networks:
       - hermes-network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   # Backend API
@@ -87,11 +98,18 @@ services:
     ports:
       - '${BACKEND_PORT}:3000'
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - hermes-network
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Frontend
   frontend:
@@ -120,7 +138,8 @@ services:
     ports:
       - '${FRONTEND_PORT}:3000'
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - hermes-network
     restart: unless-stopped

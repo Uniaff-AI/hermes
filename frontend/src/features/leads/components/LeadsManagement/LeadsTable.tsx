@@ -18,15 +18,19 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
   const { data: leads = [], isLoading, error } = useLeads(filters);
 
   const filteredLeads = useMemo(() => {
+    if (!Array.isArray(leads) || leads.length === 0) {
+      return [];
+    }
+
     if (!searchQuery.trim()) return leads;
 
     const query = searchQuery.toLowerCase();
     return leads.filter(
       (lead) =>
-        lead.leadName.toLowerCase().includes(query) ||
-        lead.phone.toLowerCase().includes(query) ||
+        lead.leadName?.toLowerCase().includes(query) ||
+        lead.phone?.toLowerCase().includes(query) ||
         (lead.email && lead.email.toLowerCase().includes(query)) ||
-        lead.subid.toLowerCase().includes(query)
+        lead.subid?.toLowerCase().includes(query)
     );
   }, [leads, searchQuery]);
 
@@ -88,6 +92,16 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
         <div className="text-center text-red-500">
           Ошибка загрузки лидов:{' '}
           {error instanceof Error ? error.message : 'Неизвестная ошибка'}
+        </div>
+      </div>
+    );
+  }
+
+  if (!Array.isArray(leads) || leads.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-8">
+        <div className="text-center text-gray-500">
+          Нет доступных лидов
         </div>
       </div>
     );
@@ -248,7 +262,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
               <tr>
                 <td colSpan={13} className="text-center py-6 text-gray-500">
                   {searchQuery ||
-                  Object.values(filters).some((f) => f && f !== '')
+                    Object.values(filters).some((f) => f && f !== '')
                     ? 'Лиды не найдены по вашему запросу.'
                     : 'Лиды не найдены.'}
                 </td>

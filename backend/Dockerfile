@@ -25,80 +25,47 @@ COPY backend/ ./backend/
 # Set working directory to backend
 WORKDIR /app/backend
 
-# Create .env if it doesn't exist
-RUN if [ ! -f .env ]; then \
-  if [ -f env-example-relational ]; then \
-    cp env-example-relational .env; \
-  else \
-    echo "NODE_ENV=development" > .env; \
-  fi; \
-fi
-
 # Build the application
 RUN pnpm run build
 
-# Create wait-for-it script
-RUN echo '#!/bin/bash\n\
-host="$1"\n\
-shift\n\
-timeout=30\n\
-\n\
-while [[ $# -gt 0 ]]; do\n\
-  case $1 in\n\
-    --timeout=*)\n\
-      timeout="${1#*=}"\n\
-      shift\n\
-      ;;\n\
-    --strict)\n\
-      shift\n\
-      ;;\n\
-    --)\n\
-      shift\n\
-      break\n\
-      ;;\n\
-    *)\n\
-      break\n\
-      ;;\n\
-  esac\n\
-done\n\
-\n\
-host_port=(${host//:/ })\n\
-host=${host_port[0]}\n\
-port=${host_port[1]}\n\
-\n\
-echo "Waiting for $host:$port to be ready..."\n\
-\n\
-for i in $(seq 1 $timeout); do\n\
-  if nc -z "$host" "$port" 2>/dev/null; then\n\
-    echo "Service $host:$port is ready!"\n\
-    exit 0\n\
-  fi\n\
-  echo "Waiting... ($i/$timeout)"\n\
-  sleep 1\n\
-done\n\
-\n\
-echo "Timeout waiting for $host:$port"\n\
-exit 1' > /opt/wait-for-it.sh
+# Create simple startup script
+COPY <<EOF /app/startup.sh
+#!/bin/bash
+set -e
 
-RUN chmod +x /opt/wait-for-it.sh
+echo "Starting Hermes Backend..."
 
-# Create startup script
-RUN echo '#!/bin/bash\n\
-set -e\n\
-echo "Waiting for database to be ready..."\n\
-/opt/wait-for-it.sh ${DATABASE_HOST:-postgres}:${DATABASE_PORT:-5432} --timeout=60 --strict || echo "Database wait failed, continuing anyway"\n\
-echo "Database connection attempt completed"\n\
-echo "Running migrations..."\n\
-pnpm run migration:run 2>/dev/null || echo "Migration failed or no migrations to run"\n\
-echo "Starting application..."\n\
-if [ "$NODE_ENV" = "production" ]; then\n\
-  pnpm run start:prod\n\
-else\n\
-  pnpm run start:dev\n\
-fi' > /opt/startup.sh
+# Wait for database
+echo "Waiting for database..."
+timeout=60
+counter=0
+while ! nc -z postgres 5432; do
+  if [ \$counter -ge \$timeout ]; then
+    echo "Database connection timeout"
+    exit 1
+  fi
+  echo "Waiting for database... (\$counter/\$timeout)"
+  sleep 1
+  counter=\$((counter + 1))
+done
 
-RUN chmod +x /opt/startup.sh
+echo "Database is ready!"
+
+# Run migrations
+echo "Running migrations..."
+pnpm run migration:run || echo "Migrations completed or no migrations to run"
+
+# Start application
+echo "Starting application..."
+if [ "\$NODE_ENV" = "production" ]; then
+  pnpm run start:prod
+else
+  pnpm run start:dev
+fi
+EOF
+
+RUN chmod +x /app/startup.sh
 
 EXPOSE 3000
 
-CMD ["/opt/startup.sh"]
+CMD ["/app/startup.sh"]
