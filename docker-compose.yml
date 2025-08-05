@@ -1,85 +1,122 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: hermes-postgres
     environment:
-      POSTGRES_DB: hermes_crm
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - '${DB_PORT}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - hermes-network
+    restart: unless-stopped
 
   # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: hermes-redis
     ports:
-      - "6379:6379"
+      - '${REDIS_PORT}:6379'
     volumes:
       - redis_data:/data
     networks:
       - hermes-network
+    restart: unless-stopped
+
+  # pgAdmin for PostgreSQL monitoring
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hermes-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - '5050:80'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - hermes-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
 
   # Backend API
   backend:
     build:
       context: .
-      dockerfile: ./backend/Dockerfile
+      dockerfile: backend/Dockerfile
     container_name: hermes-backend
     environment:
-      NODE_ENV: development
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: password
-      DB_NAME: hermes_crm
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${BACKEND_PORT}
+      APP_PORT: ${BACKEND_PORT}
+      DATABASE_TYPE: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${DB_USERNAME}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      DATABASE_NAME: ${DB_NAME}
+      DATABASE_SYNCHRONIZE: ${DB_SYNCHRONIZE}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JWT_SECRET: your-secret-key-change-in-production
-      JWT_EXPIRES_IN: 24h
-      FRONTEND_URL: http://localhost:3000
+      WORKER_HOST: redis://redis:6379/1
+
+      # External API settings
+      GET_LEADS_URL: ${GET_LEADS_URL}
+      GET_PRODUCTS_URL: ${GET_PRODUCTS_URL}
+      ADD_LEAD_URL: ${ADD_LEAD_URL}
+      EXTERNAL_API_KEY: ${EXTERNAL_API_KEY}
+      EXTERNAL_API_TIMEOUT: ${EXTERNAL_API_TIMEOUT}
+
+      # JWT settings
+      AUTH_JWT_SECRET: ${JWT_SECRET}
+      AUTH_JWT_TOKEN_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      AUTH_REFRESH_SECRET: ${AUTH_REFRESH_SECRET}
+      AUTH_REFRESH_TOKEN_EXPIRES_IN: ${AUTH_REFRESH_EXPIRES_IN}
+
+      # CORS
+      FRONTEND_DOMAIN: ${FRONTEND_URL}
+      CORS_ORIGIN: ${FRONTEND_URL}
     ports:
-      - "3001:3001"
+      - '${BACKEND_PORT}:${BACKEND_PORT}'
     depends_on:
       - postgres
       - redis
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
     networks:
       - hermes-network
+    restart: unless-stopped
 
   # Frontend
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: hermes-frontend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001/api
-      BACKEND_URL: http://localhost:3001
+      NODE_ENV: ${NODE_ENV}
+      NEXT_PUBLIC_API_URL: ${BACKEND_URL}/api
+      NEXT_PUBLIC_BACKEND_URL: ${BACKEND_URL}
+      NEXT_PUBLIC_FRONTEND_URL: ${FRONTEND_URL}
+      API_SCHEME_URL: ${EXTERNAL_API_URL}
+      API_KEY: ${EXTERNAL_API_KEY}
     ports:
-      - "3000:3000"
+      - '${FRONTEND_PORT}:3000'
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
     networks:
       - hermes-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
+  pgadmin_data:
 
 networks:
   hermes-network:
-    driver: bridge 
+    driver: bridge
