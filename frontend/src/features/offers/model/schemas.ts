@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CountryEnum, VerticalEnum, AffEnum } from '@/shared/types/enums';
+import { CountryEnum, VerticalEnum, AffEnum } from '@/shared/utilities/enums';
 
 export const ProductSchema = z.object({
   productName: z.string(),
