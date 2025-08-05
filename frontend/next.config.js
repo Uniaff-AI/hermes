@@ -43,6 +43,27 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
+
+  // Force dynamic rendering for all pages by default
+  staticPageGenerationTimeout: 0,
+
+  // Disable static generation globally
+  generateStaticParams: false,
+
+  // Set all pages to be dynamic by default
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

@@ -38,9 +38,21 @@ COPY . ./frontend/
 # Set working directory to frontend
 WORKDIR /app/frontend
 
+# Build arguments for environment variables
+ARG NODE_ENV=production
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_BACKEND_URL
+ARG NEXT_PUBLIC_FRONTEND_URL
+ARG API_SCHEME_URL
+ARG API_KEY
+
 # Environment variables for build
-ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+ENV NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL}
+ENV API_SCHEME_URL=${API_SCHEME_URL}
+ENV API_KEY=${API_KEY}
 
 # Build the application
 RUN pnpm run build
