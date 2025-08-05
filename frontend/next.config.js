@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-
   // Disable SWC for Docker compatibility
   swcMinify: false,
 
