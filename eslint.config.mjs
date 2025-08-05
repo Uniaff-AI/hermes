@@ -34,8 +34,6 @@ export default [
       },
       parser: tsParser,
       parserOptions: {
-        project: './frontend/tsconfig.json',
-        tsconfigRootDir: __dirname,
         ecmaFeatures: {
           jsx: true,
         },

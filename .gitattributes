@@ -1,9 +1,11 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+* text=auto eol=lf
 
 # TypeScript files
 *.ts text eol=lf
 *.js text eol=lf
+*.jsx text eol=lf
+*.tsx text eol=lf
 *.json text eol=lf
 *.md text eol=lf
 *.yml text eol=lf
@@ -13,6 +15,13 @@
 *.config.js text eol=lf
 *.config.ts text eol=lf
 *.config.mjs text eol=lf
+*.config.json text eol=lf
+
+# CSS and styling files
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+*.less text eol=lf
 
 # Documentation
 *.txt text eol=lf
@@ -20,9 +29,14 @@
 
 # Scripts
 *.sh text eol=lf
-*.bat text eol=lf
+*.bat text eol=crlf
 
-# Binary files
+# Template files
+*.html text eol=lf
+*.xml text eol=lf
+*.svg text eol=lf
+
+# Binary files (should not be modified)
 *.png binary
 *.jpg binary
 *.jpeg binary
@@ -30,4 +44,9 @@
 *.ico binary
 *.pdf binary
 *.zip binary
-*.tar.gz binary 
+*.tar.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary 

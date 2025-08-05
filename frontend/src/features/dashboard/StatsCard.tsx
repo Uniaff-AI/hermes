@@ -9,7 +9,13 @@ interface StatsCardProps {
     isLoading?: boolean;
 }
 
-const StatsCard: FC<StatsCardProps> = ({ title, value, change, icon, isLoading = false }) => {
+const StatsCard: FC<StatsCardProps> = ({
+    title,
+    value,
+    change,
+    icon,
+    isLoading = false,
+}) => {
     return (
         <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-md w-full">
             <div>
