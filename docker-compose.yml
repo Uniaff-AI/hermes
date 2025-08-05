@@ -83,9 +83,9 @@ services:
 
       # Redis configuration (internal container communication)
       REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_PORT: ${REDIS_INTERNAL_PORT}
       REDIS_TTL: ${REDIS_TTL}
-      WORKER_HOST: redis://redis:6379/1
+      WORKER_HOST: redis://redis:${REDIS_INTERNAL_PORT}/1
 
       # External API settings
       GET_LEADS_URL: ${GET_LEADS_URL}
