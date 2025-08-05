@@ -51,6 +51,8 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     container_name: hermes-backend
+    env_file:
+      - .env
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${BACKEND_PORT}
@@ -104,6 +106,8 @@ services:
         API_SCHEME_URL: ${EXTERNAL_API_URL}
         API_KEY: ${EXTERNAL_API_KEY}
     container_name: hermes-frontend
+    env_file:
+      - .env
     environment:
       NODE_ENV: ${NODE_ENV}
       NEXT_PUBLIC_API_URL: ${BACKEND_URL}/api
