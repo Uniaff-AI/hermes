@@ -19,7 +19,8 @@ export interface Response<T = unknown> {
   headers: Record<string, string>;
   config: RequestConfig;
 }
-const basePath = isDevelopment ? '/api' : process.env.API_ENDPOINT;
+
+const basePath = isDevelopment ? '/api' : process.env.API_ENDPOINT || '/api';
 
 export const client = {
   async request<T = unknown>(config: RequestConfig): Promise<Response<T>> {

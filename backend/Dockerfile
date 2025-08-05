@@ -4,7 +4,7 @@ FROM node:20-alpine AS base
 RUN corepack enable pnpm
 
 # Install system dependencies
-RUN apk add --no-cache bash netcat-openbsd
+RUN apk add --no-cache bash netcat-openbsd curl
 
 WORKDIR /app
 
@@ -21,6 +21,9 @@ RUN pnpm install --frozen-lockfile
 
 # Copy backend source code
 COPY backend/ ./backend/
+
+# Copy .env file to backend directory if it exists
+COPY .env ./backend/.env* ./backend/
 
 # Set working directory to backend
 WORKDIR /app/backend
@@ -51,16 +54,31 @@ done
 
 echo "Database is ready!"
 
+# Create .env if it doesn't exist (for migrations)
+if [ ! -f .env ]; then
+  echo "Creating .env file for migrations..."
+  cat > .env << EOL
+NODE_ENV=\${NODE_ENV:-production}
+DATABASE_TYPE=\${DATABASE_TYPE:-postgres}
+DATABASE_HOST=\${DATABASE_HOST:-postgres}
+DATABASE_PORT=\${DATABASE_PORT:-5432}
+DATABASE_USERNAME=\${DATABASE_USERNAME:-postgres}
+DATABASE_PASSWORD=\${DATABASE_PASSWORD:-secret}
+DATABASE_NAME=\${DATABASE_NAME:-hermes}
+DATABASE_SYNCHRONIZE=\${DATABASE_SYNCHRONIZE:-false}
+EOL
+fi
+
 # Run migrations
 echo "Running migrations..."
-pnpm run migration:run || echo "Migrations completed or no migrations to run"
+npm run migration:run || echo "Migrations completed or no migrations to run"
 
 # Start application
 echo "Starting application..."
 if [ "\$NODE_ENV" = "production" ]; then
-  pnpm run start:prod
+  npm run start:prod
 else
-  pnpm run start:dev
+  npm run start:dev
 fi
 EOF
 
