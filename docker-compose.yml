@@ -55,8 +55,8 @@ services:
       - .env
     environment:
       NODE_ENV: ${NODE_ENV}
-      PORT: ${BACKEND_PORT}
-      APP_PORT: ${BACKEND_PORT}
+      PORT: 3000
+      APP_PORT: 3000
       DATABASE_TYPE: postgres
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
@@ -85,7 +85,7 @@ services:
       FRONTEND_DOMAIN: ${FRONTEND_URL}
       CORS_ORIGIN: ${FRONTEND_URL}
     ports:
-      - '${BACKEND_PORT}:${BACKEND_PORT}'
+      - '${BACKEND_PORT}:3000'
     depends_on:
       - postgres
       - redis
@@ -100,7 +100,7 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         NODE_ENV: ${NODE_ENV}
-        NEXT_PUBLIC_API_URL: ${BACKEND_URL}/api
+        NEXT_PUBLIC_API_URL: ${BACKEND_URL}
         NEXT_PUBLIC_BACKEND_URL: ${BACKEND_URL}
         NEXT_PUBLIC_FRONTEND_URL: ${FRONTEND_URL}
         API_SCHEME_URL: ${EXTERNAL_API_URL}
@@ -110,11 +110,13 @@ services:
       - .env
     environment:
       NODE_ENV: ${NODE_ENV}
-      NEXT_PUBLIC_API_URL: ${BACKEND_URL}/api
+      NEXT_PUBLIC_API_URL: ${BACKEND_URL}
       NEXT_PUBLIC_BACKEND_URL: ${BACKEND_URL}
       NEXT_PUBLIC_FRONTEND_URL: ${FRONTEND_URL}
       API_SCHEME_URL: ${EXTERNAL_API_URL}
       API_KEY: ${EXTERNAL_API_KEY}
+      PORT: 3000
+      HOSTNAME: '0.0.0.0'
     ports:
       - '${FRONTEND_PORT}:3000'
     depends_on:
