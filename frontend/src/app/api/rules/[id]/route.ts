@@ -3,7 +3,7 @@ import { handleAPIError, createSuccessResponse } from '@/shared/api/config';
 import { UpdateRuleSchema } from '@/features/rules/model/schemas';
 
 const BACKEND_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+  process.env.NEXT_PUBLIC_BACKEND_URL || 'https://dev.uniaffcrm.com/api';
 
 export async function GET(
   request: NextRequest,
