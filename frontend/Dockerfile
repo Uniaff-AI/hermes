@@ -8,13 +8,13 @@ WORKDIR /app
 # Install pnpm
 RUN corepack enable pnpm
 
-# Copy workspace files (from project root)
-COPY ../pnpm-workspace.yaml ./
-COPY ../pnpm-lock.yaml ./
-COPY ../package.json ./
+# Copy workspace files (already at root context)
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
 
 # Copy frontend package.json
-COPY package.json ./frontend/
+COPY frontend/package.json ./frontend/
 
 # Install all dependencies using workspace
 RUN pnpm install
@@ -33,7 +33,7 @@ ENV npm_config_audit=false
 ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY . ./frontend/
+COPY frontend/ ./frontend/
 
 # Set working directory to frontend
 WORKDIR /app/frontend
