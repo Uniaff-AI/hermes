@@ -3,6 +3,8 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: hermes-postgres
+    env_file:
+      - .env
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USERNAME}
@@ -25,6 +27,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: hermes-redis
+    env_file:
+      - .env
     ports:
       - '${REDIS_PORT}:6379'
     volumes:
@@ -42,6 +46,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: hermes-pgadmin
+    env_file:
+      - .env
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -64,6 +70,7 @@ services:
       dockerfile: backend/Dockerfile
     container_name: hermes-backend
     env_file:
+      - .env
       - backend/.env
     environment:
       # Database configuration (internal container communication)
@@ -104,6 +111,7 @@ services:
         NODE_ENV: ${NODE_ENV:-production}
     container_name: hermes-frontend
     env_file:
+      - .env
       - frontend/.env
     environment:
       PORT: 3000
