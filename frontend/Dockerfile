@@ -13,8 +13,10 @@ WORKDIR /app/frontend
 COPY frontend/.env .env
 RUN pnpm run build
 
-FROM base AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 ENV NODE_ENV=production
 
