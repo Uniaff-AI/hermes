@@ -20,10 +20,22 @@ export const useProducts = () => {
 
       try {
         const response = await frontendClient.get('/api/get_products');
-        const parsed = ProductsResponseSchema.parse(response.data);
 
-        // Ensure we always return an array
-        const data = parsed.data;
+        let data: Product[];
+        if (Array.isArray(response.data)) {
+          data = response.data;
+        } else if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'data' in response.data
+        ) {
+          const parsed = ProductsResponseSchema.parse(response.data);
+          data = parsed.data;
+        } else {
+          console.warn('Unexpected API response format:', response.data);
+          return [];
+        }
+
         if (!data || !Array.isArray(data)) {
           console.warn('Products API returned non-array data:', data);
           return [];

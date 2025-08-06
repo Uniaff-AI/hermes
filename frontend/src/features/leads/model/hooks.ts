@@ -33,10 +33,22 @@ export const useLeads = (filters?: LeadsFilters) => {
           '/api/get_leads',
           cleanFilters
         );
-        const parsed = LeadsResponseSchema.parse(response.data);
 
-        // Ensure we always return an array
-        const data = parsed.data;
+        let data: Lead[];
+        if (Array.isArray(response.data)) {
+          data = response.data;
+        } else if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'data' in response.data
+        ) {
+          const parsed = LeadsResponseSchema.parse(response.data);
+          data = parsed.data;
+        } else {
+          console.warn('Unexpected API response format:', response.data);
+          return [];
+        }
+
         if (!data || !Array.isArray(data)) {
           console.warn('Leads API returned non-array data:', data);
           return [];
@@ -74,10 +86,26 @@ export const useLeadsMutation = () => {
           '/api/get_leads',
           cleanFilters
         );
-        const parsed = LeadsResponseSchema.parse(response.data);
+
+        // Handle both array and object responses
+        let data: Lead[];
+        if (Array.isArray(response.data)) {
+          // Direct array response
+          data = response.data;
+        } else if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'data' in response.data
+        ) {
+          // Object with data field
+          const parsed = LeadsResponseSchema.parse(response.data);
+          data = parsed.data;
+        } else {
+          console.warn('Unexpected API response format:', response.data);
+          return [];
+        }
 
         // Ensure we always return an array
-        const data = parsed.data;
         if (!data || !Array.isArray(data)) {
           console.warn('Leads mutation returned non-array data:', data);
           return [];
