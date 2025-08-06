@@ -21,7 +21,10 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    return createSuccessResponse(data);
+
+    const responseData = Array.isArray(data) ? data : data.data || data;
+
+    return createSuccessResponse(responseData);
   } catch (error) {
     return handleAPIError(error, 'fetch leads');
   }

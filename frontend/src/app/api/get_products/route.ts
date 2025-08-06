@@ -56,7 +56,6 @@ export async function GET() {
         body: errorText,
       });
 
-      // For 400 errors during static generation, return empty array instead of failing
       if (response.status === 400 && process.env.NODE_ENV === 'production') {
         console.warn(
           '400 error during static generation - returning empty products array'
@@ -68,9 +67,11 @@ export async function GET() {
     }
 
     const data = await response.json();
-    return createSuccessResponse(data);
+
+    const responseData = Array.isArray(data) ? data : data.data || data;
+
+    return createSuccessResponse(responseData);
   } catch (error) {
-    // Handle timeout and network errors specifically
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
         console.error('Request timeout when fetching products');
