@@ -25,8 +25,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: hermes-redis
-    env_file:
-      - .env
     ports:
       - '${REDIS_PORT}:6379'
     volumes:
@@ -49,7 +47,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - '5050:80'
+      - '${PGADMIN_PORT}:80'
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
@@ -66,49 +64,20 @@ services:
       dockerfile: backend/Dockerfile
     container_name: hermes-backend
     env_file:
-      - .env
+      - backend/.env
     environment:
-      NODE_ENV: ${NODE_ENV}
-      PORT: 3000
-      APP_PORT: 3000
-
       # Database configuration (internal container communication)
-      DATABASE_TYPE: ${DATABASE_TYPE}
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      DATABASE_USERNAME: ${DATABASE_USERNAME}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_URL: postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME}
-      DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
-      DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS}
-      DATABASE_SSL_ENABLED: ${DATABASE_SSL_ENABLED}
 
       # Redis configuration (internal container communication)
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
-      # External API settings
-      GET_LEADS_URL: ${GET_LEADS_URL}
-      GET_PRODUCTS_URL: ${GET_PRODUCTS_URL}
-      ADD_LEAD_URL: ${ADD_LEAD_URL}
-      EXTERNAL_API_KEY: ${EXTERNAL_API_KEY}
-      EXTERNAL_API_TIMEOUT: ${EXTERNAL_API_TIMEOUT}
-      AFFILIATE_API_TIMEOUT: ${AFFILIATE_API_TIMEOUT}
-
-      # JWT settings
-      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
-      AUTH_JWT_TOKEN_EXPIRES_IN: ${AUTH_JWT_TOKEN_EXPIRES_IN}
-      AUTH_REFRESH_SECRET: ${AUTH_REFRESH_SECRET}
-      AUTH_REFRESH_TOKEN_EXPIRES_IN: ${AUTH_REFRESH_TOKEN_EXPIRES_IN}
-
-      # Application settings
-      API_PREFIX: ${API_PREFIX}
-      APP_FALLBACK_LANGUAGE: ${APP_FALLBACK_LANGUAGE}
-      APP_HEADER_LANGUAGE: ${APP_HEADER_LANGUAGE}
-
-      # CORS
-      FRONTEND_DOMAIN: ${FRONTEND_DOMAIN}
+      # Application port
+      PORT: 3000
+      APP_PORT: 3000
     ports:
       - '${BACKEND_PORT}:3000'
     depends_on:
@@ -132,22 +101,11 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        NODE_ENV: ${NODE_ENV}
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
-        NEXT_PUBLIC_FRONTEND_URL: ${NEXT_PUBLIC_FRONTEND_URL}
-        API_SCHEME_URL: ${API_SCHEME_URL}
-        EXTERNAL_API_KEY: ${EXTERNAL_API_KEY}
+        NODE_ENV: ${NODE_ENV:-production}
     container_name: hermes-frontend
     env_file:
-      - .env
+      - frontend/.env
     environment:
-      NODE_ENV: ${NODE_ENV}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
-      NEXT_PUBLIC_FRONTEND_URL: ${NEXT_PUBLIC_FRONTEND_URL}
-      API_SCHEME_URL: ${API_SCHEME_URL}
-      EXTERNAL_API_KEY: ${EXTERNAL_API_KEY}
       PORT: 3000
       HOSTNAME: '0.0.0.0'
     ports:

@@ -12,7 +12,10 @@ hermes/
 ├── docker-compose.yml # Docker services configuration
 ├── package.json     # Root workspace configuration
 ├── pnpm-workspace.yaml # PNPM workspace definition
-└── env.development  # Development environment variables
+├── .env.development # Development environment template
+├── .env.production  # Production environment template
+└── scripts/
+    └── manage-env.sh # Environment management script
 ```
 
 ## 🛠️ Technology Stack
@@ -63,26 +66,36 @@ hermes/
    ```
 
 3. **Setup environment variables**:
+
    ```bash
-   cp env.development .env
-   # Edit .env if needed for your local setup
+   # For development
+   ./scripts/manage-env.sh development
+
+   # For production
+   ./scripts/manage-env.sh production
    ```
 
 ### Development with Docker (Recommended)
 
-1. **Start all services**:
+1. **Setup environment**:
+
+   ```bash
+   ./scripts/manage-env.sh docker
+   ```
+
+2. **Start all services**:
 
    ```bash
    docker-compose up -d
    ```
 
-2. **Check service status**:
+3. **Check service status**:
 
    ```bash
    docker-compose ps
    ```
 
-3. **View logs**:
+4. **View logs**:
 
    ```bash
    # All services
@@ -95,39 +108,45 @@ hermes/
 
 ### Development without Docker
 
-1. **Start database and Redis only**:
+1. **Setup environment**:
+
+   ```bash
+   ./scripts/manage-env.sh development
+   ```
+
+2. **Start database and Redis only**:
 
    ```bash
    docker-compose up -d postgres redis pgadmin
    ```
 
-2. **Install dependencies**:
+3. **Install dependencies**:
 
    ```bash
    pnpm install
    ```
 
-3. **Run database migrations**:
+4. **Run database migrations**:
 
    ```bash
    pnpm backend:migration:run
    ```
 
-4. **Run database seeds**:
+5. **Run database seeds**:
 
    ```bash
    pnpm backend:seed:run
    ```
 
-5. **Start development servers**:
+6. **Start development servers**:
 
    ```bash
    # Start both frontend and backend
    pnpm dev
 
    # Or start individually
-   pnpm backend:dev    # Backend only (http://localhost:3001)
-   pnpm frontend:dev   # Frontend only (http://localhost:3000)
+   pnpm backend:dev    # Backend only (http://localhost:3004)
+   pnpm frontend:dev   # Frontend only (http://localhost:3003)
    ```
 
 ## 📦 Available Scripts
@@ -144,6 +163,14 @@ hermes/
 | `pnpm typecheck` | Type check all TypeScript files        |
 | `pnpm format`    | Format code with Prettier              |
 | `pnpm clean`     | Clean build artifacts                  |
+
+### Environment Management
+
+| Command                               | Description                   |
+| ------------------------------------- | ----------------------------- |
+| `./scripts/manage-env.sh development` | Setup development environment |
+| `./scripts/manage-env.sh production`  | Setup production environment  |
+| `./scripts/manage-env.sh docker`      | Setup Docker environment      |
 
 ### Backend Commands
 
@@ -203,10 +230,10 @@ Connect to PostgreSQL:
 
 | Service    | Port | URL                   | Description               |
 | ---------- | ---- | --------------------- | ------------------------- |
-| Frontend   | 3000 | http://localhost:3000 | Next.js React application |
-| Backend    | 3001 | http://localhost:3001 | NestJS API server         |
-| PostgreSQL | 5432 | -                     | Main database             |
-| Redis      | 6379 | -                     | Cache & queue storage     |
+| Frontend   | 3003 | http://localhost:3003 | Next.js React application |
+| Backend    | 3004 | http://localhost:3004 | NestJS API server         |
+| PostgreSQL | 5435 | -                     | Main database             |
+| Redis      | 6382 | -                     | Cache & queue storage     |
 | pgAdmin    | 5050 | http://localhost:5050 | Database administration   |
 
 ## 🔧 Configuration
@@ -215,9 +242,27 @@ Connect to PostgreSQL:
 
 The project uses environment-specific configuration files:
 
-- **`.env`** - Local development (copy from `env.development`)
-- **`env.development`** - Development defaults
-- **`env.production`** - Production template
+- **`.env.development`** - Development environment template
+- **`.env.production`** - Production environment template
+- **`backend/.env.development`** - Backend development variables
+- **`backend/.env.production`** - Backend production variables
+- **`frontend/.env.development`** - Frontend development variables
+- **`frontend/.env.production`** - Frontend production variables
+
+### Environment Management
+
+Use the management script to switch environments:
+
+```bash
+# Development
+./scripts/manage-env.sh development
+
+# Production
+./scripts/manage-env.sh production
+
+# Docker
+./scripts/manage-env.sh docker
+```
 
 Key variables:
 
@@ -231,14 +276,13 @@ DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=secret
 
 # Application
-BACKEND_PORT=3001
-FRONTEND_PORT=3000
+BACKEND_PORT=3004
+FRONTEND_PORT=3003
 NODE_ENV=development
 
 # External API
 EXTERNAL_API_KEY=your_api_key
-GET_LEADS_URL=https://api.hermes.uniaffcrm.com/v1/get_leads
-GET_PRODUCTS_URL=https://api.hermes.uniaffcrm.com/v1/get_products
+API_SCHEME_URL=https://api.hermes.uniaffcrm.com
 ```
 
 ### Workspace Dependencies
@@ -258,6 +302,9 @@ pnpm add -w typescript
 ## 🐳 Docker Commands
 
 ```bash
+# Setup environment
+./scripts/manage-env.sh docker
+
 # Start all services
 docker-compose up -d
 
@@ -301,7 +348,7 @@ The backend provides:
 - **Leads API**: `/api/get_leads` - External leads integration
 - **Products API**: `/api/get_products` - Product catalog
 
-API documentation available at: http://localhost:3001/api-docs (when implemented)
+API documentation available at: http://localhost:3004/api-docs (when implemented)
 
 ## 🔍 Monitoring & Debugging
 
@@ -325,36 +372,42 @@ docker-compose logs -f frontend
 
 ## 🛠️ Development Workflow
 
-1. **Start infrastructure**:
+1. **Setup environment**:
+
+   ```bash
+   ./scripts/manage-env.sh development
+   ```
+
+2. **Start infrastructure**:
 
    ```bash
    docker-compose up -d postgres redis pgadmin
    ```
 
-2. **Run migrations**:
+3. **Run migrations**:
 
    ```bash
    pnpm --filter hermes-backend run migration:run
    ```
 
-3. **Seed database**:
+4. **Seed database**:
 
    ```bash
    pnpm --filter hermes-backend run seed:run:relational
    ```
 
-4. **Start development**:
+5. **Start development**:
 
    ```bash
    pnpm dev
    ```
 
-5. **Monitor database** via pgAdmin at http://localhost:5050
+6. **Monitor database** via pgAdmin at http://localhost:5050
 
 ## 🤝 Contributing
 
 1. Install dependencies: `pnpm install`
-2. Set up environment variables
+2. Setup environment: `./scripts/manage-env.sh development`
 3. Start services: `docker-compose up -d postgres redis pgadmin`
 4. Run migrations: `pnpm backend:migration:run`
 5. Start development: `pnpm dev`

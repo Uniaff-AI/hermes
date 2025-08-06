@@ -38,21 +38,8 @@ COPY frontend/ ./frontend/
 # Set working directory to frontend
 WORKDIR /app/frontend
 
-# Build arguments for environment variables
-ARG NODE_ENV=production
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_BACKEND_URL
-ARG NEXT_PUBLIC_FRONTEND_URL
-ARG API_SCHEME_URL
-ARG EXTERNAL_API_KEY
-
-# Environment variables for build
-ENV NODE_ENV=${NODE_ENV}
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
-ENV NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL}
-ENV API_SCHEME_URL=${API_SCHEME_URL}
-ENV EXTERNAL_API_KEY=${EXTERNAL_API_KEY}
+# Copy environment file for build
+COPY frontend/.env ./.env
 
 # Build the application
 RUN pnpm run build
@@ -84,9 +71,13 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder /app/frontend/.next ./.next
 COPY --from=builder /app/frontend/package.json ./package.json
 
+# Copy environment file
+COPY --from=builder /app/frontend/.env ./.env
+
 # Set ownership
 RUN chown -R nextjs:nodejs ./.next
 RUN chown -R nextjs:nodejs ./public
+RUN chown nextjs:nodejs ./.env
 
 USER nextjs
 

@@ -22,16 +22,13 @@ RUN pnpm install --frozen-lockfile
 # Copy backend source code
 COPY backend/ ./backend/
 
-# Copy .env file to backend directory if it exists
-COPY .env ./backend/.env* ./backend/
-
 # Set working directory to backend
 WORKDIR /app/backend
 
 # Build the application
 RUN pnpm run build
 
-# Create simple startup script
+# Create startup script
 COPY <<EOF /app/startup.sh
 #!/bin/bash
 set -e
@@ -54,24 +51,13 @@ done
 
 echo "Database is ready!"
 
-# Create .env if it doesn't exist (for migrations)
-if [ ! -f .env ]; then
-  echo "Creating .env file for migrations..."
-  cat > .env << EOL
-NODE_ENV=\${NODE_ENV:-production}
-DATABASE_TYPE=\${DATABASE_TYPE:-postgres}
-DATABASE_HOST=\${DATABASE_HOST:-postgres}
-DATABASE_PORT=\${DATABASE_PORT:-5432}
-DATABASE_USERNAME=\${DATABASE_USERNAME:-postgres}
-DATABASE_PASSWORD=\${DATABASE_PASSWORD:-secret}
-DATABASE_NAME=\${DATABASE_NAME:-hermes}
-DATABASE_SYNCHRONIZE=\${DATABASE_SYNCHRONIZE:-false}
-EOL
+# Run migrations if .env exists
+if [ -f .env ]; then
+  echo "Running migrations..."
+  pnpm run migration:run || echo "Migrations completed or no migrations to run"
+else
+  echo "No .env file found, skipping migrations"
 fi
-
-# Run migrations
-echo "Running migrations..."
-npm run migration:run || echo "Migrations completed or no migrations to run"
 
 # Start application
 echo "Starting application..."
