@@ -1,5 +1,8 @@
 export type AppConfig = {
   nodeEnv: string;
+  isDevelopment: boolean;
+  isProduction: boolean;
+  isTest: boolean;
   name: string;
   workingDirectory: string;
   frontendDomain?: string;

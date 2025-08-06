@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
+import { ENV_CONFIG } from '@/config/envConfig';
 
 export const API_CONFIG = {
-  BASE_URL: process.env.API_SCHEME_URL,
-  API_KEY: process.env.API_KEY,
+  BASE_URL: ENV_CONFIG.EXTERNAL_API_URL,
+  EXTERNAL_API_KEY: ENV_CONFIG.EXTERNAL_API_KEY,
   VERSION: 'v1',
 } as const;
 
 export const getExternalAPIHeaders = () => ({
-  'X-API-KEY': API_CONFIG.API_KEY!,
+  'X-API-KEY': API_CONFIG.EXTERNAL_API_KEY!,
   'Content-Type': 'application/json',
 });
 

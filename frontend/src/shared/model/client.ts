@@ -20,7 +20,10 @@ export interface Response<T = unknown> {
   config: RequestConfig;
 }
 
-const basePath = isDevelopment ? '/api' : process.env.API_ENDPOINT || '/api';
+// Determine the base path for API calls
+const basePath = isDevelopment
+  ? ENV_CONFIG.API_BASE_URL // '/api' in development (proxied to backend)
+  : ENV_CONFIG.BACKEND_URL; // Direct backend URL in production
 
 export const client = {
   async request<T = unknown>(config: RequestConfig): Promise<Response<T>> {

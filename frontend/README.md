@@ -173,7 +173,7 @@ Create a `.env.development` file in the frontend directory:
 
 ```env
 API_SCHEME_URL=https://api.hermes.uniaffcrm.com
-API_KEY=your_api_key_here
+EXTERNAL_API_KEY=your_api_key_here
 
 NEXT_PUBLIC_BASE_URL=/api
 NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
