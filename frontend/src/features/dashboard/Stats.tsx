@@ -1,15 +1,32 @@
 import { DollarSign, Target, TrendingUp, Users } from 'lucide-react';
 import { useLeads } from '@/features/leads/model/hooks';
 import { useProducts } from '@/features/offers/model/hooks';
+import { useEffect, useState } from 'react';
 
 import StatsCard from './StatsCard';
 
 const Stats = () => {
   const { data: leads, isLoading: leadsLoading } = useLeads();
   const { data: products, isLoading: productsLoading } = useProducts();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const activeOffers = Array.isArray(products) ? products.length : 0;
   const totalLeads = Array.isArray(leads) ? leads.length : 0;
+
+  if (!isClient) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+        <div className="h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+        <div className="h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+        <div className="h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

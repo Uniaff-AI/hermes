@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const response = await fetch(`${BACKEND_BASE_URL}/api/rules/${params.id}`, {
+    const response = await fetch(`${BACKEND_BASE_URL}/rules/${params.id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ export async function PATCH(
 
     const validatedData = UpdateRuleSchema.parse(body);
 
-    const response = await fetch(`${BACKEND_BASE_URL}/api/rules/${params.id}`, {
+    const response = await fetch(`${BACKEND_BASE_URL}/rules/${params.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const response = await fetch(`${BACKEND_BASE_URL}/api/rules/${params.id}`, {
+    const response = await fetch(`${BACKEND_BASE_URL}/rules/${params.id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

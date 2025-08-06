@@ -4,8 +4,8 @@ export const ENV_CONFIG = {
 
   // Backend API configuration
   BACKEND_URL:
-    process.env.NEXT_PUBLIC_BACKEND_URL || 'https://dev.uniaffcrm.com/api',
-  API_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || '/api',
+    process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3004/api',
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004/api',
 
   // External API configuration
   EXTERNAL_API_URL:
@@ -19,8 +19,7 @@ export const ENV_CONFIG = {
   EXTERNAL_API_KEY: process.env.EXTERNAL_API_KEY || '',
 
   // Frontend URL
-  FRONTEND_URL:
-    process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://dev.uniaffcrm.com',
+  FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3003',
 } as const;
 
 // Environment helpers

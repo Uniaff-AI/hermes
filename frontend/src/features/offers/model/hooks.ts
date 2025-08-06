@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { client } from '@/shared/model/client';
+import { frontendClient } from '@/shared/model/client';
 import { ApiResponseSchema } from '@/shared/api/apiSchema';
-import { ProductSchema, Product } from './schemas';
+import { Product, ProductSchema } from './schemas';
 
 export const OFFERS_QUERY_KEYS = {
   PRODUCTS: ['products'] as const,
@@ -19,7 +19,7 @@ export const useProducts = () => {
       }
 
       try {
-        const response = await client.get('/get_products/');
+        const response = await frontendClient.get('/api/get_products');
         const parsed = ProductsResponseSchema.parse(response.data);
 
         // Ensure we always return an array

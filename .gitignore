@@ -36,6 +36,7 @@ out/
 .env.development
 .env.production
 env.production.centralized
+.env.backup
 
 # Cache directories
 .cache/

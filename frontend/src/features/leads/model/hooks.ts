@@ -1,7 +1,7 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { client } from '@/shared/model/client';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { frontendClient } from '@/shared/model/client';
 import { ApiResponseSchema } from '@/shared/api/apiSchema';
-import { LeadSchema, Lead, LeadsFilters } from './schemas';
+import { Lead, LeadSchema, type LeadsFilters } from './schemas';
 
 export const LEADS_QUERY_KEYS = {
   LEADS: ['leads'] as const,
@@ -29,7 +29,10 @@ export const useLeads = (filters?: LeadsFilters) => {
               )
             : {};
 
-        const response = await client.post('/get_leads/', cleanFilters);
+        const response = await frontendClient.post(
+          '/api/get_leads',
+          cleanFilters
+        );
         const parsed = LeadsResponseSchema.parse(response.data);
 
         // Ensure we always return an array
@@ -67,7 +70,10 @@ export const useLeadsMutation = () => {
               )
             : {};
 
-        const response = await client.post('/get_leads/', cleanFilters);
+        const response = await frontendClient.post(
+          '/api/get_leads',
+          cleanFilters
+        );
         const parsed = LeadsResponseSchema.parse(response.data);
 
         // Ensure we always return an array

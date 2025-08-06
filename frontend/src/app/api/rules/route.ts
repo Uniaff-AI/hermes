@@ -7,7 +7,7 @@ const BACKEND_BASE_URL =
 
 export async function GET() {
   try {
-    const response = await fetch(`${BACKEND_BASE_URL}/api/rules`, {
+    const response = await fetch(`${BACKEND_BASE_URL}/rules`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const validatedData = CreateRuleSchema.parse(body);
 
-    const response = await fetch(`${BACKEND_BASE_URL}/api/rules`, {
+    const response = await fetch(`${BACKEND_BASE_URL}/rules`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

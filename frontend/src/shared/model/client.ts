@@ -20,12 +20,8 @@ export interface Response<T = unknown> {
   config: RequestConfig;
 }
 
-// Determine the base path for API calls
-const basePath = isDevelopment
-  ? ENV_CONFIG.API_BASE_URL // '/api' in development (proxied to backend)
-  : ENV_CONFIG.BACKEND_URL; // Direct backend URL in production
-
-export const client = {
+// Base client implementation
+const createClient = (basePath: string) => ({
   async request<T = unknown>(config: RequestConfig): Promise<Response<T>> {
     const { url, method = 'GET', data, headers = {}, params } = config;
 
@@ -133,4 +129,25 @@ export const client = {
   ): Promise<Response<T>> {
     return this.request<T>({ ...config, url, method: 'DELETE' });
   },
-};
+});
+
+// Frontend API client - for Next.js API routes (get_products, get_leads)
+// These routes are served by the frontend on port 3003
+const frontendBasePath = isDevelopment
+  ? ENV_CONFIG.FRONTEND_URL // http://localhost:3003
+  : ENV_CONFIG.FRONTEND_URL; // Production frontend URL
+
+// Backend API client - for backend API routes (rules, health, etc.)
+// These routes are served by the backend on port 3004
+const backendBasePath = isDevelopment
+  ? ENV_CONFIG.BACKEND_URL // http://localhost:3004/api
+  : ENV_CONFIG.BACKEND_URL; // Production backend URL
+
+// Frontend API client (for Next.js API routes)
+export const frontendClient = createClient(frontendBasePath);
+
+// Backend API client (for NestJS API routes)
+export const backendClient = createClient(backendBasePath);
+
+// Default client - backwards compatibility (uses backend)
+export const client = backendClient;
