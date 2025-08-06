@@ -42,19 +42,6 @@ check_database() {
     return $?
 }
 
-# Function to check if database exists
-check_database_exists() {
-    echo "Checking if database 'hermes' exists..."
-    psql "postgresql://postgres:${DATABASE_PASSWORD}@postgres:5432/postgres" -c "SELECT 1 FROM pg_database WHERE datname='hermes';" | grep -q 1
-    return $?
-}
-
-# Function to create database if it doesn't exist
-create_database() {
-    echo "Creating database 'hermes'..."
-    psql "postgresql://postgres:${DATABASE_PASSWORD}@postgres:5432/postgres" -c "CREATE DATABASE hermes;" || echo "Database might already exist"
-}
-
 # Function to run migrations with retry
 run_migrations() {
     local max_attempts=5
@@ -81,35 +68,6 @@ run_migrations() {
     done
 }
 
-# Function to run seed data with retry
-run_seeds() {
-    local max_attempts=3
-    local attempt=1
-    
-    echo "Running seed data..."
-    
-    while [ $attempt -le $max_attempts ]; do
-        echo "Seed attempt $attempt/$max_attempts"
-        
-        if pnpm run seed:run; then
-            echo "Seed data completed successfully"
-            return 0
-        else
-            echo "Seed attempt $attempt failed"
-            if [ $attempt -eq $max_attempts ]; then
-                echo "All seed attempts failed"
-                return 1
-            fi
-            echo "Waiting 5 seconds before retry..."
-            sleep 5
-            attempt=$((attempt + 1))
-        fi
-    done
-}
-
-# Main execution
-echo "Starting database initialization..."
-
 # Wait for database to be ready
 echo "Waiting for database to be ready..."
 timeout=120
@@ -125,14 +83,6 @@ while ! check_database; do
 done
 
 echo "Database is ready!"
-
-# Check if database exists, create if not
-if ! check_database_exists; then
-    echo "Database 'hermes' does not exist, creating..."
-    create_database
-else
-    echo "Database 'hermes' already exists"
-fi
 
 # Run migrations
 if run_migrations; then
