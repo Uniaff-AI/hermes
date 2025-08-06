@@ -116,22 +116,14 @@ fi
 
 # Run migrations
 if run_migrations; then
-    echo "✅ Database initialization completed successfully"
+    echo "Database initialization completed successfully"
 else
-    echo "❌ Database initialization failed"
+    echo "Database initialization failed"
     exit 1
 fi
 
-# Run seed data (optional - only if seed script exists)
-if [ -f "package.json" ] && grep -q "seed:run" package.json; then
-    if run_seeds; then
-        echo "✅ Seed data completed successfully"
-    else
-        echo "⚠️ Seed data failed, but continuing..."
-    fi
-else
-    echo "ℹ️ No seed script found, skipping seed data"
-fi
+# Skip seed data - not needed
+echo "Skipping seed data - not required"
 
-echo "🎉 Database initialization completed!"
+echo "Database initialization completed!"
 echo "========================================" 

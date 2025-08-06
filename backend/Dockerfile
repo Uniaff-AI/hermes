@@ -107,6 +107,9 @@ run_seeds() {
     done
 }
 
+# Main execution
+echo "Starting database initialization..."
+
 # Wait for database to be ready
 echo "Waiting for database to be ready..."
 timeout=120
@@ -139,16 +142,8 @@ else
     exit 1
 fi
 
-# Run seed data (optional - only if seed script exists)
-if [ -f "package.json" ] && grep -q "seed:run" package.json; then
-    if run_seeds; then
-        echo "Seed data completed successfully"
-    else
-        echo "Seed data failed, but continuing..."
-    fi
-else
-    echo "No seed script found, skipping seed data"
-fi
+# Skip seed data - not needed
+echo "Skipping seed data - not required"
 
 echo "Database initialization completed!"
 EOF
@@ -158,24 +153,24 @@ COPY <<EOF /app/startup.sh
 #!/bin/bash
 set -e
 
-echo "🚀 Starting Hermes Backend..."
+echo "Starting Hermes Backend..."
 
-# Run database initialization
-echo "🔧 Initializing database..."
+# Run database initialization (migrations only)
+echo "Initializing database..."
 if /app/init-db.sh; then
-    echo "✅ Database initialization completed"
+    echo "Database initialization completed"
 else
-    echo "❌ Database initialization failed"
+    echo "Database initialization failed"
     exit 1
 fi
 
 # Start application
-echo "🚀 Starting application..."
+echo "Starting application..."
 if [ "$NODE_ENV" = "production" ]; then
-    echo "🏭 Starting in production mode..."
+    echo "Starting in production mode..."
     pnpm run start:prod
 else
-    echo "🔧 Starting in development mode..."
+    echo "Starting in development mode..."
     pnpm run start:dev
 fi
 EOF

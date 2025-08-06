@@ -6,6 +6,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { TypeOrmConfigService } from '../../typeorm-config.service';
 import databaseConfig from '../../config/database.config';
 import appConfig from '../../../config/app.config';
+import { Rule } from '../../../rules/domain/rule.entity';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import appConfig from '../../../config/app.config';
         return new DataSource(options).initialize();
       },
     }),
+    TypeOrmModule.forFeature([Rule]),
   ],
 })
 export class SeedModule {}
