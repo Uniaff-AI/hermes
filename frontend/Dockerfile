@@ -1,25 +1,23 @@
-# --- Base image
 FROM node:20-alpine AS base
 WORKDIR /app
-RUN corepack enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# --- Dependencies layer
 FROM base AS deps
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY frontend/package.json ./frontend/
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
-# --- Build layer
 FROM deps AS builder
 COPY frontend ./frontend
 WORKDIR /app/frontend
-COPY frontend/.env ./.env
+COPY frontend/.env .env
 RUN pnpm run build
 
-# --- Runtime layer
-FROM node:20-alpine AS runner
+FROM base AS runner
 WORKDIR /app
-ENV NODE_ENV production
+
+ENV NODE_ENV=production
+
 COPY --from=builder /app/frontend/.next .next
 COPY --from=builder /app/frontend/public ./public
 COPY --from=builder /app/frontend/package.json ./package.json
