@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3003",
-    "build": "dotenv -e ../.env -- next build",
+    "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit --incremental false",
     "format": "prettier -w ts-nextjs-tailwind-starter-main",
