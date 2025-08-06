@@ -99,14 +99,14 @@ export const TemplatesView = () => {
     setTemplates((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  const filteredTemplates = templates.filter((t) => {
+  const filteredTemplates = Array.isArray(templates) ? templates.filter((t) => {
     const byCategory = category === 'all' || t.category === category;
     const byStatus =
       status === 'all' ||
       (status === 'active' && t.isActive) ||
       (status === 'paused' && !t.isActive);
     return byCategory && byStatus;
-  });
+  }) : [];
 
   return (
     <div className="p-6 space-y-6">
@@ -206,7 +206,7 @@ export const TemplatesView = () => {
       <CreateCategoryModal
         open={isCreateCategoryOpen}
         onClose={() => setCreateCategoryOpen(false)}
-        onSubmit={() => {}}
+        onSubmit={() => { }}
       />
 
       <CreateTemplateModal

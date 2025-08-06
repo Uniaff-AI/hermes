@@ -47,7 +47,7 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
     });
   };
 
-  const hasActiveFilters = Object.values(filters).some(
+  const hasActiveFilters = filters && typeof filters === 'object' && Object.keys(filters).length > 0 && Object.values(filters).some(
     (value) => value !== undefined && value !== ''
   );
 
@@ -174,7 +174,7 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 label="Вертикаль"
                 value={filters.vertical}
                 onChange={(value) => handleFilterChange('vertical', value)}
-                options={Object.values(VerticalEnum) as string[]}
+                options={(Object.values(VerticalEnum) || []) as string[]}
                 placeholder="Выберите вертикаль"
               />
 
@@ -183,7 +183,7 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 label="Страна"
                 value={filters.country}
                 onChange={(value) => handleFilterChange('country', value)}
-                options={Object.values(CountryEnum) as string[]}
+                options={(Object.values(CountryEnum) || []) as string[]}
                 placeholder="Выберите страну"
               />
 
@@ -192,7 +192,7 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 label="Статус"
                 value={filters.status}
                 onChange={(value) => handleFilterChange('status', value)}
-                options={Object.values(StatusEnum) as string[]}
+                options={(Object.values(StatusEnum) || []) as string[]}
                 placeholder="Выберите статус"
               />
 
