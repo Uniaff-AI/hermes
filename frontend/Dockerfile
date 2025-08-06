@@ -20,12 +20,12 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 ENV NODE_ENV=production
 
-COPY --from=builder /app/frontend/.next .next
-COPY --from=builder /app/frontend/public ./public
-COPY --from=builder /app/frontend/package.json ./package.json
-COPY --from=builder /app/frontend/node_modules ./node_modules
-COPY --from=builder /app/frontend/next.config.js ./next.config.js
-COPY --from=builder /app/frontend/.env .env
+COPY --from=builder /app/frontend ./frontend
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+
+WORKDIR /app/frontend
 
 EXPOSE 3000
 CMD ["pnpm", "start"]
