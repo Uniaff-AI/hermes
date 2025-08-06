@@ -38,8 +38,8 @@ COPY frontend/ ./frontend/
 # Set working directory to frontend
 WORKDIR /app/frontend
 
-# Create a minimal .env file for build (actual env vars come from docker-compose)
-RUN echo "NODE_ENV=production" > ./.env
+# Copy the actual .env.production file and rename it to .env for the build
+COPY frontend/.env ./.env
 
 # Build the application
 RUN pnpm run build
@@ -71,8 +71,8 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder /app/frontend/.next ./.next
 COPY --from=builder /app/frontend/package.json ./package.json
 
-# Create minimal .env file (actual env vars come from docker-compose)
-RUN echo "NODE_ENV=production" > ./.env
+# Copy the built .env file
+COPY --from=builder /app/frontend/.env ./.env
 
 # Set ownership
 RUN chown -R nextjs:nodejs ./.next

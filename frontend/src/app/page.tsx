@@ -2,6 +2,7 @@
 
 import Head from 'next/head';
 import React from 'react';
+import ErrorBoundary from '@/shared/providers/ErrorBoundary';
 
 import Stats from '@/features/dashboard/Stats';
 import Layout from '@/app/layout/Layout';
@@ -15,8 +16,13 @@ const HomePage: React.FC = () => {
         <title>Offers Dashboard - Hermes</title>
       </Head>
 
-      <Stats />
-      <DashboardPage />
+      <ErrorBoundary>
+        <Stats />
+      </ErrorBoundary>
+
+      <ErrorBoundary>
+        <DashboardPage />
+      </ErrorBoundary>
     </Layout>
   );
 };

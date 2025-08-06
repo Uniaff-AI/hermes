@@ -20,7 +20,7 @@ export const useLeads = (filters?: LeadsFilters) => {
 
       try {
         const cleanFilters =
-          filters && typeof filters === 'object'
+          filters && typeof filters === 'object' && filters !== null
             ? Object.fromEntries(
                 Object.entries(filters).filter(
                   ([_, value]) =>
@@ -61,7 +61,7 @@ export const useLeadsMutation = () => {
     mutationFn: async (filters: LeadsFilters): Promise<Lead[]> => {
       try {
         const cleanFilters =
-          filters && typeof filters === 'object'
+          filters && typeof filters === 'object' && filters !== null
             ? Object.fromEntries(
                 Object.entries(filters).filter(
                   ([_, value]) =>

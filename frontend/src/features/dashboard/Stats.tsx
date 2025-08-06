@@ -2,20 +2,32 @@ import { DollarSign, Target, TrendingUp, Users } from 'lucide-react';
 import { useLeads } from '@/features/leads/model/hooks';
 import { useProducts } from '@/features/offers/model/hooks';
 import { useEffect, useState } from 'react';
+import ErrorBoundary from '@/shared/providers/ErrorBoundary';
 
 import StatsCard from './StatsCard';
 
-const Stats = () => {
-  const { data: leads, isLoading: leadsLoading } = useLeads();
-  const { data: products, isLoading: productsLoading } = useProducts();
+const StatsContent = () => {
+  const { data: leads = [], isLoading: leadsLoading, error: leadsError } = useLeads();
+  const { data: products = [], isLoading: productsLoading, error: productsError } = useProducts();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  // Safe calculations with fallbacks
   const activeOffers = Array.isArray(products) ? products.length : 0;
   const totalLeads = Array.isArray(leads) ? leads.length : 0;
+
+  // Log errors for debugging
+  useEffect(() => {
+    if (leadsError) {
+      console.error('Leads API error:', leadsError);
+    }
+    if (productsError) {
+      console.error('Products API error:', productsError);
+    }
+  }, [leadsError, productsError]);
 
   if (!isClient) {
     return (
@@ -32,14 +44,14 @@ const Stats = () => {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatsCard
         title="Total Leads"
-        value={leadsLoading ? '...' : totalLeads.toString()}
+        value={leadsLoading ? '...' : leadsError ? 'Error' : totalLeads.toString()}
         change="+12.3%"
         icon={<Users className="w-6 h-6" />}
         isLoading={leadsLoading}
       />
       <StatsCard
         title="Active Offers"
-        value={productsLoading ? '...' : activeOffers.toString()}
+        value={productsLoading ? '...' : productsError ? 'Error' : activeOffers.toString()}
         change="+2"
         icon={<Target className="w-6 h-6" />}
         isLoading={productsLoading}
@@ -63,6 +75,14 @@ const Stats = () => {
       // This should sum up revenue from all converted leads
       />
     </div>
+  );
+};
+
+const Stats = () => {
+  return (
+    <ErrorBoundary>
+      <StatsContent />
+    </ErrorBoundary>
   );
 };
 
