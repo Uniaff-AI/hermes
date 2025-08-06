@@ -16,6 +16,7 @@ import { DatabaseConfig } from './database/config/database-config.type';
 
 import { FilesModule } from './files/files.module';
 import { RulesModule } from './rules/rules.module';
+import { HealthController } from './health/health.controller';
 
 const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
   .isDocumentDatabase
@@ -53,5 +54,6 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
     FilesModule,
     RulesModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

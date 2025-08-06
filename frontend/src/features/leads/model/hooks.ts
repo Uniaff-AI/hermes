@@ -13,18 +13,33 @@ export const useLeads = (filters?: LeadsFilters) => {
   return useQuery({
     queryKey: [...LEADS_QUERY_KEYS.LEADS, filters] as const,
     queryFn: async (): Promise<Lead[]> => {
+      // Prevent execution during SSR
+      if (typeof window === 'undefined') {
+        return [];
+      }
+
       try {
-        const cleanFilters = filters
-          ? Object.fromEntries(
-              Object.entries(filters).filter(
-                ([_, value]) => value !== undefined && value !== ''
+        const cleanFilters =
+          filters && typeof filters === 'object'
+            ? Object.fromEntries(
+                Object.entries(filters).filter(
+                  ([_, value]) =>
+                    value !== undefined && value !== null && value !== ''
+                )
               )
-            )
-          : {};
+            : {};
 
         const response = await client.post('/get_leads/', cleanFilters);
         const parsed = LeadsResponseSchema.parse(response.data);
-        return parsed.data || [];
+
+        // Ensure we always return an array
+        const data = parsed.data;
+        if (!data || !Array.isArray(data)) {
+          console.warn('Leads API returned non-array data:', data);
+          return [];
+        }
+
+        return data;
       } catch (error) {
         console.error('Error fetching leads:', error);
         return [];
@@ -32,7 +47,7 @@ export const useLeads = (filters?: LeadsFilters) => {
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
-    enabled: true, // Always enabled, empty filters = get all
+    enabled: typeof window !== 'undefined', // Only run on client side
     retry: 1, // Only retry once
     retryDelay: 1000, // Wait 1 second before retry
   });
@@ -42,15 +57,27 @@ export const useLeadsMutation = () => {
   return useMutation({
     mutationFn: async (filters: LeadsFilters): Promise<Lead[]> => {
       try {
-        const cleanFilters = Object.fromEntries(
-          Object.entries(filters).filter(
-            ([_, value]) => value !== undefined && value !== ''
-          )
-        );
+        const cleanFilters =
+          filters && typeof filters === 'object'
+            ? Object.fromEntries(
+                Object.entries(filters).filter(
+                  ([_, value]) =>
+                    value !== undefined && value !== null && value !== ''
+                )
+              )
+            : {};
 
         const response = await client.post('/get_leads/', cleanFilters);
         const parsed = LeadsResponseSchema.parse(response.data);
-        return parsed.data || [];
+
+        // Ensure we always return an array
+        const data = parsed.data;
+        if (!data || !Array.isArray(data)) {
+          console.warn('Leads mutation returned non-array data:', data);
+          return [];
+        }
+
+        return data;
       } catch (error) {
         console.error('Error in leads mutation:', error);
         throw error;

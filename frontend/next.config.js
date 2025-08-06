@@ -30,6 +30,9 @@ const nextConfig = {
   // Force dynamic rendering for all pages
   staticPageGenerationTimeout: 0,
 
+  // Disable static optimization completely to prevent SSR issues
+  output: 'standalone',
+
   // Set all pages to be dynamic by default
   async headers() {
     return [
@@ -41,6 +44,16 @@ const nextConfig = {
             value: 'no-store, must-revalidate',
           },
         ],
+      },
+    ];
+  },
+
+  // Prevent build-time API calls
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: '/api/:path*',
       },
     ];
   },

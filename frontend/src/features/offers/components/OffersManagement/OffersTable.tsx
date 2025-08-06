@@ -1,9 +1,9 @@
 'use client';
 
+import { FC, useMemo, useEffect, useState } from 'react';
 import { useProducts } from '../../model/hooks';
 import { Product } from '../../model/schemas';
 import type { OffersFilters } from '../../model/schemas';
-import React, { FC, useMemo } from 'react';
 
 type OffersTableProps = {
   searchQuery: string;
@@ -11,45 +11,58 @@ type OffersTableProps = {
 };
 
 const OffersTable: FC<OffersTableProps> = ({ searchQuery, filters = {} }) => {
+  const [isClient, setIsClient] = useState(false);
   const { data: offers = [], isLoading, error } = useProducts();
 
+  // Ensure this only runs on client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const filteredOffers = useMemo(() => {
-    if (!Array.isArray(offers) || offers.length === 0) {
+    // Return empty array during SSR or if data is invalid
+    if (!isClient || !offers || !Array.isArray(offers) || offers.length === 0) {
       return [];
     }
 
-    let filtered = offers;
+    try {
+      let filtered = [...offers]; // Create a copy to avoid mutations
 
-    if (searchQuery.trim()) {
-      const lowerQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (offer) =>
-          offer.productName?.toLowerCase().includes(lowerQuery) ||
-          offer.productId?.toLowerCase().includes(lowerQuery) ||
-          offer.country?.toLowerCase().includes(lowerQuery) ||
-          offer.vertical?.toLowerCase().includes(lowerQuery) ||
-          offer.aff?.toLowerCase().includes(lowerQuery)
-      );
+      if (searchQuery?.trim()) {
+        const lowerQuery = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (offer) =>
+            offer?.productName?.toLowerCase()?.includes(lowerQuery) ||
+            offer?.productId?.toLowerCase()?.includes(lowerQuery) ||
+            offer?.country?.toLowerCase()?.includes(lowerQuery) ||
+            offer?.vertical?.toLowerCase()?.includes(lowerQuery) ||
+            offer?.aff?.toLowerCase()?.includes(lowerQuery)
+        );
+      }
+
+      if (filters?.country) {
+        filtered = filtered.filter((offer) => offer?.country === filters.country);
+      }
+
+      if (filters?.vertical) {
+        filtered = filtered.filter(
+          (offer) => offer?.vertical === filters.vertical
+        );
+      }
+
+      if (filters?.aff) {
+        filtered = filtered.filter((offer) => offer?.aff === filters.aff);
+      }
+
+      return filtered;
+    } catch (error) {
+      console.error('Error filtering offers:', error);
+      return [];
     }
+  }, [isClient, offers, searchQuery, filters]);
 
-    if (filters.country) {
-      filtered = filtered.filter((offer) => offer.country === filters.country);
-    }
-
-    if (filters.vertical) {
-      filtered = filtered.filter(
-        (offer) => offer.vertical === filters.vertical
-      );
-    }
-
-    if (filters.aff) {
-      filtered = filtered.filter((offer) => offer.aff === filters.aff);
-    }
-
-    return filtered;
-  }, [offers, searchQuery, filters]);
-
-  if (isLoading) {
+  // Show loading during SSR and initial client load
+  if (!isClient || isLoading) {
     return (
       <div className="bg-white p-8 rounded shadow">
         <div className="text-center text-gray-500">Загрузка офферов...</div>
@@ -109,7 +122,7 @@ const OffersTable: FC<OffersTableProps> = ({ searchQuery, filters = {} }) => {
           ) : (
             <tr>
               <td colSpan={5} className="text-center py-6 text-gray-500">
-                {searchQuery || Object.values(filters).some((f) => f)
+                {searchQuery || Object.values(filters || {}).some((f) => f)
                   ? 'Офферы не найдены по вашему запросу.'
                   : 'Офферы не найдены.'}
               </td>

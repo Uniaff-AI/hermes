@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { RotateCcw, Trash2, Users } from 'lucide-react';
 
 import { Badge } from '@/shared/ui/badge';
@@ -15,30 +15,47 @@ interface LeadsTableProps {
 
 export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+  const [isClient, setIsClient] = useState(false);
   const { data: leads = [], isLoading, error } = useLeads(filters);
 
+  // Ensure this only runs on client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const filteredLeads = useMemo(() => {
-    if (!Array.isArray(leads) || leads.length === 0) {
+    // Return empty array during SSR or if data is invalid
+    if (!isClient || !leads || !Array.isArray(leads) || leads.length === 0) {
       return [];
     }
 
-    if (!searchQuery.trim()) return leads;
+    if (!searchQuery?.trim()) return leads;
 
-    const query = searchQuery.toLowerCase();
-    return leads.filter(
-      (lead) =>
-        lead.leadName?.toLowerCase().includes(query) ||
-        lead.phone?.toLowerCase().includes(query) ||
-        (lead.email && lead.email.toLowerCase().includes(query)) ||
-        lead.subid?.toLowerCase().includes(query)
-    );
-  }, [leads, searchQuery]);
+    try {
+      const query = searchQuery.toLowerCase();
+      return leads.filter(
+        (lead) =>
+          lead?.leadName?.toLowerCase()?.includes(query) ||
+          lead?.phone?.toLowerCase()?.includes(query) ||
+          (lead?.email && lead.email.toLowerCase().includes(query)) ||
+          lead?.subid?.toLowerCase()?.includes(query)
+      );
+    } catch (error) {
+      console.error('Error filtering leads:', error);
+      return [];
+    }
+  }, [isClient, leads, searchQuery]);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    if (checked) {
-      setSelectedLeads(filteredLeads.map((lead) => lead.subid));
-    } else {
+    try {
+      const checked = e.target.checked;
+      if (checked && Array.isArray(filteredLeads)) {
+        setSelectedLeads(filteredLeads.map((lead) => lead.subid));
+      } else {
+        setSelectedLeads([]);
+      }
+    } catch (error) {
+      console.error('Error selecting all leads:', error);
       setSelectedLeads([]);
     }
   };
@@ -47,11 +64,15 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     leadId: string,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const checked = e.target.checked;
-    if (checked) {
-      setSelectedLeads((prev) => [...prev, leadId]);
-    } else {
-      setSelectedLeads((prev) => prev.filter((id) => id !== leadId));
+    try {
+      const checked = e.target.checked;
+      if (checked) {
+        setSelectedLeads((prev) => [...prev, leadId]);
+      } else {
+        setSelectedLeads((prev) => prev.filter((id) => id !== leadId));
+      }
+    } catch (error) {
+      console.error('Error selecting lead:', error);
     }
   };
 
@@ -78,7 +99,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     }
   };
 
-  if (isLoading) {
+  if (!isClient || isLoading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
         <div className="text-center text-gray-500">Загрузка лидов...</div>
