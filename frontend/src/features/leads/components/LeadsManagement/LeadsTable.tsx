@@ -46,6 +46,19 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     }
   }, [isClient, leads, searchQuery]);
 
+  const hasActiveFilters = () => {
+    try {
+      if (!filters || typeof filters !== 'object' || filters === null) {
+        return false;
+      }
+      return Object.keys(filters).length > 0 &&
+        Object.values(filters).some((f) => f !== undefined && f !== null && String(f).trim() !== '');
+    } catch (error) {
+      console.error('Error checking active filters:', error);
+      return false;
+    }
+  };
+
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const checked = e.target.checked;
@@ -282,8 +295,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
             ) : (
               <tr>
                 <td colSpan={13} className="text-center py-6 text-gray-500">
-                  {searchQuery ||
-                    (filters && typeof filters === 'object' && Object.keys(filters).length > 0 && Object.values(filters).some((f) => f && f !== ''))
+                  {searchQuery?.trim() || hasActiveFilters()
                     ? 'Лиды не найдены по вашему запросу.'
                     : 'Лиды не найдены.'}
                 </td>

@@ -61,7 +61,19 @@ const OffersTable: FC<OffersTableProps> = ({ searchQuery, filters = {} }) => {
     }
   }, [isClient, offers, searchQuery, filters]);
 
-  // Show loading during SSR and initial client load
+  const hasActiveFilters = () => {
+    try {
+      if (!filters || typeof filters !== 'object' || filters === null) {
+        return false;
+      }
+      return Object.keys(filters).length > 0 &&
+        Object.values(filters).some((f) => f !== undefined && f !== null && String(f).trim() !== '');
+    } catch (error) {
+      console.error('Error checking active filters:', error);
+      return false;
+    }
+  };
+
   if (!isClient || isLoading) {
     return (
       <div className="bg-white p-8 rounded shadow">
@@ -74,55 +86,39 @@ const OffersTable: FC<OffersTableProps> = ({ searchQuery, filters = {} }) => {
     return (
       <div className="bg-white p-8 rounded shadow">
         <div className="text-center text-red-500">
-          Ошибка загрузки офферов:{' '}
-          {error instanceof Error ? error.message : 'Неизвестная ошибка'}
-        </div>
-      </div>
-    );
-  }
-
-  if (!Array.isArray(offers) || offers.length === 0) {
-    return (
-      <div className="bg-white p-8 rounded shadow">
-        <div className="text-center text-gray-500">
-          Нет доступных офферов
+          Ошибка загрузки офферов: {error.message}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-4 rounded shadow">
-      <table className="min-w-full text-sm">
+    <div className="bg-white p-8 rounded shadow">
+      <table className="w-full border-collapse">
         <thead>
-          <tr className="text-left border-b text-gray-600 font-medium">
-            <th className="py-2 px-3">ID</th>
-            <th className="py-2 px-3">Название</th>
-            <th className="py-2 px-3">Страна</th>
-            <th className="py-2 px-3">Вертикаль</th>
-            <th className="py-2 px-3">Аффилиат</th>
+          <tr className="border-b border-gray-200">
+            <th className="text-left py-3 px-2">Product Name</th>
+            <th className="text-left py-3 px-2">Product ID</th>
+            <th className="text-left py-3 px-2">Country</th>
+            <th className="text-left py-3 px-2">Vertical</th>
+            <th className="text-left py-3 px-2">Affiliate</th>
           </tr>
         </thead>
         <tbody>
           {filteredOffers.length > 0 ? (
             filteredOffers.map((offer, index) => (
-              <tr
-                key={`${offer.productId}-${index}`}
-                className="border-b hover:bg-gray-50 transition"
-              >
-                <td className="py-2 px-3">{offer.productId}</td>
-                <td className="py-2 px-3 text-blue-600 cursor-pointer hover:underline">
-                  {offer.productName}
-                </td>
-                <td className="py-2 px-3">{offer.country}</td>
-                <td className="py-2 px-3">{offer.vertical}</td>
-                <td className="py-2 px-3">{offer.aff}</td>
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="py-3 px-2">{offer.productName}</td>
+                <td className="py-3 px-2">{offer.productId}</td>
+                <td className="py-3 px-2">{offer.country}</td>
+                <td className="py-3 px-2">{offer.vertical}</td>
+                <td className="py-3 px-2">{offer.aff}</td>
               </tr>
             ))
           ) : (
             <tr>
               <td colSpan={5} className="text-center py-6 text-gray-500">
-                {searchQuery || (filters && typeof filters === 'object' && Object.keys(filters).length > 0 && Object.values(filters).some((f) => f))
+                {searchQuery?.trim() || hasActiveFilters()
                   ? 'Офферы не найдены по вашему запросу.'
                   : 'Офферы не найдены.'}
               </td>

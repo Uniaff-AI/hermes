@@ -1,7 +1,12 @@
 import * as React from 'react';
 
 export const cn = (...inputs: (string | undefined | false)[]) => {
-  return inputs.filter(Boolean).join(' ');
+  try {
+    return (inputs && Array.isArray(inputs) ? inputs : []).filter(Boolean).join(' ');
+  } catch (error) {
+    console.error('Error in cn function:', error);
+    return '';
+  }
 };
 
 export const Card = React.forwardRef<

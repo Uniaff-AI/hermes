@@ -7,7 +7,7 @@ import ErrorBoundary from '@/shared/providers/ErrorBoundary';
 import StatsCard from './StatsCard';
 
 const StatsContent = () => {
-  const { data: leads = [], isLoading: leadsLoading, error: leadsError } = useLeads();
+  const { data: leads = [], isLoading: leadsLoading, error: leadsError } = useLeads({});
   const { data: products = [], isLoading: productsLoading, error: productsError } = useProducts();
   const [isClient, setIsClient] = useState(false);
 
@@ -15,7 +15,6 @@ const StatsContent = () => {
     setIsClient(true);
   }, []);
 
-  // Safe calculations with fallbacks
   const activeOffers = Array.isArray(products) ? products.length : 0;
   const totalLeads = Array.isArray(leads) ? leads.length : 0;
 
