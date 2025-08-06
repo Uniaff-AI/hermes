@@ -38,21 +38,21 @@ echo "Starting database initialization..."
 # Function to check if database is ready
 check_database() {
     echo "Checking database connection..."
-    PGPASSWORD=$DATABASE_PASSWORD pg_isready -h postgres -p 5432 -U postgres
+    pg_isready -h postgres -p 5432 -U postgres -d postgres
     return $?
 }
 
 # Function to check if database exists
 check_database_exists() {
     echo "Checking if database 'hermes' exists..."
-    PGPASSWORD=$DATABASE_PASSWORD psql -h postgres -p 5432 -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname='hermes';" | grep -q 1
+    psql "postgresql://postgres:${DATABASE_PASSWORD}@postgres:5432/postgres" -c "SELECT 1 FROM pg_database WHERE datname='hermes';" | grep -q 1
     return $?
 }
 
 # Function to create database if it doesn't exist
 create_database() {
     echo "Creating database 'hermes'..."
-    PGPASSWORD=$DATABASE_PASSWORD psql -h postgres -p 5432 -U postgres -d postgres -c "CREATE DATABASE hermes;" || echo "Database might already exist"
+    psql "postgresql://postgres:${DATABASE_PASSWORD}@postgres:5432/postgres" -c "CREATE DATABASE hermes;" || echo "Database might already exist"
 }
 
 # Function to run migrations with retry
