@@ -1,12 +1,5 @@
 packages:
-  - backend
-  - frontend
-
-onlyBuiltDependencies:
-  - '@nestjs/core'
-  - '@prisma/client'
-  - '@prisma/engines'
-  - esbuild
-  - msgpackr-extract
-  - prisma
-  - unrs-resolver
+  - 'frontend'
+  - 'backend'
+  - 'scripts'
+  - 'tests'

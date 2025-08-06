@@ -58,38 +58,51 @@ const createClient = (basePath: string) => ({
       }
     }
 
-    const response = await fetch(fullUrl, fetchOptions);
+    try {
+      const response = await fetch(fullUrl, fetchOptions);
 
-    const responseHeaders: Record<string, string> = {};
-    response.headers.forEach((value, key) => {
-      responseHeaders[key] = value;
-    });
+      const responseHeaders: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value;
+      });
 
-    let responseData: T;
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      responseData = await response.json();
-    } else {
-      responseData = (await response.text()) as unknown as T;
+      let responseData: T;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        responseData = await response.json();
+      } else {
+        responseData = (await response.text()) as unknown as T;
+      }
+
+      const clientResponse: Response<T> = {
+        data: responseData,
+        status: response.status,
+        statusText: response.statusText,
+        headers: responseHeaders,
+        config,
+      };
+
+      if (!response.ok) {
+        const error = new Error(
+          `HTTP ${response.status}: ${response.statusText}`
+        );
+        (error as any).response = clientResponse;
+        throw error;
+      }
+
+      return clientResponse;
+    } catch (error) {
+      console.error(`API request failed for ${fullUrl}:`, error);
+      // Return a safe default response to prevent filter errors
+      const safeResponse: Response<T> = {
+        data: [] as unknown as T, // Safe default for arrays
+        status: 500,
+        statusText: 'Internal Server Error',
+        headers: {},
+        config,
+      };
+      return safeResponse;
     }
-
-    const clientResponse: Response<T> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      config,
-    };
-
-    if (!response.ok) {
-      const error = new Error(
-        `HTTP ${response.status}: ${response.statusText}`
-      );
-      (error as any).response = clientResponse;
-      throw error;
-    }
-
-    return clientResponse;
   },
 
   async get<T = unknown>(
