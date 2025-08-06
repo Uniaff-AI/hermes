@@ -4,18 +4,19 @@ services:
     image: postgres:15-alpine
     container_name: hermes-postgres
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - '${DB_PORT}:5432'
+      - '${DATABASE_PORT}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - hermes-network
     restart: unless-stopped
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}']
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -83,7 +84,7 @@ services:
 
       # Redis configuration (internal container communication)
       REDIS_HOST: redis
-      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PORT: 6379
 
       # External API settings
       GET_LEADS_URL: ${GET_LEADS_URL}
