@@ -38,8 +38,8 @@ COPY frontend/ ./frontend/
 # Set working directory to frontend
 WORKDIR /app/frontend
 
-# Copy environment file for build
-COPY frontend/.env ./.env
+# Create a minimal .env file for build (actual env vars come from docker-compose)
+RUN echo "NODE_ENV=production" > ./.env
 
 # Build the application
 RUN pnpm run build
@@ -56,6 +56,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# Add debug environment variables
+ENV DEBUG=*
+ENV NODE_OPTIONS="--inspect=0.0.0.0:9229"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -71,8 +74,8 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder /app/frontend/.next ./.next
 COPY --from=builder /app/frontend/package.json ./package.json
 
-# Copy environment file
-COPY --from=builder /app/frontend/.env ./.env
+# Create minimal .env file (actual env vars come from docker-compose)
+RUN echo "NODE_ENV=production" > ./.env
 
 # Set ownership
 RUN chown -R nextjs:nodejs ./.next
@@ -86,5 +89,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application
-CMD ["npx", "next", "start"] 
+# Start the application with more verbose logging
+CMD ["npx", "next", "start", "--verbose"] 
