@@ -3,8 +3,8 @@ FROM node:20-alpine AS base
 # Install pnpm globally
 RUN corepack enable pnpm
 
-# Install system dependencies
-RUN apk add --no-cache bash netcat-openbsd curl
+# Install system dependencies including postgresql-client for database checks
+RUN apk add --no-cache bash netcat-openbsd curl postgresql-client
 
 WORKDIR /app
 
@@ -28,47 +28,159 @@ WORKDIR /app/backend
 # Build the application
 RUN pnpm run build
 
-# Create startup script
-COPY <<EOF /app/startup.sh
+# Create database initialization script
+COPY <<EOF /app/init-db.sh
 #!/bin/bash
 set -e
 
-echo "Starting Hermes Backend..."
+echo "Starting database initialization..."
 
-# Wait for database
-echo "Waiting for database..."
-timeout=60
+# Function to check if database is ready
+check_database() {
+    echo "Checking database connection..."
+    pg_isready -h postgres -p 5432 -U postgres
+    return $?
+}
+
+# Function to check if database exists
+check_database_exists() {
+    echo "Checking if database 'hermes' exists..."
+    psql -h postgres -p 5432 -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname='hermes';" | grep -q 1
+    return $?
+}
+
+# Function to create database if it doesn't exist
+create_database() {
+    echo "Creating database 'hermes'..."
+    psql -h postgres -p 5432 -U postgres -d postgres -c "CREATE DATABASE hermes;" || echo "Database might already exist"
+}
+
+# Function to run migrations with retry
+run_migrations() {
+    local max_attempts=5
+    local attempt=1
+    
+    echo "Running database migrations..."
+    
+    while [ $attempt -le $max_attempts ]; do
+        echo "Migration attempt $attempt/$max_attempts"
+        
+        if pnpm run migration:run; then
+            echo "Migrations completed successfully"
+            return 0
+        else
+            echo "Migration attempt $attempt failed"
+            if [ $attempt -eq $max_attempts ]; then
+                echo "All migration attempts failed"
+                return 1
+            fi
+            echo "Waiting 10 seconds before retry..."
+            sleep 10
+            attempt=$((attempt + 1))
+        fi
+    done
+}
+
+# Function to run seed data with retry
+run_seeds() {
+    local max_attempts=3
+    local attempt=1
+    
+    echo "Running seed data..."
+    
+    while [ $attempt -le $max_attempts ]; do
+        echo "Seed attempt $attempt/$max_attempts"
+        
+        if pnpm run seed:run; then
+            echo "Seed data completed successfully"
+            return 0
+        else
+            echo "Seed attempt $attempt failed"
+            if [ $attempt -eq $max_attempts ]; then
+                echo "All seed attempts failed"
+                return 1
+            fi
+            echo "Waiting 5 seconds before retry..."
+            sleep 5
+            attempt=$((attempt + 1))
+        fi
+    done
+}
+
+# Wait for database to be ready
+echo "Waiting for database to be ready..."
+timeout=120
 counter=0
-while ! nc -z postgres 5432; do
-  if [ \$counter -ge \$timeout ]; then
-    echo "Database connection timeout"
-    exit 1
-  fi
-  echo "Waiting for database... (\$counter/\$timeout)"
-  sleep 1
-  counter=\$((counter + 1))
+while ! check_database; do
+    if [ $counter -ge $timeout ]; then
+        echo "Database connection timeout after ${timeout} seconds"
+        exit 1
+    fi
+    echo "Waiting for database... ($counter/$timeout)"
+    sleep 2
+    counter=$((counter + 2))
 done
 
 echo "Database is ready!"
 
-# Run migrations if .env exists
-if [ -f .env ]; then
-  echo "Running migrations..."
-  pnpm run migration:run || echo "Migrations completed or no migrations to run"
+# Check if database exists, create if not
+if ! check_database_exists; then
+    echo "Database 'hermes' does not exist, creating..."
+    create_database
 else
-  echo "No .env file found, skipping migrations"
+    echo "Database 'hermes' already exists"
+fi
+
+# Run migrations
+if run_migrations; then
+    echo "Database initialization completed successfully"
+else
+    echo "Database initialization failed"
+    exit 1
+fi
+
+# Run seed data (optional - only if seed script exists)
+if [ -f "package.json" ] && grep -q "seed:run" package.json; then
+    if run_seeds; then
+        echo "Seed data completed successfully"
+    else
+        echo "Seed data failed, but continuing..."
+    fi
+else
+    echo "No seed script found, skipping seed data"
+fi
+
+echo "Database initialization completed!"
+EOF
+
+# Create improved startup script
+COPY <<EOF /app/startup.sh
+#!/bin/bash
+set -e
+
+echo "🚀 Starting Hermes Backend..."
+
+# Run database initialization
+echo "🔧 Initializing database..."
+if /app/init-db.sh; then
+    echo "✅ Database initialization completed"
+else
+    echo "❌ Database initialization failed"
+    exit 1
 fi
 
 # Start application
-echo "Starting application..."
-if [ "\$NODE_ENV" = "production" ]; then
-  pnpm run start:prod
+echo "🚀 Starting application..."
+if [ "$NODE_ENV" = "production" ]; then
+    echo "🏭 Starting in production mode..."
+    pnpm run start:prod
 else
-  pnpm run start:dev
+    echo "🔧 Starting in development mode..."
+    pnpm run start:dev
 fi
 EOF
 
-RUN chmod +x /app/startup.sh
+RUN chmod +x /app/startup.sh /app/init-db.sh
 
 EXPOSE 3000
 

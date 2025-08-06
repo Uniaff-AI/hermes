@@ -33,6 +33,7 @@
     "app:config": "ts-node -r tsconfig-paths/register .install-scripts/index.ts && pnpm install && pnpm run lint -- --fix",
     "seed:run:relational": "ts-node -r tsconfig-paths/register src/database/seeds/relational/run-seed.ts",
     "seed:run:document": "ts-node -r tsconfig-paths/register src/database/seeds/document/run-seed.ts",
+    "seed:run": "pnpm run seed:run:relational && pnpm run seed:run:document",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \\\"src/**/*.ts\\\" \\\"test/**/*.ts\\\"",

@@ -6,14 +6,35 @@ import {
   createSuccessResponse,
 } from '@/shared/api/config';
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const body = await request.json();
+    const { searchParams } = new URL(request.url);
 
-    const response = await fetch(createExternalAPIUrl('get_leads'), {
-      method: 'POST',
+    const queryParams = new URLSearchParams();
+
+    const validParams = [
+      'vertical',
+      'country',
+      'status',
+      'productName',
+      'dateFrom',
+      'dateTo',
+    ];
+    validParams.forEach((param) => {
+      const value = searchParams.get(param);
+      if (value) {
+        queryParams.append(param, value);
+      }
+    });
+
+    const url = createExternalAPIUrl('get_leads');
+    const finalUrl = queryParams.toString()
+      ? `${url}?${queryParams.toString()}`
+      : url;
+
+    const response = await fetch(finalUrl, {
+      method: 'GET',
       headers: getExternalAPIHeaders(),
-      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -21,7 +42,6 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-
     const responseData = Array.isArray(data) ? data : data.data || data;
 
     return createSuccessResponse(responseData);

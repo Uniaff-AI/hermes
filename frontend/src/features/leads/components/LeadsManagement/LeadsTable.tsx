@@ -18,57 +18,37 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
   const [isClient, setIsClient] = useState(false);
   const { data: leads = [], isLoading, error } = useLeads(filters);
 
-  // Ensure this only runs on client side
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   const filteredLeads = useMemo(() => {
-    // Return empty array during SSR or if data is invalid
-    if (!isClient || !leads || !Array.isArray(leads) || leads.length === 0) {
+    if (!isClient || !Array.isArray(leads) || leads.length === 0) {
       return [];
     }
 
     if (!searchQuery?.trim()) return leads;
 
-    try {
-      const query = searchQuery.toLowerCase();
-      return leads.filter(
-        (lead) =>
-          lead?.leadName?.toLowerCase()?.includes(query) ||
-          lead?.phone?.toLowerCase()?.includes(query) ||
-          (lead?.email && lead.email.toLowerCase().includes(query)) ||
-          lead?.subid?.toLowerCase()?.includes(query)
-      );
-    } catch (error) {
-      console.error('Error filtering leads:', error);
-      return [];
-    }
+    const query = searchQuery.toLowerCase();
+    return leads.filter(
+      (lead) =>
+        lead?.leadName?.toLowerCase()?.includes(query) ||
+        lead?.phone?.toLowerCase()?.includes(query) ||
+        (lead?.email && lead.email.toLowerCase().includes(query)) ||
+        lead?.subid?.toLowerCase()?.includes(query)
+    );
   }, [isClient, leads, searchQuery]);
 
   const hasActiveFilters = () => {
-    try {
-      if (!filters || typeof filters !== 'object' || filters === null) {
-        return false;
-      }
-      return Object.keys(filters).length > 0 &&
-        Object.values(filters).some((f) => f !== undefined && f !== null && String(f).trim() !== '');
-    } catch (error) {
-      console.error('Error checking active filters:', error);
-      return false;
-    }
+    if (!filters || typeof filters !== 'object') return false;
+    return Object.values(filters).some((value) => value !== undefined && value !== null && String(value).trim() !== '');
   };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      const checked = e.target.checked;
-      if (checked && Array.isArray(filteredLeads)) {
-        setSelectedLeads(filteredLeads.map((lead) => lead.subid));
-      } else {
-        setSelectedLeads([]);
-      }
-    } catch (error) {
-      console.error('Error selecting all leads:', error);
+    const checked = e.target.checked;
+    if (checked && Array.isArray(filteredLeads)) {
+      setSelectedLeads(filteredLeads.map((lead) => lead.subid));
+    } else {
       setSelectedLeads([]);
     }
   };
@@ -77,15 +57,11 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     leadId: string,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    try {
-      const checked = e.target.checked;
-      if (checked) {
-        setSelectedLeads((prev) => [...prev, leadId]);
-      } else {
-        setSelectedLeads((prev) => prev.filter((id) => id !== leadId));
-      }
-    } catch (error) {
-      console.error('Error selecting lead:', error);
+    const checked = e.target.checked;
+    if (checked) {
+      setSelectedLeads((prev) => [...prev, leadId]);
+    } else {
+      setSelectedLeads((prev) => prev.filter((id) => id !== leadId));
     }
   };
 

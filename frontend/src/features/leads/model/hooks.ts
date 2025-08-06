@@ -9,30 +9,32 @@ export const LEADS_QUERY_KEYS = {
 
 const LeadsResponseSchema = ApiResponseSchema(LeadSchema.array());
 
+const buildQueryParams = (filters?: LeadsFilters): string => {
+  if (!filters || typeof filters !== 'object') return '';
+
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.append(key, String(value));
+    }
+  });
+
+  return params.toString();
+};
+
 export const useLeads = (filters?: LeadsFilters) => {
   return useQuery({
     queryKey: [...LEADS_QUERY_KEYS.LEADS, filters] as const,
     queryFn: async (): Promise<Lead[]> => {
-      // Prevent execution during SSR
-      if (typeof window === 'undefined') {
-        return [];
-      }
+      if (typeof window === 'undefined') return [];
 
       try {
-        const cleanFilters =
-          filters && typeof filters === 'object' && filters !== null
-            ? Object.fromEntries(
-                Object.entries(filters).filter(
-                  ([_, value]) =>
-                    value !== undefined && value !== null && value !== ''
-                )
-              )
-            : {};
+        const queryParams = buildQueryParams(filters);
+        const url = queryParams
+          ? `/api/get_leads?${queryParams}`
+          : '/api/get_leads';
 
-        const response = await frontendClient.post(
-          '/api/get_leads',
-          cleanFilters
-        );
+        const response = await frontendClient.get(url);
 
         let data: Lead[];
         if (Array.isArray(response.data)) {
@@ -45,26 +47,20 @@ export const useLeads = (filters?: LeadsFilters) => {
           const parsed = LeadsResponseSchema.parse(response.data);
           data = parsed.data;
         } else {
-          console.warn('Unexpected API response format:', response.data);
           return [];
         }
 
-        if (!data || !Array.isArray(data)) {
-          console.warn('Leads API returned non-array data:', data);
-          return [];
-        }
-
-        return data;
+        return Array.isArray(data) ? data : [];
       } catch (error) {
         console.error('Error fetching leads:', error);
         return [];
       }
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    enabled: typeof window !== 'undefined', // Only run on client side
-    retry: 1, // Only retry once
-    retryDelay: 1000, // Wait 1 second before retry
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    enabled: typeof window !== 'undefined',
+    retry: 1,
+    retryDelay: 1000,
   });
 };
 
@@ -72,46 +68,28 @@ export const useLeadsMutation = () => {
   return useMutation({
     mutationFn: async (filters: LeadsFilters): Promise<Lead[]> => {
       try {
-        const cleanFilters =
-          filters && typeof filters === 'object' && filters !== null
-            ? Object.fromEntries(
-                Object.entries(filters).filter(
-                  ([_, value]) =>
-                    value !== undefined && value !== null && value !== ''
-                )
-              )
-            : {};
+        const queryParams = buildQueryParams(filters);
+        const url = queryParams
+          ? `/api/get_leads?${queryParams}`
+          : '/api/get_leads';
 
-        const response = await frontendClient.post(
-          '/api/get_leads',
-          cleanFilters
-        );
+        const response = await frontendClient.get(url);
 
-        // Handle both array and object responses
         let data: Lead[];
         if (Array.isArray(response.data)) {
-          // Direct array response
           data = response.data;
         } else if (
           response.data &&
           typeof response.data === 'object' &&
           'data' in response.data
         ) {
-          // Object with data field
           const parsed = LeadsResponseSchema.parse(response.data);
           data = parsed.data;
         } else {
-          console.warn('Unexpected API response format:', response.data);
           return [];
         }
 
-        // Ensure we always return an array
-        if (!data || !Array.isArray(data)) {
-          console.warn('Leads mutation returned non-array data:', data);
-          return [];
-        }
-
-        return data;
+        return Array.isArray(data) ? data : [];
       } catch (error) {
         console.error('Error in leads mutation:', error);
         throw error;

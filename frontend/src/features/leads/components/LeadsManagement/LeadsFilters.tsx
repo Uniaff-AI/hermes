@@ -47,7 +47,7 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
     });
   };
 
-  const hasActiveFilters = filters && typeof filters === 'object' && Object.keys(filters).length > 0 && Object.values(filters).some(
+  const hasActiveFilters = filters && typeof filters === 'object' && Object.values(filters).some(
     (value) => value !== undefined && value !== ''
   );
 
@@ -73,7 +73,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
         )}
       </div>
 
-      {/* Search */}
       <div className="mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -87,7 +86,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
         </div>
       </div>
 
-      {/* Active Filters Display */}
       {hasActiveFilters && (
         <div className="mb-4 flex flex-wrap gap-2">
           {filters.vertical && (
@@ -141,7 +139,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
         </div>
       )}
 
-      {/* Advanced Filters Toggle */}
       <div className="mb-4">
         <button
           onClick={() => setAdvancedVisible(!isAdvancedVisible)}
@@ -158,7 +155,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
         </button>
       </div>
 
-      {/* Advanced Filters */}
       <AnimatePresence>
         {isAdvancedVisible && (
           <motion.div
@@ -169,7 +165,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
             className="overflow-visible"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-gray-200">
-              {/* Vertical Filter */}
               <FilterSelect
                 label="Вертикаль"
                 value={filters.vertical}
@@ -178,7 +173,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 placeholder="Выберите вертикаль"
               />
 
-              {/* Country Filter */}
               <FilterSelect
                 label="Страна"
                 value={filters.country}
@@ -187,7 +181,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 placeholder="Выберите страну"
               />
 
-              {/* Status Filter */}
               <FilterSelect
                 label="Статус"
                 value={filters.status}
@@ -196,7 +189,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 placeholder="Выберите статус"
               />
 
-              {/* Product Name Filter */}
               <div className="md:col-span-2 lg:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Название продукта
@@ -212,7 +204,6 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 />
               </div>
 
-              {/* Date Range Filter */}
               <div className="md:col-span-2 lg:col-span-2">
                 <FilterDateRange
                   label="Период"
@@ -343,7 +334,7 @@ const FilterDateRange: FC<{
   };
 
   const handleDateSelect = (date: Date | null, type: 'from' | 'to') => {
-    const dateString = date ? date.toISOString().split('T')[0] : undefined; // YYYY-MM-DD format or undefined
+    const dateString = date ? date.toISOString().split('T')[0] : undefined;
     if (type === 'from') {
       onFromDateChange(dateString || '');
     } else {
