@@ -56,9 +56,6 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-# Add debug environment variables
-ENV DEBUG=*
-ENV NODE_OPTIONS="--inspect=0.0.0.0:9229"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -89,5 +86,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application with more verbose logging
-CMD ["npx", "next", "start", "--verbose"] 
+# Start the application with standard Next.js command
+CMD ["npx", "next", "start"] 
