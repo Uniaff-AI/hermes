@@ -122,7 +122,7 @@ const OffersTable: FC<OffersTableProps> = ({ searchQuery, filters = {} }) => {
           ) : (
             <tr>
               <td colSpan={5} className="text-center py-6 text-gray-500">
-                {searchQuery || Object.values(filters || {}).some((f) => f)
+                {searchQuery || (filters && typeof filters === 'object' && Object.keys(filters).length > 0 && Object.values(filters).some((f) => f))
                   ? 'Офферы не найдены по вашему запросу.'
                   : 'Офферы не найдены.'}
               </td>

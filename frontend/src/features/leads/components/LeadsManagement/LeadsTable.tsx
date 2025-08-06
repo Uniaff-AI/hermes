@@ -283,7 +283,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
               <tr>
                 <td colSpan={13} className="text-center py-6 text-gray-500">
                   {searchQuery ||
-                    Object.values(filters).some((f) => f && f !== '')
+                    (filters && typeof filters === 'object' && Object.keys(filters).length > 0 && Object.values(filters).some((f) => f && f !== ''))
                     ? 'Лиды не найдены по вашему запросу.'
                     : 'Лиды не найдены.'}
                 </td>

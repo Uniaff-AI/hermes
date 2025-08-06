@@ -23,11 +23,22 @@ const OffersFilters: FC<OffersFiltersProps> = ({
   const [isAdvancedVisible, setAdvancedVisible] = useState(false);
 
   const filterOptions = useMemo(
-    () => ({
-      country: Object.values(CountryEnum) as string[],
-      vertical: Object.values(VerticalEnum) as string[],
-      aff: Object.values(AffEnum) as string[],
-    }),
+    () => {
+      try {
+        return {
+          country: (Object.values(CountryEnum) || []) as string[],
+          vertical: (Object.values(VerticalEnum) || []) as string[],
+          aff: (Object.values(AffEnum) || []) as string[],
+        };
+      } catch (error) {
+        console.error('Error creating filter options:', error);
+        return {
+          country: [] as string[],
+          vertical: [] as string[],
+          aff: [] as string[],
+        };
+      }
+    },
     []
   );
 
@@ -148,7 +159,7 @@ const FilterSelect: FC<{
     };
   }, []);
 
-  const allOptions = ['Все', ...options];
+  const allOptions = ['Все', ...(Array.isArray(options) ? options : [])];
 
   return (
     <div className="mb-4" ref={ref}>
@@ -165,9 +176,8 @@ const FilterSelect: FC<{
         >
           <span>{value}</span>
           <ChevronDown
-            className={`w-4 h-4 text-gray-400 transition-transform ${
-              isOpen ? 'rotate-180' : ''
-            }`}
+            className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''
+              }`}
           />
         </button>
         <AnimatePresence>
