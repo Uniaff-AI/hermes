@@ -9,9 +9,13 @@ export const ENV_CONFIG = {
 
   // External API configuration
   EXTERNAL_API_URL:
-    process.env.API_SCHEME_URL || 'https://api.hermes.uniaffcrm.com',
+    process.env.API_SCHEME_URL ||
+    process.env.NEXT_PUBLIC_API_ENDPOINT ||
+    'https://api.hermes.uniaffcrm.com',
   EXTERNAL_API_ENDPOINT:
-    process.env.NEXT_PUBLIC_API_ENDPOINT || 'https://api.hermes.uniaffcrm.com',
+    process.env.NEXT_PUBLIC_API_ENDPOINT ||
+    process.env.API_SCHEME_URL ||
+    'https://api.hermes.uniaffcrm.com',
   EXTERNAL_API_KEY: process.env.EXTERNAL_API_KEY || '',
 
   // Frontend URL
@@ -23,3 +27,8 @@ export const ENV_CONFIG = {
 export const isDevelopment = ENV_CONFIG.NODE_ENV === 'development';
 export const isProduction = ENV_CONFIG.NODE_ENV === 'production';
 export const isTest = ENV_CONFIG.NODE_ENV === 'test';
+
+// Validation helpers
+export const hasValidExternalAPIConfig = () => {
+  return !!(ENV_CONFIG.EXTERNAL_API_URL && ENV_CONFIG.EXTERNAL_API_KEY);
+};

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ENV_CONFIG } from '@/config/envConfig';
+import { ENV_CONFIG, hasValidExternalAPIConfig } from '@/config/envConfig';
 
 export const API_CONFIG = {
   BASE_URL: ENV_CONFIG.EXTERNAL_API_URL,
@@ -7,20 +7,48 @@ export const API_CONFIG = {
   VERSION: 'v1',
 } as const;
 
-export const getExternalAPIHeaders = () => ({
-  'X-API-KEY': API_CONFIG.EXTERNAL_API_KEY!,
-  'Content-Type': 'application/json',
-});
+export const getExternalAPIHeaders = () => {
+  if (!hasValidExternalAPIConfig()) {
+    throw new Error('External API configuration is missing');
+  }
+
+  return {
+    'X-API-KEY': API_CONFIG.EXTERNAL_API_KEY!,
+    'Content-Type': 'application/json',
+  };
+};
 
 export const handleAPIError = (error: unknown, context: string) => {
   console.error(`Error in ${context}:`, error);
 
+  // Provide more detailed error information
+  let errorMessage = `Failed to ${context.toLowerCase()}`;
+  let statusCode = 500;
+
+  if (error instanceof Error) {
+    if (error.message.includes('External API error:')) {
+      const statusMatch = error.message.match(/External API error: (\d+)/);
+      if (statusMatch) {
+        statusCode = parseInt(statusMatch[1], 10);
+        errorMessage = `External API returned ${statusCode} error`;
+      }
+    } else if (
+      error.message.includes('External API configuration is missing')
+    ) {
+      statusCode = 500;
+      errorMessage = 'External API configuration is missing';
+    } else {
+      errorMessage = error.message;
+    }
+  }
+
   return NextResponse.json(
     {
       success: false,
-      message: `Failed to ${context.toLowerCase()}`,
+      message: errorMessage,
+      error: error instanceof Error ? error.message : String(error),
     },
-    { status: 500 }
+    { status: statusCode }
   );
 };
 
@@ -32,5 +60,11 @@ export const createSuccessResponse = (data: unknown) => {
 };
 
 export const createExternalAPIUrl = (endpoint: string) => {
-  return `${API_CONFIG.BASE_URL}/${API_CONFIG.VERSION}/${endpoint}`;
+  if (!hasValidExternalAPIConfig()) {
+    throw new Error('External API configuration is missing');
+  }
+
+  // Remove leading slash from endpoint if present to avoid double slashes
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  return `${API_CONFIG.BASE_URL}/${API_CONFIG.VERSION}/${cleanEndpoint}`;
 };
