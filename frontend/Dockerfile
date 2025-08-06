@@ -44,12 +44,6 @@ COPY frontend/.env ./.env
 # Build the application
 RUN pnpm run build
 
-# Check what was built and create missing directories
-RUN ls -la .next/ || true
-RUN ls -la .next/standalone/ || echo "No standalone directory found"
-RUN ls -la .next/static/ || echo "No static directory found"
-RUN mkdir -p .next/standalone .next/static || true
-
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -60,16 +54,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy public folder
+# Copy the standalone output
+COPY --from=builder /app/frontend/.next/standalone ./
+COPY --from=builder /app/frontend/.next/static ./.next/static
 COPY --from=builder /app/frontend/public ./public
-
-# Create .next directory with proper permissions
-RUN mkdir -p .next
-RUN chown nextjs:nodejs .next
-
-# Copy Next.js build files
-COPY --from=builder /app/frontend/.next ./.next
-COPY --from=builder /app/frontend/package.json ./package.json
 
 # Copy the built .env file
 COPY --from=builder /app/frontend/.env ./.env
@@ -86,5 +74,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application with pnpm instead of npx
-CMD ["pnpm", "exec", "next", "start"] 
+# Start the application using the standalone server
+CMD ["node", "server.js"] 

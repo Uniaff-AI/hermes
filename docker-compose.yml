@@ -63,7 +63,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Backend API
+  # Backend API (Rules Management Only)
   backend:
     build:
       context: .
@@ -102,7 +102,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # Frontend
+  # Frontend (Uses External APIs for Products/Leads, Local Backend for Rules)
   frontend:
     build:
       context: .
@@ -116,14 +116,14 @@ services:
       PORT: 3000
       HOSTNAME: '0.0.0.0'
       NODE_ENV: production
-      # Browser requests (these will be proxied by nginx)
-      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT}/api
-      NEXT_PUBLIC_BACKEND_URL: http://localhost:${BACKEND_PORT}/api
+      # External API URLs (for products and leads)
+      NEXT_PUBLIC_API_URL: https://api.hermes.uniaffcrm.com/api
+      NEXT_PUBLIC_API_ENDPOINT: https://api.hermes.uniaffcrm.com
+      API_SCHEME_URL: https://api.hermes.uniaffcrm.com
+      # Local backend URL (for rules management) - DOCKER INTERNAL NETWORKING
+      NEXT_PUBLIC_BACKEND_URL: http://backend:3000/api
       NEXT_PUBLIC_FRONTEND_URL: http://localhost:${FRONTEND_PORT}
       NEXT_PUBLIC_BASE_URL: /api
-      # Server-side requests (Docker internal networking)
-      NEXT_PUBLIC_API_ENDPOINT: http://backend:3000/api
-      API_SCHEME_URL: http://backend:3000/api
       EXTERNAL_API_KEY: ${EXTERNAL_API_KEY}
       # Debug environment
       DEBUG: 'hermes:*'
