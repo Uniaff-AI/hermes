@@ -6,6 +6,8 @@ const nextConfig = {
   // Disable static optimization for dynamic pages
   trailingSlash: false,
 
+  // Docker compatibility settings
+  output: 'standalone',
   experimental: {
     // Optimizations for Docker
     outputFileTracingRoot: process.cwd(),
