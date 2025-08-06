@@ -48,24 +48,32 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 
+# Install pnpm in runner stage
+RUN corepack enable pnpm
+
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy the standalone output
-COPY --from=builder /app/frontend/.next/standalone ./
-COPY --from=builder /app/frontend/.next/static ./.next/static
-COPY --from=builder /app/frontend/public ./public
+# Copy package.json files
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/frontend/package.json ./frontend/package.json
 
-# Copy the built .env file
-COPY --from=builder /app/frontend/.env ./.env
+# Copy built application and node_modules
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/frontend/.next ./frontend/.next
+COPY --from=builder /app/frontend/public ./frontend/public
+COPY --from=builder /app/frontend/.env ./frontend/.env
 
 # Set ownership
-RUN chown -R nextjs:nodejs ./.next
-RUN chown -R nextjs:nodejs ./public
-RUN chown nextjs:nodejs ./.env
+RUN chown -R nextjs:nodejs ./frontend
+RUN chown -R nextjs:nodejs ./node_modules
+
+# Set working directory to frontend
+WORKDIR /app/frontend
 
 USER nextjs
 
@@ -74,5 +82,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application using the standalone server
-CMD ["node", "server.js"] 
+# Start the application using pnpm
+CMD ["pnpm", "start"] 
