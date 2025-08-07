@@ -17,7 +17,7 @@ COPY package.json ./
 COPY backend/package.json ./backend/
 
 # Install all dependencies using workspace
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Copy backend source code
 COPY backend/ ./backend/
