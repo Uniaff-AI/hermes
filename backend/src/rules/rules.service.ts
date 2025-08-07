@@ -148,6 +148,19 @@ export class RulesService {
    */
   async getAllRulesAnalytics() {
     const rules = await this.repo.find();
+
+    if (!rules || rules.length === 0) {
+      return {
+        totalStats: {
+          totalSent: 0,
+          totalSuccess: 0,
+          totalErrors: 0,
+          successRate: '0%',
+        },
+        rules: [],
+      };
+    }
+
     const analyticsPromises = rules.map((rule) =>
       this.getRuleAnalytics(rule.id),
     );

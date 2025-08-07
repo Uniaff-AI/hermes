@@ -49,7 +49,7 @@ export default function AnalyticsView() {
     );
   }
 
-  if (!analyticsData || analyticsData.rules.length === 0) {
+  if (!analyticsData || !analyticsData.rules || analyticsData.rules.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-600">Нет данных для аналитики</p>
@@ -61,6 +61,15 @@ export default function AnalyticsView() {
   }
 
   const { totalStats, rules } = analyticsData;
+
+  // Additional safety check for totalStats
+  if (!totalStats) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600">Ошибка: отсутствуют данные статистики</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -188,7 +197,7 @@ export default function AnalyticsView() {
                   className="mt-4 flex justify-between items-center cursor-pointer text-sm text-muted-foreground"
                   onClick={() => toggleLeads(rule.id)}
                 >
-                  <span>Показать лиды ({recentSendings.length})</span>
+                  <span>Показать лиды ({recentSendings?.length || 0})</span>
                   <ChevronRight
                     className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
                   />
@@ -196,7 +205,7 @@ export default function AnalyticsView() {
 
                 {isExpanded && (
                   <div className="mt-4 space-y-4">
-                    {recentSendings.length === 0 ? (
+                    {!recentSendings || recentSendings.length === 0 ? (
                       <div className="text-center py-4 text-muted-foreground">
                         Нет данных об отправках
                       </div>

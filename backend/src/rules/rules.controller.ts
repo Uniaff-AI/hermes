@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   Patch,
+  Logger,
 } from '@nestjs/common';
 
 import { RulesService } from './rules.service';
@@ -18,6 +19,8 @@ import { UpdateRuleDto } from './dto/update-rule.dto';
 
 @Controller('rules')
 export class RulesController {
+  private readonly logger = new Logger(RulesController.name);
+
   constructor(private readonly rules: RulesService) {}
 
   // 1) Партнёрские продукты
@@ -60,13 +63,23 @@ export class RulesController {
 
   // 7) Аналитика: общая статистика по всем правилам
   @Get('analytics/overview')
-  getAnalyticsOverview() {
-    return this.rules.getAllRulesAnalytics();
+  async getAnalyticsOverview() {
+    try {
+      return await this.rules.getAllRulesAnalytics();
+    } catch (error) {
+      this.logger.error('Error getting analytics overview:', error);
+      throw error;
+    }
   }
 
   // 8) Аналитика: детальная статистика по конкретному правилу
   @Get(':id/analytics')
-  getRuleAnalytics(@Param('id') id: string) {
-    return this.rules.getRuleAnalytics(id);
+  async getRuleAnalytics(@Param('id') id: string) {
+    try {
+      return await this.rules.getRuleAnalytics(id);
+    } catch (error) {
+      this.logger.error(`Error getting analytics for rule ${id}:`, error);
+      throw error;
+    }
   }
 }
