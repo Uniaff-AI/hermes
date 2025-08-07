@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddErrorDetailsToLeadSendings1715028537218
+export class AddErrorDetailsToLeadSendings1753890000001
   implements MigrationInterface
 {
-  name = 'AddErrorDetailsToLeadSendings1715028537218';
+  name = 'AddErrorDetailsToLeadSendings1753890000001';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
