@@ -48,23 +48,41 @@ run_migrations() {
     local attempt=1
     
     echo "Running database migrations..."
+    echo "Current directory: $(pwd)"
+    echo "Node version: $(node --version)"
+    echo "Available packages:"
+    ls -la node_modules/ | head -10
     
     while [ $attempt -le $max_attempts ]; do
         echo "Migration attempt $attempt/$max_attempts"
         
-        # Use direct Node.js command instead of pnpm
-        if node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js --dataSource=src/database/data-source.ts migration:run; then
+        # Set environment variables explicitly
+        export NODE_ENV=production
+        export TS_NODE_PROJECT=tsconfig.json
+        
+        # Try simpler approach - use npx with direct TypeORM installation
+        echo "Attempting migration with npx..."
+        if npx -y typeorm-ts-node-commonjs@0.3.20 --dataSource=src/database/data-source.ts migration:run; then
             echo "Migrations completed successfully"
             return 0
         else
-            echo "Migration attempt $attempt failed"
-            if [ $attempt -eq $max_attempts ]; then
-                echo "All migration attempts failed"
-                return 1
+            echo "npx migration failed, trying node command..."
+            # Fallback to node command
+            if node -r ts-node/register -r tsconfig-paths/register ./node_modules/.bin/typeorm --dataSource=src/database/data-source.ts migration:run; then
+                echo "Migrations completed successfully with node"
+                return 0
+            else
+                echo "Migration attempt $attempt failed"
+                if [ $attempt -eq $max_attempts ]; then
+                    echo "All migration attempts failed"
+                    echo "Listing database contents:"
+                    psql "$DATABASE_URL" -c "\\dt" || echo "Could not connect to database"
+                    return 1
+                fi
+                echo "Waiting 10 seconds before retry..."
+                sleep 10
+                attempt=$((attempt + 1))
             fi
-            echo "Waiting 10 seconds before retry..."
-            sleep 10
-            attempt=$((attempt + 1))
         fi
     done
 }
@@ -104,24 +122,38 @@ COPY <<EOF /app/startup.sh
 #!/bin/bash
 set -e
 
+echo "=========================================="
 echo "Starting Hermes Backend..."
+echo "Working directory: $(pwd)"
+echo "User: $(whoami)"
+echo "Environment: $NODE_ENV"
+echo "=========================================="
 
 # Run database initialization (migrations only)
 echo "Initializing database..."
+echo "Database URL: $DATABASE_URL"
+echo "Database Host: $DATABASE_HOST"
+echo "Database Name: $DATABASE_NAME"
+
 if /app/init-db.sh; then
-    echo "Database initialization completed successfully"
+    echo "✅ Database initialization completed successfully"
 else
-    echo "Database initialization failed, but continuing..."
+    echo "❌ Database initialization failed, but continuing..."
+    echo "Checking if database is accessible..."
+    pg_isready -h postgres -p 5432 -U postgres -d postgres || echo "Database not ready"
     # Don't exit here, let the application try to start anyway
 fi
 
+echo "=========================================="
 # Start application
 echo "Starting application..."
 if [ "$NODE_ENV" = "production" ]; then
     echo "Starting in production mode..."
+    echo "Checking if dist/main exists: $(ls -la dist/main || echo 'not found')"
     exec node dist/main
 else
     echo "Starting in development mode..."
+    echo "Checking NestJS CLI: $(ls -la ./node_modules/.bin/nest || echo 'not found')"
     exec node -r ts-node/register -r tsconfig-paths/register ./node_modules/@nestjs/cli/bin/nest.js start --watch
 fi
 EOF
