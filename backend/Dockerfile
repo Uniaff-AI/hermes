@@ -52,8 +52,8 @@ run_migrations() {
     while [ $attempt -le $max_attempts ]; do
         echo "Migration attempt $attempt/$max_attempts"
         
-        # Use direct TypeORM command instead of pnpm script
-        if npx typeorm-ts-node-commonjs --dataSource=src/database/data-source.ts migration:run; then
+        # Use direct Node.js command instead of pnpm
+        if node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js --dataSource=src/database/data-source.ts migration:run; then
             echo "Migrations completed successfully"
             return 0
         else
@@ -109,20 +109,20 @@ echo "Starting Hermes Backend..."
 # Run database initialization (migrations only)
 echo "Initializing database..."
 if /app/init-db.sh; then
-    echo "Database initialization completed"
+    echo "Database initialization completed successfully"
 else
-    echo "Database initialization failed"
-    exit 1
+    echo "Database initialization failed, but continuing..."
+    # Don't exit here, let the application try to start anyway
 fi
 
 # Start application
 echo "Starting application..."
 if [ "$NODE_ENV" = "production" ]; then
     echo "Starting in production mode..."
-    pnpm run start:prod
+    exec node dist/main
 else
     echo "Starting in development mode..."
-    pnpm run start:dev
+    exec node -r ts-node/register -r tsconfig-paths/register ./node_modules/@nestjs/cli/bin/nest.js start --watch
 fi
 EOF
 
