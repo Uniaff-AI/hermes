@@ -52,7 +52,8 @@ run_migrations() {
     while [ $attempt -le $max_attempts ]; do
         echo "Migration attempt $attempt/$max_attempts"
         
-        if pnpm run migration:run; then
+        # Use direct TypeORM command instead of pnpm script
+        if npx typeorm-ts-node-commonjs --dataSource=src/database/data-source.ts migration:run; then
             echo "Migrations completed successfully"
             return 0
         else
