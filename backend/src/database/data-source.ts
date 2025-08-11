@@ -1,6 +1,11 @@
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
+// Determine if we're in production (compiled) environment
+const isProduction =
+  process.env.NODE_ENV === 'production' || !__filename.includes('src');
+const basePath = isProduction ? 'dist' : 'src';
+
 export const AppDataSource = new DataSource({
   type: process.env.DATABASE_TYPE as any,
   url: process.env.DATABASE_URL,
@@ -15,8 +20,8 @@ export const AppDataSource = new DataSource({
   dropSchema: false,
   keepConnectionAlive: true,
   logging: process.env.NODE_ENV !== 'production',
-  entities: ['src/**/*.entity{.ts,.js}'],
-  migrations: ['src/database/migrations/**/*{.ts,.js}'],
+  entities: [`${basePath}/**/*.entity{.ts,.js}`],
+  migrations: [`${basePath}/database/migrations/**/*{.ts,.js}`],
   cli: {
     entitiesDir: 'src',
     migrationsDir: 'src/database/migrations',

@@ -1,11 +1,19 @@
-# Development Environment Variables
+# Production Environment Variables - Centralized Configuration
 
-NODE_ENV=development
-APP_NAME="Hermes CRM"
+# This file contains all environment variables for the entire Hermes CRM system
 
 # =============================================================================
 
-# PORTS CONFIGURATION
+# GENERAL CONFIGURATION
+
+# =============================================================================
+
+NODE_ENV=production
+APP_NAME=Hermes CRM
+
+# =============================================================================
+
+# EXTERNAL PORTS (Docker port mapping - Host ports)
 
 # =============================================================================
 
@@ -13,7 +21,6 @@ DATABASE_PORT=5435
 REDIS_PORT=6382
 BACKEND_PORT=3004
 FRONTEND_PORT=3003
-PGADMIN_PORT=5050
 
 # =============================================================================
 
@@ -22,12 +29,12 @@ PGADMIN_PORT=5050
 # =============================================================================
 
 DATABASE_TYPE=postgres
-DATABASE_HOST=localhost
+DATABASE_HOST=postgres
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=secret
 DATABASE_NAME=hermes
-DATABASE_URL=postgresql://postgres:secret@localhost:5435/hermes
-DATABASE_SYNCHRONIZE=true
+DATABASE_URL=postgresql://postgres:secret@postgres:5432/hermes
+DATABASE_SYNCHRONIZE=false
 DATABASE_MAX_CONNECTIONS=100
 DATABASE_SSL_ENABLED=false
 DATABASE_REJECT_UNAUTHORIZED=false
@@ -41,8 +48,8 @@ DATABASE_CERT=
 
 # =============================================================================
 
-REDIS_HOST=localhost
-REDIS_PORT=6382
+REDIS_HOST=redis
+REDIS_PORT=6379
 REDIS_PASSWORD=
 
 # =============================================================================
@@ -51,8 +58,8 @@ REDIS_PASSWORD=
 
 # =============================================================================
 
-FRONTEND_DOMAIN=http://localhost:3003
-BACKEND_DOMAIN=http://localhost:3004/api
+FRONTEND_DOMAIN=https://dev.uniaffcrm.com
+BACKEND_DOMAIN=https://dev.uniaffcrm.com/api
 
 # =============================================================================
 
@@ -83,9 +90,9 @@ AFFILIATE_API_TIMEOUT=5000
 
 # =============================================================================
 
-AUTH_JWT_SECRET=dev-jwt-secret-key-change-me-in-production
+AUTH_JWT_SECRET=prod-jwt-secret-key-change-me-in-production
 AUTH_JWT_TOKEN_EXPIRES_IN=15m
-AUTH_REFRESH_SECRET=dev-refresh-secret-change-me
+AUTH_REFRESH_SECRET=prod-refresh-secret-change-me
 AUTH_REFRESH_TOKEN_EXPIRES_IN=7d
 
 # =============================================================================
@@ -115,9 +122,9 @@ MAIL_CLIENT_PORT=1080
 
 # =============================================================================
 
-NEXT_PUBLIC_API_URL=http://localhost:3004/api
-NEXT_PUBLIC_BACKEND_URL=http://localhost:3004
-NEXT_PUBLIC_FRONTEND_URL=http://localhost:3003
+NEXT_PUBLIC_API_URL=https://dev.uniaffcrm.com/api
+NEXT_PUBLIC_BACKEND_URL=https://dev.uniaffcrm.com
+NEXT_PUBLIC_FRONTEND_URL=https://dev.uniaffcrm.com
 NEXT_PUBLIC_BASE_URL=/api
 NEXT_PUBLIC_API_ENDPOINT=https://api.hermes.uniaffcrm.com
 API_SCHEME_URL=https://api.hermes.uniaffcrm.com
