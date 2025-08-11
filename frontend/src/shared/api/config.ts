@@ -102,5 +102,5 @@ export const createExternalAPIUrl = (endpoint: string) => {
 
 export const createInternalAPIUrl = (endpoint: string) => {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-  return `${INTERNAL_API_CONFIG.BASE_URL}/${cleanEndpoint}`;
+  return `${INTERNAL_API_CONFIG.BASE_URL}/api/${cleanEndpoint}`;
 };

@@ -72,6 +72,10 @@ const API_CONFIG = {
 const INTERNAL_API_CONFIG = {
   BASE_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3004',
 };
+
+// createInternalAPIUrl автоматически добавляет /api к пути
+const url = createInternalAPIUrl('rules/analytics/overview');
+// Результат: http://localhost:3004/api/rules/analytics/overview
 ```
 
 ### Утилитарные функции:
