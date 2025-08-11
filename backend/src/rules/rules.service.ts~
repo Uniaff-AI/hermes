@@ -107,7 +107,7 @@ export class RulesService {
     const entity = this.repo.create({ isActive: true, ...dto } as unknown as DeepPartial<Rule>);
     const rule = await this.repo.save(entity);
 
-    // запускаем сразу (fire-and-forget)
+    // запускаем сразу
     this.scheduleLeadsSending(rule).catch(e =>
         this.logger.error(`scheduleLeadsSending(${rule.id}) failed: ${e?.message || e}`),
     );
@@ -115,12 +115,8 @@ export class RulesService {
     // ежедневный автозапуск (00:00)
     this.planNextDay(rule.id).catch(() => {});
 
-    // пробуем добавить в очередь, но не валим запрос если Bull отсутствует
-    try {
-      await this.leadSchedulerQueue.add('schedule', { ruleId: rule.id });
-    } catch (e: any) {
-      this.logger.warn(`Bull enqueue skipped: ${e?.message || e}`);
-    }
+    // отправим в Bull (как у тебя было)
+    await this.leadSchedulerQueue.add('schedule', { ruleId: rule.id });
 
     return rule;
   }
@@ -169,7 +165,7 @@ export class RulesService {
       return;
     }
 
-    // 1) POST /get_leads — snake_case поля как в вашей ПП
+    // 1) POST /get_leads — snake_case тело
     const body: Record<string, any> = {
       limit: rule.dailyLimit,
       ...(rule.offerName ? { offer_name: rule.offerName } : {}),
@@ -188,6 +184,7 @@ export class RulesService {
 
     let leads: Lead[] = [];
     try {
+      // ретраи: таймауты и 5xx/429
       const maxAttempts = 3;
       let resp: any;
 
@@ -219,19 +216,8 @@ export class RulesService {
         }
       }
 
-      let raw: any[] = Array.isArray(resp.data) ? resp.data : [];
+      const raw: any[] = Array.isArray(resp.data) ? resp.data : [];
       this.logger.debug?.(`Raw leads for rule ${rule.id}: ${this.stringify(raw).slice(0, 4000)}`);
-
-      // если отфильтрованные пустые — делаем фоллбэк по offer_name+limit
-      if (
-          raw.length === 0 &&
-          (rule.vertical || rule.country || rule.status || rule.dateFrom || rule.dateTo)
-      ) {
-        this.logger.warn(`rule ${rule.id}: empty by filters, fallback request by offer_name only`);
-        const fallbackBody = { limit: rule.dailyLimit, ...(rule.offerName ? { offer_name: rule.offerName } : {}) };
-        const fb = await firstValueFrom(this.http.post<any[]>(this.endpoints.getLeads, fallbackBody, cfgLeads));
-        if (fb.status === 200 && Array.isArray(fb.data)) raw = fb.data;
-      }
 
       // нормализация + локальные фильтры (offerId/cap)
       leads = raw

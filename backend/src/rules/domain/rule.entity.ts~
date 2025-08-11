@@ -1,3 +1,4 @@
+// rule.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('rules')
@@ -5,17 +6,18 @@ export class Rule {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  // <- добавили default, чтобы старые строки получили значение при ALTER TABLE
   @Column({ type: 'text', default: 'Unnamed rule' })
   name!: string;
 
   @Column({ type: 'text', nullable: true })
-  offerId?: string;
+  offerId?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  offerName?: string;
+  offerName?: string | null;
 
   @Column({ type: 'int', nullable: true })
-  periodMinutes?: number;
+  periodMinutes?: number | null;
 
   @Column({ type: 'int' })
   minInterval!: number;
@@ -26,34 +28,33 @@ export class Rule {
   @Column({ type: 'int' })
   dailyLimit!: number;
 
-  // дефолты нужны, чтобы ALTER TABLE не падал на старых NULL
-  @Column({ type: 'text', default: '09:00' })
+  @Column({ type: 'text' })
   sendWindowStart!: string;
 
-  @Column({ type: 'text', default: '21:00' })
+  @Column({ type: 'text' })
   sendWindowEnd!: string;
 
   @Column({ type: 'boolean', default: true })
   isActive!: boolean;
 
   @Column({ type: 'text', nullable: true })
-  vertical?: string;
+  vertical?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  country?: string;
+  country?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  status?: string;
+  status?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  productName?: string;
+  productName?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  dateFrom?: string;
+  dateFrom?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  dateTo?: string;
+  dateTo?: string | null;
 
   @Column({ type: 'int', nullable: true })
-  cap?: number;
+  cap?: number | null;
 }
