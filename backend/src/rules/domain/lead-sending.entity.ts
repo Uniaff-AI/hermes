@@ -9,11 +9,11 @@ import {
 import { Rule } from './rule.entity';
 
 export enum LeadSendingStatus {
-  SUCCESS = 'success',
-  ERROR = 'error',
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
 }
 
-@Entity({ name: 'lead_sendings' })
+@Entity({ name: 'lead_sending' })
 export class LeadSending {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

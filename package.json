@@ -25,6 +25,7 @@
     "frontend:lint": "eslint frontend --fix",
     "backend:migration:generate": "pnpm --filter nestjs-hermes run migration:generate",
     "backend:migration:run": "pnpm --filter nestjs-hermes run migration:run",
+    "backend:migration:run:prod": "pnpm --filter nestjs-hermes run migration:run:prod",
     "backend:migration:revert": "pnpm --filter nestjs-hermes run migration:revert",
     "backend:schema:drop": "pnpm --filter nestjs-hermes run schema:drop",
     "backend:seed:run": "pnpm --filter nestjs-hermes run seed:run:relational",
