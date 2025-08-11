@@ -12,12 +12,12 @@ const TabsNavigation = () => {
     ? 'redirects'
     : pathname.includes('/LeadsManagement')
       ? 'leads'
-      : 'offers';
+      : 'products';
 
   const handleTabChange = (value: string) => {
     switch (value) {
-      case 'offers':
-        router.push('/dashboard/OffersDashboard');
+      case 'products':
+        router.push('/dashboard/ProductsDashboard');
         break;
       case 'leads':
         router.push('/dashboard/LeadsManagement');
@@ -32,10 +32,10 @@ const TabsNavigation = () => {
     <Tabs value={currentTab} onValueChange={handleTabChange}>
       <TabsList className="w-full grid grid-cols-3 bg-transparent border-b border-gray-200 mb-6">
         <TabsTrigger
-          value="offers"
+          value="products"
           className="w-full px-4 py-3 text-sm font-medium text-center border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:text-black text-gray-500"
         >
-          Offers Dashboard
+          Products Dashboard
         </TabsTrigger>
         <TabsTrigger
           value="leads"

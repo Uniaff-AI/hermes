@@ -1,11 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { RotateCcw, Trash2, Users } from 'lucide-react';
 
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Checkbox } from '@/shared/ui/checkbox';
 import { useLeads } from '../../model/hooks';
-import { Lead, LeadsFilters } from '../../model/schemas';
+import { LeadsFilters } from '../../model/schemas';
+import { StatusTranslations } from '@/shared/utilities/enums';
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface LeadsTableProps {
@@ -16,28 +17,49 @@ interface LeadsTableProps {
 export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isClient, setIsClient] = useState(false);
-  const { data: leads = [], isLoading, error } = useLeads(filters);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const serverFilters = useMemo(() => {
+    const { searchQuery: _, productName: __, ...serverFilters } = filters;
+    return serverFilters;
+  }, [filters]);
+
+  const { data: leads = [], isLoading, error } = useLeads(serverFilters);
 
   const filteredLeads = useMemo(() => {
     if (!isClient || !Array.isArray(leads) || leads.length === 0) {
       return [];
     }
 
-    if (!searchQuery?.trim()) return leads;
+    let filtered = [...leads];
 
-    const query = searchQuery.toLowerCase();
-    return leads.filter(
-      (lead) =>
-        lead?.leadName?.toLowerCase()?.includes(query) ||
-        lead?.phone?.toLowerCase()?.includes(query) ||
-        (lead?.email && lead.email.toLowerCase().includes(query)) ||
-        lead?.subid?.toLowerCase()?.includes(query)
-    );
-  }, [isClient, leads, searchQuery]);
+    if (searchQuery && searchQuery.trim() !== '') {
+      const searchLower = searchQuery.toLowerCase();
+      filtered = filtered.filter((lead) => {
+        return (
+          lead.leadName?.toLowerCase().includes(searchLower) ||
+          lead.email?.toLowerCase().includes(searchLower) ||
+          lead.phone?.toLowerCase().includes(searchLower) ||
+          lead.productName?.toLowerCase().includes(searchLower) ||
+          lead.vertical?.toLowerCase().includes(searchLower) ||
+          lead.country?.toLowerCase().includes(searchLower) ||
+          lead.status?.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    if (filters.productName && filters.productName.trim() !== '') {
+      const productNameLower = filters.productName.toLowerCase();
+      filtered = filtered.filter((lead) => {
+        return lead.productName?.toLowerCase().includes(productNameLower);
+      });
+    }
+
+    return filtered;
+  }, [isClient, leads, searchQuery, filters.productName]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const hasActiveFilters = () => {
     if (!filters || typeof filters !== 'object') return false;
@@ -70,21 +92,23 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
       return <Badge variant="secondary">Неизвестно</Badge>;
     }
 
+    const translatedStatus = StatusTranslations[status];
+
     switch (status) {
       case 'New':
         return (
           <Badge variant="default" className="bg-blue-100 text-blue-800">
-            Новый
+            {translatedStatus || status}
           </Badge>
         );
       case 'Sale':
-        return <Badge variant="success">Продажа</Badge>;
+        return <Badge variant="success">{translatedStatus || status}</Badge>;
       case 'Reject':
-        return <Badge variant="danger">Отклонен</Badge>;
+        return <Badge variant="danger">{translatedStatus || status}</Badge>;
       case 'Trash':
-        return <Badge variant="secondary">Удален</Badge>;
+        return <Badge variant="secondary">{translatedStatus || status}</Badge>;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="secondary">{translatedStatus || status}</Badge>;
     }
   };
 
@@ -107,11 +131,13 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     );
   }
 
-  if (!Array.isArray(leads) || leads.length === 0) {
+  if (!Array.isArray(filteredLeads) || filteredLeads.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
         <div className="text-center text-gray-500">
-          Нет доступных лидов
+          {hasActiveFilters()
+            ? 'Лиды не найдены по вашему запросу.'
+            : 'Лиды не найдены'}
         </div>
       </div>
     );
@@ -143,7 +169,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Лиды</h2>
         <p className="text-sm text-gray-500">
-          Показано {filteredLeads.length} из {leads.length} лидов
+          Показано {filteredLeads.length} лидов
           {selectedLeads.length > 0 && ` • Выбрано: ${selectedLeads.length}`}
         </p>
       </div>
@@ -271,7 +297,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
             ) : (
               <tr>
                 <td colSpan={13} className="text-center py-6 text-gray-500">
-                  {searchQuery?.trim() || hasActiveFilters()
+                  {hasActiveFilters()
                     ? 'Лиды не найдены по вашему запросу.'
                     : 'Лиды не найдены.'}
                 </td>

@@ -1,126 +1,62 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeepPartial } from 'typeorm';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import axios, { AxiosRequestConfig } from 'axios';
-import { ConfigService } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 
 import { Rule } from './domain/rule.entity';
-import { LeadSending, LeadSendingStatus } from './domain/lead-sending.entity';
 import { CreateRuleDto } from './dto/create-rule.dto';
-import { AppConfig } from '../config/app-config.type';
 
-import { parseTimeHM, getTodayTimestamp } from '../utils/time.util';
-import { randomInRange } from '../utils/random.util';
-
-type Product = {
-  productName: string;
-  country:     string;
-  vertical:    string;
-  aff:         string;
-  productId:   string;
-};
-
-type Lead = {
-  productName: string;
-  country: string;
-  vertical?: string;
-  aff?: string;
-  productId: string;
-  date?: string;
-  subid: string;
-  status?: string;
-  leadName?: string;
-  phone?: string;
-  email?: string;
-  ip?: string;
-  ua?: string;
-  redirects?: number;
-};
+// Импортируем новые сервисы
+import { ExternalApiService, Product } from './services/external-api.service';
+import { LeadSchedulingService } from './services/lead-scheduling.service';
+import { RulesAnalyticsService } from './services/rules-analytics.service';
+import { RulesMonitoringService } from './services/rules-monitoring.service';
 
 @Injectable()
 export class RulesService {
   private readonly logger = new Logger(RulesService.name);
 
-  private readonly endpoints = { getLeads: '', getProducts: '', addLead: '' };
-  private readonly apiKey: string;
-  private readonly timeout: number;
-
   constructor(
-      @InjectRepository(Rule) private readonly repo: Repository<Rule>,
-      @InjectRepository(LeadSending) private readonly leadSendingRepo: Repository<LeadSending>,
-      private readonly http: HttpService,
-      private readonly config: ConfigService,
-      @InjectQueue('lead-scheduler') private readonly leadSchedulerQueue: Queue,
-  ) {
-    const app = this.config.get<AppConfig>('app')!;
-    this.endpoints.getLeads    = app.externalApis.leads.url;
-    this.endpoints.getProducts = app.externalApis.products.url;
-    this.endpoints.addLead     = app.externalApis.affiliate.url;
-    this.apiKey  = app.externalApis.leads.apiKey;
-    this.timeout = app.externalApis.leads.timeout;
-  }
+    @InjectRepository(Rule) private readonly repo: Repository<Rule>,
+    private readonly externalApi: ExternalApiService,
+    private readonly leadScheduling: LeadSchedulingService,
+    private readonly analytics: RulesAnalyticsService,
+    private readonly monitoring: RulesMonitoringService,
+    @InjectQueue('lead-scheduler') private readonly leadSchedulerQueue: Queue,
+  ) {}
 
-  // ===== utils
-  private stringify(data: any): string {
-    if (data == null) return '';
-    if (typeof data === 'string') return data;
-    try { return JSON.stringify(data); } catch { return String(data); }
-  }
-  private sleep(ms: number) { return new Promise(res => setTimeout(res, ms)); }
-  private minTimeout() { return Math.max(this.timeout ?? 0, 15000); } // минимум 15s
-  private getField(obj: any, ...keys: string[]): string | undefined {
-    for (const k of keys) {
-      const v = obj?.[k];
-      if (v != null && String(v).trim() !== '') return String(v);
-    }
-    return undefined;
-  }
-
-  // ===== Products (для UI)
-  async getProducts(): Promise<Product[]> {
-    const cfg: AxiosRequestConfig = {
-      headers: { 'X-API-KEY': this.apiKey, Accept: 'application/json' },
-      timeout: this.minTimeout(),
-      validateStatus: () => true,
-    };
-    try {
-      const resp = await firstValueFrom(this.http.get<Product[]>(this.endpoints.getProducts, cfg));
-      if (resp.status !== 200) {
-        this.logger.error(`Products HTTP ${resp.status}: ${this.stringify(resp.data)}`);
-        return [];
-      }
-      return Array.isArray(resp.data) ? resp.data : [];
-    } catch (err: any) {
-      const status  = err?.response?.status;
-      const details = err?.response?.data ?? err?.message ?? err;
-      this.logger.error(`Failed to fetch products: ${status ?? ''} ${this.stringify(details)}`);
-      return [];
-    }
-  }
-
-  // ===== CRUD
+  // ===== CRUD Operations =====
   async createAndSchedule(dto: CreateRuleDto): Promise<Rule> {
-    const entity = this.repo.create({ isActive: true, ...dto } as unknown as DeepPartial<Rule>);
+    // Manual validation for time window fields when isInfinite is false
+    if (dto.isInfinite !== true) {
+      const errors: string[] = [];
+
+      if (!dto.sendWindowStart || !/^\d{2}:\d{2}$/.test(dto.sendWindowStart)) {
+        errors.push(
+          'sendWindowStart is required and must be in HH:MM format when isInfinite is false',
+        );
+      }
+
+      if (!dto.sendWindowEnd || !/^\d{2}:\d{2}$/.test(dto.sendWindowEnd)) {
+        errors.push(
+          'sendWindowEnd is required and must be in HH:MM format when isInfinite is false',
+        );
+      }
+
+      if (errors.length > 0) {
+        throw new Error(`Validation failed: ${errors.join(', ')}`);
+      }
+    }
+
+    const entity = this.repo.create({
+      isActive: true,
+      ...dto,
+    } as unknown as DeepPartial<Rule>);
     const rule = await this.repo.save(entity);
 
-    // запускаем сразу (fire-and-forget)
-    this.scheduleLeadsSending(rule).catch(e =>
-        this.logger.error(`scheduleLeadsSending(${rule.id}) failed: ${e?.message || e}`),
-    );
-
-    // ежедневный автозапуск (00:00)
-    this.planNextDay(rule.id).catch(() => {});
-
-    // пробуем добавить в очередь, но не валим запрос если Bull отсутствует
-    try {
-      await this.leadSchedulerQueue.add('schedule', { ruleId: rule.id });
-    } catch (e: any) {
-      this.logger.warn(`Bull enqueue skipped: ${e?.message || e}`);
-    }
+    // Запускаем процессы асинхронно (не блокируем создание правила)
+    this.scheduleInitialProcesses(rule);
 
     return rule;
   }
@@ -144,260 +80,65 @@ export class RulesService {
     await this.repo.delete(id);
   }
 
-  // ===== daily planner
-  private async planNextDay(ruleId: string) {
-    const rule = await this.findOne(ruleId);
-    if (!rule) return;
-
-    const now = new Date();
-    const nextMidnight = new Date(now);
-    nextMidnight.setHours(24, 0, 0, 0);
-    const delay = nextMidnight.getTime() - now.getTime();
-
-    setTimeout(async () => {
-      const r = await this.findOne(ruleId);
-      if (!r || !r.isActive) return;
-      await this.scheduleLeadsSending(r);
-      this.planNextDay(ruleId).catch(() => {});
-    }, Math.max(delay, 0));
+  // ===== Delegation to specialized services =====
+  async getProducts(): Promise<Product[]> {
+    return this.externalApi.getProducts();
   }
 
-  // ===== main process
+  async getAllRulesAnalytics() {
+    return this.analytics.getAllRulesAnalytics();
+  }
+
+  async getRuleAnalytics(id: string) {
+    return this.analytics.getRuleAnalytics(id);
+  }
+
+  async testRuleExecution(id: string) {
+    return this.monitoring.testRuleExecution(id);
+  }
+
+  async manualTriggerRule(id: string) {
+    return this.leadScheduling.manualTriggerRule(id);
+  }
+
+  async testExternalAPIConnection() {
+    return this.monitoring.testExternalAPIConnection();
+  }
+
+  async getRuleDebugLogs(id: string) {
+    return this.monitoring.getRuleDebugLogs(id);
+  }
+
+  // Публичный метод для планирования отправки лидов (для Bull processor)
   public async scheduleLeadsSending(rule: Rule): Promise<void> {
-    if (!rule.isActive) {
-      this.logger.log(`rule ${rule.id} paused — skip`);
-      return;
-    }
+    return this.leadScheduling.scheduleLeadsSending(rule);
+  }
 
-    // 1) POST /get_leads — snake_case поля как в вашей ПП
-    const body: Record<string, any> = {
-      limit: rule.dailyLimit,
-      ...(rule.offerName ? { offer_name: rule.offerName } : {}),
-      ...(rule.vertical  ? { vertical:   rule.vertical   } : {}),
-      ...(rule.country   ? { country:    rule.country    } : {}),
-      ...(rule.status    ? { status:     rule.status     } : {}),
-      ...(rule.dateFrom  ? { date_from:  rule.dateFrom   } : {}),
-      ...(rule.dateTo    ? { date_to:    rule.dateTo     } : {}),
-    };
-
-    const cfgLeads: AxiosRequestConfig = {
-      headers: { 'X-API-KEY': this.apiKey, 'Content-Type': 'application/json', Accept: 'application/json' },
-      timeout: this.minTimeout(),
-      validateStatus: () => true,
-    };
-
-    let leads: Lead[] = [];
-    try {
-      const maxAttempts = 3;
-      let resp: any;
-
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-          this.logger.debug?.(`POST ${this.endpoints.getLeads} body=${this.stringify(body)}`);
-          resp = await firstValueFrom(this.http.post<any[]>(this.endpoints.getLeads, body, cfgLeads));
-          if (resp.status === 200) break;
-
-          if (resp.status >= 500 || resp.status === 429) {
-            const backoff = Math.min(4000, 1000 * Math.pow(2, attempt - 1));
-            this.logger.warn(`get_leads HTTP ${resp.status}, retry in ${backoff}ms`);
-            await this.sleep(backoff);
-            if (attempt === maxAttempts) throw new Error(`HTTP ${resp.status} ${this.stringify(resp.data)}`);
-            continue;
-          }
-          throw new Error(`HTTP ${resp.status} ${this.stringify(resp.data)}`);
-        } catch (err: any) {
-          const isTimeout =
-              axios.isAxiosError(err) &&
-              (err.code === 'ECONNABORTED' || String(err.message).includes('timeout'));
-          if (isTimeout && attempt < maxAttempts) {
-            const backoff = Math.min(4000, 1000 * Math.pow(2, attempt - 1));
-            this.logger.warn(`get_leads timeout, retry in ${backoff}ms`);
-            await this.sleep(backoff);
-            continue;
-          }
-          throw err;
-        }
-      }
-
-      let raw: any[] = Array.isArray(resp.data) ? resp.data : [];
-      this.logger.debug?.(`Raw leads for rule ${rule.id}: ${this.stringify(raw).slice(0, 4000)}`);
-
-      // если отфильтрованные пустые — делаем фоллбэк по offer_name+limit
-      if (
-          raw.length === 0 &&
-          (rule.vertical || rule.country || rule.status || rule.dateFrom || rule.dateTo)
-      ) {
-        this.logger.warn(`rule ${rule.id}: empty by filters, fallback request by offer_name only`);
-        const fallbackBody = { limit: rule.dailyLimit, ...(rule.offerName ? { offer_name: rule.offerName } : {}) };
-        const fb = await firstValueFrom(this.http.post<any[]>(this.endpoints.getLeads, fallbackBody, cfgLeads));
-        if (fb.status === 200 && Array.isArray(fb.data)) raw = fb.data;
-      }
-
-      // нормализация + локальные фильтры (offerId/cap)
-      leads = raw
-          .filter(r => {
-            const sid = this.getField(r, 'subid', 'subId', 'sub_id');
-            const pid = this.getField(r, 'productId', 'product_id', 'product');
-            if (!sid || !pid) return false;
-            if (rule.offerId && String(pid) !== String(rule.offerId)) return false;
-
-            const redirects = r.redirects ?? r.redirects_count ?? r.redirectsCount;
-            if (typeof redirects === 'number' && typeof rule.cap === 'number' && redirects > rule.cap) return false;
-            return true;
-          })
-          .map<Lead>(r => {
-            const sid = this.getField(r, 'subid', 'subId', 'sub_id')!;
-            const pid = this.getField(r, 'productId', 'product_id', 'product')!;
-            const pnm =
-                this.getField(r, 'productName', 'product_name', 'offerName', 'offer_name', 'product') ?? '';
-            const name = (r.leadName ?? r.name ?? '').toString().trim() || 'Unknown';
-            return {
-              subid: sid,
-              productId: pid,
-              productName: pnm,
-              aff: (r.aff ?? '').toString(),
-              country: (r.country ?? '').toString(),
-              vertical: (r.vertical ?? '').toString() || undefined,
-              status: (r.status ?? '').toString() || undefined,
-              leadName: name,
-              phone: (r.phone ?? '').toString() || undefined,
-              email: (r.email ?? '').toString() || undefined,
-              ip: (r.ip ?? '').toString() || undefined,
-              ua: (r.ua ?? '').toString() || undefined,
-              redirects: typeof r.redirects === 'number' ? r.redirects : undefined,
-              date: (r.date ?? r.created_at ?? '').toString() || undefined,
-            };
-          });
-    } catch (err: any) {
-      const status  = err?.response?.status;
-      const details = err?.response?.data ?? err?.message ?? err;
-      this.logger.error(`Failed to fetch leads for rule ${rule.id}: ${status ?? ''} ${this.stringify(details)}`);
-      return;
-    }
-
-    const toSend = leads.slice(0, rule.dailyLimit);
-    if (!toSend.length) {
-      this.logger.warn(`rule ${rule.id}: no leads to send`);
-      return;
-    }
-
-    // 2) окно
-    let sh: number, sm: number, eh: number, em: number;
-    try {
-      [sh, sm] = parseTimeHM(rule.sendWindowStart);
-      [eh, em] = parseTimeHM(rule.sendWindowEnd);
-    } catch (e: any) {
-      this.logger.warn(`rule ${rule.id}: invalid window: ${e?.message || e}`);
-      return;
-    }
-    const windowStart = getTodayTimestamp(sh, sm);
-    const windowEnd   = getTodayTimestamp(eh, em);
-    if (windowEnd <= windowStart) {
-      this.logger.warn(`rule ${rule.id}: empty/inverted window`);
-      return;
-    }
-
-    // 3) разбрасываем и шлём
-    toSend.forEach(lead => {
-      const rndMin  = randomInRange(rule.minInterval, rule.maxInterval);
-      const at      = windowStart + rndMin * 60_000;
-      const delay   = Math.max(at - Date.now(), 0);
-
-      setTimeout(() => {
-        this.sendOneLead(rule.id, lead).catch(err =>
-            this.logger.error(`rule ${rule.id}: send ${lead.subid} error: ${err?.message || err}`),
+  // ===== Private helper methods =====
+  private scheduleInitialProcesses(rule: Rule): void {
+    // Запускаем получение лидов асинхронно
+    setImmediate(() => {
+      this.leadScheduling
+        .scheduleLeadsSending(rule)
+        .catch((e) =>
+          this.logger.error(
+            `scheduleLeadsSending(${rule.id}) failed: ${e?.message || e}`,
+          ),
         );
-      }, delay);
     });
 
-    this.logger.log(`rule ${rule.id}: scheduled ${toSend.length} leads`);
-  }
+    // Ежедневный автозапуск (00:00) - тоже асинхронно
+    setImmediate(() => {
+      this.leadScheduling.planNextDay(rule.id).catch(() => {});
+    });
 
-  // ===== POST /add_lead
-  private async sendOneLead(ruleId: string, lead: Lead): Promise<void> {
-    const payload = {
-      productName: lead.productName,
-      country:     lead.country,
-      vertical:    lead.vertical ?? '',
-      aff:         lead.aff ?? '',
-      productId:   lead.productId,
-      subid:       lead.subid,
-      status:      lead.status ?? 'Sale',
-      leadName:    lead.leadName ?? '',
-      phone:       lead.phone ?? '',
-      email:       lead.email ?? '',
-      ip:          lead.ip ?? '',
-      ua:          lead.ua ?? '',
-    };
-
-    const cfgPost: AxiosRequestConfig = {
-      headers: { 'X-API-KEY': this.apiKey, 'Content-Type': 'application/json' },
-      timeout: this.minTimeout(),
-      validateStatus: () => true,
-    };
-
-    try {
-      // ретраи на таймаут/5xx/429
-      const maxAttempts = 3;
-      let resp: any;
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-          resp = await firstValueFrom(this.http.post(this.endpoints.addLead, payload, cfgPost));
-          if (resp.status >= 200 && resp.status < 300) break;
-
-          if (resp.status >= 500 || resp.status === 429) {
-            const backoff = Math.min(4000, 1000 * Math.pow(2, attempt - 1));
-            this.logger.warn(`add_lead HTTP ${resp.status}, retry in ${backoff}ms`);
-            await this.sleep(backoff);
-            if (attempt === maxAttempts) throw new Error(`HTTP ${resp.status} ${this.stringify(resp.data)}`);
-            continue;
-          }
-          throw new Error(`HTTP ${resp.status} ${this.stringify(resp.data)}`);
-        } catch (err: any) {
-          const isTimeout =
-              axios.isAxiosError(err) &&
-              (err.code === 'ECONNABORTED' || String(err.message).includes('timeout'));
-          if (isTimeout && attempt < maxAttempts) {
-            const backoff = Math.min(4000, 1000 * Math.pow(2, attempt - 1));
-            this.logger.warn(`add_lead timeout, retry in ${backoff}ms`);
-            await this.sleep(backoff);
-            continue;
-          }
-          throw err;
-        }
+    // Добавляем в очередь Bull асинхронно
+    setImmediate(async () => {
+      try {
+        await this.leadSchedulerQueue.add('schedule', { ruleId: rule.id });
+      } catch (e: any) {
+        this.logger.warn(`Bull enqueue skipped: ${e?.message || e}`);
       }
-
-      const ok = this.leadSendingRepo.create({
-        ruleId,
-        subid: lead.subid,
-        leadName: lead.leadName || '',
-        phone: lead.phone || '',
-        email: lead.email || undefined,
-        country: lead.country || undefined,
-        status: LeadSendingStatus.SUCCESS,
-        responseStatus: resp.status,
-      } as DeepPartial<LeadSending>);
-      await this.leadSendingRepo.save(ok);
-
-      this.logger.log(`rule ${ruleId}: lead ${lead.subid} sent (HTTP ${resp.status})`);
-    } catch (err: any) {
-      const status  = err?.response?.status;
-      const details = err?.response?.data ?? err?.message ?? err;
-
-      const fail = this.leadSendingRepo.create({
-        ruleId,
-        subid: lead.subid,
-        leadName: lead.leadName || '',
-        phone: lead.phone || '',
-        email: lead.email || undefined,
-        country: lead.country || undefined,
-        status: LeadSendingStatus.ERROR,
-        responseStatus: status,
-        errorDetails: this.stringify(details),
-      } as DeepPartial<LeadSending>);
-      await this.leadSendingRepo.save(fail);
-
-      this.logger.error(`rule ${ruleId}: send ${lead.subid} failed: ${status ?? ''} ${this.stringify(details)}`);
-    }
+    });
   }
 }

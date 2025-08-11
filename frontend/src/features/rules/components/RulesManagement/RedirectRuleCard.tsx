@@ -1,13 +1,14 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { Settings, Filter, Loader2, Trash2 } from 'lucide-react';
+import { Settings, Filter, Loader2, Trash2, Infinity } from 'lucide-react';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Card } from '@/shared/ui/card';
 import { useRules } from '@/features/rules/model/hooks';
 import { Rule } from '@/features/rules/model/schemas';
 import RuleEditModal from './RuleEditModal';
+import { StatusTranslations } from '@/shared/utilities/enums';
 
 const formatFrequency = (minInterval: number, maxInterval: number) => {
   return `${minInterval}–${maxInterval} минут`;
@@ -131,6 +132,12 @@ const RedirectRulesView: FC = () => {
                 <Badge variant="outline" className="text-xs px-2 py-0.5">
                   {rule.isActive ? 'Активно' : 'Неактивно'}
                 </Badge>
+                {rule.isInfinite && (
+                  <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                    <Infinity className="w-3 h-3 mr-1" />
+                    Бесконечно
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 <Button
@@ -151,15 +158,15 @@ const RedirectRulesView: FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-x-8 gap-y-4 text-sm text-gray-600">
               <div>
-                <div className="uppercase text-xs mb-1">Оффер</div>
+                <div className="uppercase text-xs mb-1">Продукт</div>
                 <div className="font-medium text-gray-900">
-                  {rule.offerName}
+                  {rule.productName}
                 </div>
               </div>
               <div>
-                <div className="uppercase text-xs mb-1">ID Оффера</div>
+                <div className="uppercase text-xs mb-1">ID Продукта</div>
                 <div className="font-medium text-gray-900 font-mono text-xs">
-                  {rule.offerId.slice(0, 8)}...
+                  {rule.productId.slice(0, 8)}...
                 </div>
               </div>
               <div>
@@ -176,11 +183,48 @@ const RedirectRulesView: FC = () => {
               </div>
               <div>
                 <div className="uppercase text-xs mb-1">Лимит в день</div>
-                <div className="inline-block bg-gray-100 px-3 py-1 rounded-full font-semibold text-gray-900">
-                  {rule.dailyLimit} лидов
-                </div>
+                {rule.isInfinite ? (
+                  <div className="inline-block bg-blue-100 px-3 py-1 rounded-full font-semibold text-blue-700">
+                    <Infinity className="w-3 h-3 inline mr-1" />
+                    Бесконечно
+                  </div>
+                ) : (
+                  <div className="inline-block bg-gray-100 px-3 py-1 rounded-full font-semibold text-gray-900">
+                    {rule.dailyCapLimit} лидов
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Новые поля фильтрации */}
+            {(rule.vertical || rule.country || rule.status) && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-4 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-100">
+                {rule.vertical && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">Вертикаль</div>
+                    <div className="font-medium text-gray-900">
+                      {rule.vertical}
+                    </div>
+                  </div>
+                )}
+                {rule.country && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">Страна</div>
+                    <div className="font-medium text-gray-900">
+                      {rule.country}
+                    </div>
+                  </div>
+                )}
+                {rule.status && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">Статус лида</div>
+                    <div className="font-medium text-gray-900">
+                      {StatusTranslations[rule.status] || rule.status}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-6 flex items-center text-xs text-gray-500">
               <span className="mr-1">🕒</span>

@@ -1,55 +1,86 @@
-import { IsInt, IsOptional, IsString, Matches, Min } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+  IsBoolean,
+  Matches,
+  IsNotEmpty,
+  ValidateIf,
+} from 'class-validator';
 
 export class CreateRuleDto {
   @IsString()
+  @IsNotEmpty({ message: 'Name is required' })
   name!: string;
 
-  // оффер
   @IsString()
-  offerId!: string;
+  @IsNotEmpty({ message: 'Product ID is required' })
+  productId!: string;
 
   @IsString()
-  offerName!: string; // уйдёт в productName при запросе /get_leads
+  @IsNotEmpty({ message: 'Product name is required' })
+  productName!: string;
 
-  // расписание/лимиты
-  @IsInt() @Min(1)
+  @IsInt()
+  @Min(1, { message: 'Period minutes must be at least 1' })
   periodMinutes!: number;
 
-  @IsInt() @Min(1)
+  @IsInt()
+  @Min(1, { message: 'Min interval must be at least 1' })
   minInterval!: number;
 
-  @IsInt() @Min(1)
+  @IsInt()
+  @Min(1, { message: 'Max interval must be at least 1' })
   maxInterval!: number;
 
-  @IsInt() @Min(1)
-  dailyLimit!: number;
+  // dailyCapLimit обязателен всегда
+  @IsInt({ message: 'dailyCapLimit must be an integer number' })
+  @Min(1, { message: 'dailyCapLimit must not be less than 1' })
+  dailyCapLimit!: number;
 
+  // Временные окна только для не бесконечной отправки
+  @ValidateIf((o) => o.isInfinite !== true)
+  @IsString()
   @Matches(/^\d{2}:\d{2}$/, { message: 'sendWindowStart must be HH:MM' })
-  sendWindowStart!: string;
+  sendWindowStart?: string;
 
+  @ValidateIf((o) => o.isInfinite !== true)
+  @IsString()
   @Matches(/^\d{2}:\d{2}$/, { message: 'sendWindowEnd must be HH:MM' })
-  sendWindowEnd!: string;
+  sendWindowEnd?: string;
 
-  // ---- ФИЛЬТРЫ к /get_leads ----
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   vertical?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   country?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   status?: string;
 
-  @IsOptional() @IsString()
-  dateFrom?: string; // YYYY-MM-DD
-
-  @IsOptional() @IsString()
-  dateTo?: string;   // YYYY-MM-DD
-
-  @IsOptional() @IsInt() @Min(0)
-  cap?: number;
-
-  // пауза при создании (необязательно)
   @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'dateFrom must be in YYYY-MM-DD format',
+  })
+  dateFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'dateTo must be in YYYY-MM-DD format',
+  })
+  dateTo?: string;
+
+  @IsOptional()
+  @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isInfinite?: boolean;
 }

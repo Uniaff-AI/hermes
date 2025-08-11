@@ -19,6 +19,7 @@ interface SelectWithSearchProps {
   searchPlaceholder?: string;
   className?: string;
   displayMode?: 'value' | 'label';
+  disabled?: boolean;
 }
 
 export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
@@ -30,6 +31,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   searchPlaceholder = 'Поиск...',
   className = '',
   displayMode = 'label',
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,14 +60,18 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   };
 
   const handleSelect = (option: Option) => {
-    onChange?.(option.value);
-    onLabelChange?.(option.label);
-    setInputValue(option.label);
-    setIsOpen(false);
-    setSearchTerm('');
+    if (!disabled) {
+      onChange?.(option.value);
+      onLabelChange?.(option.label);
+      setInputValue(option.label);
+      setIsOpen(false);
+      setSearchTerm('');
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+
     const newValue = e.target.value;
     setInputValue(newValue);
     setSearchTerm(newValue);
@@ -76,19 +82,23 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   };
 
   const handleClear = () => {
-    onChange?.('');
-    onLabelChange?.('');
-    setInputValue('');
-    setSearchTerm('');
+    if (!disabled) {
+      onChange?.('');
+      onLabelChange?.('');
+      setInputValue('');
+      setSearchTerm('');
+    }
   };
 
   const handleToggle = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      setSearchTerm('');
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
+    if (!disabled) {
+      setIsOpen(!isOpen);
+      if (!isOpen) {
+        setSearchTerm('');
+        setTimeout(() => {
+          searchInputRef.current?.focus();
+        }, 100);
+      }
     }
   };
 
@@ -110,18 +120,23 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   return (
     <div ref={containerRef} className={`relative w-full text-sm ${className}`}>
       <div className="relative">
-        <div className="flex items-center border border-gray-300 rounded-md bg-white hover:border-gray-400 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-          <Search className="w-4 h-4 text-gray-400 ml-3 flex-shrink-0" />
+        <div className={`flex items-center border border-gray-300 rounded-md bg-white ${disabled
+          ? 'cursor-not-allowed bg-gray-50'
+          : 'hover:border-gray-400 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500'
+          }`}>
+          <Search className={`w-4 h-4 ml-3 flex-shrink-0 ${disabled ? 'text-gray-300' : 'text-gray-400'}`} />
           <input
             ref={searchInputRef}
             type="text"
             value={inputValue}
             onChange={handleInputChange}
             placeholder={placeholder}
-            className="flex-1 px-3 py-2 text-gray-700 bg-transparent border-none outline-none placeholder-gray-400"
+            disabled={disabled}
+            className={`flex-1 px-3 py-2 bg-transparent border-none outline-none placeholder-gray-400 ${disabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700'
+              }`}
             onClick={handleToggle}
           />
-          {inputValue && (
+          {inputValue && !disabled && (
             <button
               onClick={handleClear}
               className="p-1 mr-2 text-gray-400 hover:text-gray-600"
@@ -132,7 +147,11 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
           )}
           <button
             onClick={handleToggle}
-            className="p-2 text-gray-400 hover:text-gray-600 border-l border-gray-300"
+            disabled={disabled}
+            className={`p-2 border-l border-gray-300 ${disabled
+              ? 'text-gray-300 cursor-not-allowed'
+              : 'text-gray-400 hover:text-gray-600'
+              }`}
             aria-label="Открыть список опций"
           >
             <ChevronDown
@@ -142,7 +161,7 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
         </div>
       </div>
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <div className="absolute z-20 w-full mt-1 border border-gray-300 rounded-md shadow-lg bg-white max-h-60 overflow-hidden">
           {filteredOptions.length === 0 ? (
             <div className="px-3 py-2 text-gray-500 text-center">

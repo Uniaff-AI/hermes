@@ -1,5 +1,14 @@
 import {
-  Controller, Get, Post, Delete, Param, Body, HttpCode, HttpStatus, Patch, Logger,
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Logger,
 } from '@nestjs/common';
 import { RulesService } from './rules.service';
 import { CreateRuleDto } from './dto/create-rule.dto';
@@ -13,6 +22,12 @@ export class RulesController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() dto: CreateRuleDto) {
+    this.logger.debug(
+      'CREATE RULE - Received DTO:',
+      JSON.stringify(dto, null, 2),
+    );
+    this.logger.debug('CREATE RULE - DTO type:', typeof dto);
+    this.logger.debug('CREATE RULE - DTO constructor:', dto.constructor.name);
     return this.rules.createAndSchedule(dto);
   }
 
@@ -44,13 +59,36 @@ export class RulesController {
   }
 
   // аналитика
-  // @Get('analytics/overview')
-  // async getAnalyticsOverview() {
-  //   return this.rules.getAllRulesAnalytics();
-  // }
+  @Get('analytics/overview')
+  async getAnalyticsOverview() {
+    return this.rules.getAllRulesAnalytics();
+  }
 
-  // @Get(':id/analytics')
-  // async getRuleAnalytics(@Param('id') id: string) {
-  //   return this.rules.getRuleAnalytics(id);
-  // }
+  @Get(':id/analytics')
+  async getRuleAnalytics(@Param('id') id: string) {
+    return this.rules.getRuleAnalytics(id);
+  }
+
+  // Тестирование и мониторинг
+  @Post(':id/test')
+  async testRule(@Param('id') id: string) {
+    this.logger.log(`Testing rule ${id} manually`);
+    return await this.rules.testRuleExecution(id);
+  }
+
+  @Post(':id/trigger')
+  async triggerRule(@Param('id') id: string) {
+    this.logger.log(`Triggering rule ${id} manually`);
+    return await this.rules.manualTriggerRule(id);
+  }
+
+  @Get('external/test-connection')
+  async testExternalConnection() {
+    return await this.rules.testExternalAPIConnection();
+  }
+
+  @Get('debug/logs/:id')
+  async getRuleDebugLogs(@Param('id') id: string) {
+    return await this.rules.getRuleDebugLogs(id);
+  }
 }

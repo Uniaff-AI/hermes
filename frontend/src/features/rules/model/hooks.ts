@@ -3,9 +3,10 @@ import { CreateRuleRequest, Rule, UpdateRule } from './schemas';
 import { createQueryOptions } from '@/shared/api/hooks';
 import { ANALYTICS_QUERY_KEYS } from '@/features/dashboard/model/hooks';
 import { rulesToast } from './toast';
+import { toast } from 'sonner';
 
 const RULES_QUERY_KEY = 'rules';
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/api/internal/rules';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -32,17 +33,17 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
 
 const rulesAPI = {
   async getRules(): Promise<Rule[]> {
-    const response = await fetch(`${API_BASE_URL}/rules`);
+    const response = await fetch(`${API_BASE_URL}`);
     return handleApiResponse<Rule[]>(response);
   },
 
   async getRule(id: string): Promise<Rule> {
-    const response = await fetch(`${API_BASE_URL}/rules/${id}`);
+    const response = await fetch(`${API_BASE_URL}/${id}`);
     return handleApiResponse<Rule>(response);
   },
 
   async createRule(data: CreateRuleRequest): Promise<Rule> {
-    const response = await fetch(`${API_BASE_URL}/rules`, {
+    const response = await fetch(`${API_BASE_URL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ const rulesAPI = {
   },
 
   async deleteRule(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/rules/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
       method: 'DELETE',
     });
 
@@ -66,7 +67,7 @@ const rulesAPI = {
   },
 
   async updateRule(id: string, data: UpdateRule): Promise<Rule> {
-    const response = await fetch(`${API_BASE_URL}/rules/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -119,67 +120,137 @@ export const useDeleteRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => rulesAPI.deleteRule(id),
-    onMutate: async (deletedRuleId) => {
-      await queryClient.cancelQueries({ queryKey: [RULES_QUERY_KEY] });
-      await queryClient.cancelQueries({
-        queryKey: ANALYTICS_QUERY_KEYS.overview,
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/internal/rules/${id}`, {
+        method: 'DELETE',
       });
 
-      const previousRules = queryClient.getQueryData<Rule[]>([RULES_QUERY_KEY]);
-      const previousAnalytics = queryClient.getQueryData(
-        ANALYTICS_QUERY_KEYS.overview
-      );
-
-      const deletedRule = previousRules?.find(
-        (rule) => rule.id === deletedRuleId
-      );
-
-      queryClient.setQueryData<Rule[]>([RULES_QUERY_KEY], (old) => {
-        return old ? old.filter((rule) => rule.id !== deletedRuleId) : [];
-      });
-
-      queryClient.setQueryData(ANALYTICS_QUERY_KEYS.overview, (old: any) => {
-        if (!old) return old;
-
-        return {
-          ...old,
-          rules: old.rules.filter(
-            (ruleAnalytics: any) => ruleAnalytics.rule.id !== deletedRuleId
-          ),
-          totalStats: {
-            ...old.totalStats,
-          },
-        };
-      });
-
-      return { previousRules, previousAnalytics, deletedRule };
-    },
-    onError: (err, deletedRuleId, context) => {
-      if (context?.previousRules) {
-        queryClient.setQueryData([RULES_QUERY_KEY], context.previousRules);
-      }
-      if (context?.previousAnalytics) {
-        queryClient.setQueryData(
-          ANALYTICS_QUERY_KEYS.overview,
-          context.previousAnalytics
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `HTTP ${response.status}: Failed to delete rule`
         );
       }
 
-      const errorMessage = err instanceof Error ? err.message : undefined;
-      rulesToast.delete.error(errorMessage);
+      return response.json();
     },
-    onSuccess: (_, deletedRuleId, context) => {
-      if (context?.deletedRule) {
-        rulesToast.delete.success(context.deletedRule.name);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rules'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      toast.success('Правило успешно удалено');
+    },
+    onError: (error) => {
+      console.error('Delete rule error:', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Ошибка при удалении правила'
+      );
+    },
+  });
+};
+
+// Тестирование и мониторинг
+export const useTestRule = () => {
+  return useMutation({
+    mutationFn: async (ruleId: string) => {
+      const response = await fetch(
+        `/api/internal/rules/${ruleId}?action=test`,
+        {
+          method: 'POST',
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `HTTP ${response.status}: Failed to test rule`
+        );
       }
+
+      return response.json();
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: [RULES_QUERY_KEY] });
-      queryClient.invalidateQueries({
-        queryKey: ANALYTICS_QUERY_KEYS.overview,
-      });
+    onSuccess: () => {
+      toast.success('Тест правила завершен');
     },
+    onError: (error) => {
+      console.error('Test rule error:', error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при тестировании правила'
+      );
+    },
+  });
+};
+
+export const useTriggerRule = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (ruleId: string) => {
+      const response = await fetch(
+        `/api/internal/rules/${ruleId}?action=trigger`,
+        {
+          method: 'POST',
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `HTTP ${response.status}: Failed to trigger rule`
+        );
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      toast.success('Правило запущено вручную');
+    },
+    onError: (error) => {
+      console.error('Trigger rule error:', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Ошибка при запуске правила'
+      );
+    },
+  });
+};
+
+export const useTestConnection = () => {
+  return useQuery({
+    queryKey: ['test-connection'],
+    queryFn: async () => {
+      const response = await fetch(
+        '/api/internal/rules/external/test-connection'
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to test connection`);
+      }
+
+      const result = await response.json();
+      return result.data;
+    },
+    enabled: false, // Запускаем только по требованию
+    retry: false,
+  });
+};
+
+export const useRuleDebugLogs = (ruleId: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['rule-debug-logs', ruleId],
+    queryFn: async () => {
+      const response = await fetch(`/api/internal/rules/debug/${ruleId}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to fetch debug logs`);
+      }
+
+      const result = await response.json();
+      return result.data;
+    },
+    enabled: enabled && !!ruleId,
+    refetchInterval: 30000, // Обновляем каждые 30 секунд
   });
 };
 

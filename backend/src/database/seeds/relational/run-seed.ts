@@ -22,12 +22,12 @@ const runSeed = async () => {
       // Create default rule
       const defaultRule = dataSource.getRepository(Rule).create({
         name: 'Default Rule',
-        offerId: 'default-offer',
-        offerName: 'Default Offer',
+        productId: 'default-product',
+        productName: 'Default Product',
         periodMinutes: 60,
         minInterval: 30,
         maxInterval: 120,
-        dailyLimit: 100,
+        dailyCapLimit: 100,
         sendWindowStart: '09:00',
         sendWindowEnd: '18:00',
         isActive: true,

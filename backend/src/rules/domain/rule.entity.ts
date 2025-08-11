@@ -9,13 +9,13 @@ export class Rule {
   name!: string;
 
   @Column({ type: 'text', nullable: true })
-  offerId?: string;
+  productId?: string;
 
   @Column({ type: 'text', nullable: true })
-  offerName?: string;
+  productName?: string;
 
-  @Column({ type: 'int', nullable: true })
-  periodMinutes?: number;
+  @Column({ type: 'int' })
+  periodMinutes!: number;
 
   @Column({ type: 'int' })
   minInterval!: number;
@@ -23,18 +23,21 @@ export class Rule {
   @Column({ type: 'int' })
   maxInterval!: number;
 
-  @Column({ type: 'int' })
-  dailyLimit!: number;
+  @Column({ type: 'int', nullable: true })
+  dailyCapLimit?: number;
 
   // дефолты нужны, чтобы ALTER TABLE не падал на старых NULL
-  @Column({ type: 'text', default: '09:00' })
-  sendWindowStart!: string;
+  @Column({ type: 'text', nullable: true })
+  sendWindowStart?: string;
 
-  @Column({ type: 'text', default: '21:00' })
-  sendWindowEnd!: string;
+  @Column({ type: 'text', nullable: true })
+  sendWindowEnd?: string;
 
   @Column({ type: 'boolean', default: true })
   isActive!: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  isInfinite!: boolean;
 
   @Column({ type: 'text', nullable: true })
   vertical?: string;
@@ -46,14 +49,8 @@ export class Rule {
   status?: string;
 
   @Column({ type: 'text', nullable: true })
-  productName?: string;
-
-  @Column({ type: 'text', nullable: true })
   dateFrom?: string;
 
   @Column({ type: 'text', nullable: true })
   dateTo?: string;
-
-  @Column({ type: 'int', nullable: true })
-  cap?: number;
 }

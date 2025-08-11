@@ -17,6 +17,7 @@ import {
   VerticalEnum,
   AffEnum,
   StatusEnum,
+  StatusTranslations,
 } from '@/shared/utilities/enums';
 import { LeadsFilters } from '../../model/schemas';
 
@@ -48,7 +49,7 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
   };
 
   const hasActiveFilters = filters && typeof filters === 'object' && Object.values(filters).some(
-    (value) => value !== undefined && value !== ''
+    (value) => value !== undefined && value !== '' && value !== null
   );
 
   return (
@@ -108,10 +109,19 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
           )}
           {filters.status && (
             <Badge variant="secondary" className="flex items-center gap-1">
-              Статус: {filters.status}
+              Статус: {StatusTranslations[filters.status] || filters.status}
               <X
                 className="w-3 h-3 cursor-pointer"
                 onClick={() => handleFilterChange('status', undefined)}
+              />
+            </Badge>
+          )}
+          {filters.aff && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              Партнерская программа: {filters.aff}
+              <X
+                className="w-3 h-3 cursor-pointer"
+                onClick={() => handleFilterChange('aff', undefined)}
               />
             </Badge>
           )}
@@ -187,6 +197,15 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 onChange={(value) => handleFilterChange('status', value)}
                 options={(Object.values(StatusEnum) || []) as string[]}
                 placeholder="Выберите статус"
+                showTranslations={true}
+              />
+
+              <FilterSelect
+                label="Партнерская программа"
+                value={filters.aff}
+                onChange={(value) => handleFilterChange('aff', value)}
+                options={(Object.values(AffEnum) || []) as string[]}
+                placeholder="Выберите партнерскую программу"
               />
 
               <div className="md:col-span-2 lg:col-span-1">
@@ -229,7 +248,8 @@ const FilterSelect: FC<{
   onChange: (value: string) => void;
   options: string[];
   placeholder: string;
-}> = ({ label, value, onChange, options, placeholder }) => {
+  showTranslations?: boolean;
+}> = ({ label, value, onChange, options, placeholder, showTranslations }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -257,7 +277,7 @@ const FilterSelect: FC<{
         className="w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-sm text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <span className={value ? 'text-gray-900' : 'text-gray-500'}>
-          {value || placeholder}
+          {value ? (showTranslations && StatusTranslations[value as StatusEnum] ? StatusTranslations[value as StatusEnum] : value) : placeholder}
         </span>
         <ChevronDown
           className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -290,7 +310,7 @@ const FilterSelect: FC<{
                   }}
                   className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
-                  {option}
+                  {showTranslations && StatusTranslations[option as StatusEnum] ? StatusTranslations[option as StatusEnum] : option}
                 </li>
               ))}
             </ul>

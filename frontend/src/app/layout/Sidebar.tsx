@@ -42,9 +42,9 @@ const menuItems = [
     href: '/creatives',
   },
   {
-    label: 'Офферы',
+    label: 'Продукты',
     icon: <DollarSign className="w-4 h-4" />,
-    href: '/offers',
+    href: '/products',
   },
   {
     label: 'Финансы',

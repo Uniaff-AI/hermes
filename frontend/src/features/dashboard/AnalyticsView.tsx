@@ -62,11 +62,90 @@ export default function AnalyticsView() {
 
   const { totalStats, rules } = analyticsData;
 
-  // Additional safety check for totalStats
   if (!totalStats) {
     return (
       <div className="text-center py-8">
         <p className="text-red-600">Ошибка: отсутствуют данные статистики</p>
+      </div>
+    );
+  }
+
+  const activeRules = rules.filter((ruleAnalytics) => {
+    const { rule } = ruleAnalytics;
+    return rule &&
+      rule.name &&
+      rule.name.trim() !== '' &&
+      rule.productName &&
+      rule.productName.trim() !== '' &&
+      rule.productName !== 'Unknown' &&
+      rule.productName !== 'Не указан';
+  });
+
+  if (activeRules.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">Аналитика Редиректов</h2>
+          <p className="text-sm text-muted-foreground">
+            Статистика отправки лидов и производительность правил
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="p-4 flex justify-between items-center">
+              <div>
+                <div className="text-sm text-muted-foreground">
+                  Всего отправлено
+                </div>
+                <div className="text-2xl font-semibold">
+                  {totalStats.totalSent}
+                </div>
+                <div className="text-sm text-green-600 mt-1">
+                  {totalStats.totalSuccess} успешных
+                </div>
+              </div>
+              <ChevronDown className="w-8 h-8 text-blue-500 rotate-90" />
+            </Card>
+            <Card className="p-4 flex justify-between items-center">
+              <div>
+                <div className="text-sm text-muted-foreground">Успешно</div>
+                <div className="text-2xl font-semibold">
+                  {totalStats.totalSuccess}
+                </div>
+                <div className="text-sm text-green-600 mt-1">
+                  {totalStats.successRate} успешных
+                </div>
+              </div>
+              <CheckCircle className="w-8 h-8 text-green-500" />
+            </Card>
+            <Card className="p-4 flex justify-between items-center">
+              <div>
+                <div className="text-sm text-muted-foreground">Ошибки</div>
+                <div className="text-2xl font-semibold">
+                  {totalStats.totalErrors}
+                </div>
+                <div className="text-sm text-red-600 mt-1">
+                  неуспешных отправок
+                </div>
+              </div>
+              <XCircle className="w-8 h-8 text-red-500" />
+            </Card>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold">Производительность Правил</h2>
+          <p className="text-sm text-muted-foreground">
+            Детальная статистика по каждому правилу редиректа
+          </p>
+          <Card className="p-8 text-center">
+            <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <div className="text-lg font-medium text-foreground mb-2">
+              Нет активных правил
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Создайте правила для отображения статистики производительности
+            </div>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -127,7 +206,7 @@ export default function AnalyticsView() {
         </p>
 
         <div className="space-y-6">
-          {rules.map((ruleAnalytics) => {
+          {activeRules.map((ruleAnalytics) => {
             const { rule, stats, recentSendings } = ruleAnalytics;
             const successRateNum = parseFloat(
               stats.successRate.replace('%', '')
@@ -144,7 +223,7 @@ export default function AnalyticsView() {
                     <div className="text-sm font-medium">
                       {rule.name}
                       <div className="text-xs text-muted-foreground">
-                        {`Оффер: ${rule.offerName}`}
+                        {`Оффер: ${rule.productName}`}
                       </div>
                     </div>
                     <Badge variant="outline">

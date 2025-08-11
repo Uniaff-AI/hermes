@@ -1,16 +1,20 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { frontendClient } from '@/shared/model/client';
 import { ApiResponseSchema } from '@/shared/api/apiSchema';
 import { Lead, LeadSchema, type LeadsFilters } from './schemas';
 
 export const LEADS_QUERY_KEYS = {
   LEADS: ['leads'] as const,
+  LEADS_FILTERED: ['leads', 'filtered'] as const,
+  LEADS_STATS: ['leads', 'stats'] as const,
 } as const;
 
 const LeadsResponseSchema = ApiResponseSchema(LeadSchema.array());
 
 const buildQueryParams = (filters?: LeadsFilters): string => {
-  if (!filters || typeof filters !== 'object') return '';
+  if (!filters || typeof filters !== 'object') {
+    return '';
+  }
 
   const params = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
@@ -24,15 +28,15 @@ const buildQueryParams = (filters?: LeadsFilters): string => {
 
 export const useLeads = (filters?: LeadsFilters) => {
   return useQuery({
-    queryKey: [...LEADS_QUERY_KEYS.LEADS, filters] as const,
+    queryKey: [...LEADS_QUERY_KEYS.LEADS_FILTERED, filters] as const,
     queryFn: async (): Promise<Lead[]> => {
       if (typeof window === 'undefined') return [];
 
       try {
         const queryParams = buildQueryParams(filters);
         const url = queryParams
-          ? `/api/get_leads?${queryParams}`
-          : '/api/get_leads';
+          ? `/api/external/get_leads?${queryParams}`
+          : '/api/external/get_leads';
 
         const response = await frontendClient.get(url);
 
@@ -64,16 +68,14 @@ export const useLeads = (filters?: LeadsFilters) => {
   });
 };
 
-export const useLeadsMutation = () => {
-  return useMutation({
-    mutationFn: async (filters: LeadsFilters): Promise<Lead[]> => {
-      try {
-        const queryParams = buildQueryParams(filters);
-        const url = queryParams
-          ? `/api/get_leads?${queryParams}`
-          : '/api/get_leads';
+export const useLeadsStats = () => {
+  return useQuery({
+    queryKey: LEADS_QUERY_KEYS.LEADS_STATS,
+    queryFn: async (): Promise<Lead[]> => {
+      if (typeof window === 'undefined') return [];
 
-        const response = await frontendClient.get(url);
+      try {
+        const response = await frontendClient.get('/api/external/get_leads');
 
         let data: Lead[];
         if (Array.isArray(response.data)) {
@@ -91,9 +93,14 @@ export const useLeadsMutation = () => {
 
         return Array.isArray(data) ? data : [];
       } catch (error) {
-        console.error('Error in leads mutation:', error);
-        throw error;
+        console.error('Error fetching leads stats:', error);
+        return [];
       }
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    enabled: typeof window !== 'undefined',
+    retry: 1,
+    retryDelay: 1000,
   });
 };

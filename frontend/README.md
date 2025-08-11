@@ -1,6 +1,6 @@
 # Hermes CRM - Frontend
 
-The frontend application for Hermes CRM, built with Next.js 14, React 18, and TypeScript. This application provides the user interface for managing leads, offers, and business rules.
+The frontend application for Hermes CRM, built with Next.js 14, React 18, and TypeScript. This application provides the user interface for managing leads, products, and business rules.
 
 ## 🏗️ Architecture
 
@@ -21,14 +21,18 @@ src/
 ├── app/                 # Next.js App Router pages & API routes
 │   └── api/            # API proxy routes
 ├── features/           # Feature-based modules
-│   ├── offers/
-│   │   ├── api/        # Offers-specific API hooks & schemas
-│   │   ├── components/ # Offers UI components
-│   │   └── types/      # Offers type definitions
-│   └── leads/
-│       ├── api/        # Leads-specific API hooks & schemas
-│       ├── components/ # Leads UI components
-│       └── types/      # Leads type definitions
+│   ├── products/
+│   │   ├── api/        # Products-specific API hooks & schemas
+│   │   ├── components/ # Products UI components
+│   │   └── types/      # Products type definitions
+│   ├── leads/
+│   │   ├── api/        # Leads-specific API hooks & schemas
+│   │   ├── components/ # Leads UI components
+│   │   └── types/      # Leads type definitions
+│   └── rules/
+│       ├── api/        # Rules-specific API hooks & schemas
+│       ├── components/ # Rules UI components
+│       └── types/      # Rules type definitions
 ├── shared/             # Shared utilities
 │   ├── api/           # Common API utilities & config
 │   ├── model/         # HTTP client
@@ -110,10 +114,10 @@ Frontend -> /api/get_leads/ -> External API
 ### **Example Usage**
 
 ```typescript
-// Offers feature
-import { useProducts } from '@/features/offers/api/hooks';
+// Products feature
+import { useProducts } from '@/features/products/api/hooks';
 
-function OffersList() {
+function ProductsList() {
   const { data: products, isLoading } = useProducts();
 
   if (isLoading) return <div>Loading...</div>;
@@ -139,6 +143,23 @@ function LeadsList() {
     <div>
       {leads?.map(lead => (
         <div key={lead.subid}>{lead.name}</div>
+      ))}
+    </div>
+  );
+}
+
+// Rules feature
+import { useRules } from '@/features/rules/api/hooks';
+
+function RulesList() {
+  const { data: rules, isLoading } = useRules();
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      {rules?.map(rule => (
+        <div key={rule.id}>{rule.name}</div>
       ))}
     </div>
   );
@@ -229,3 +250,17 @@ features/[feature]/
 ## 📝 License
 
 MIT License - see LICENSE file for details.
+
+## 🔄 Recent Changes
+
+### Data Structure Updates
+
+- `offerId` → `productId` (renamed for consistency)
+- `dailyLimit` + `cap` → `dailyCapLimit` (unified field)
+
+### Benefits
+
+- **Consistency**: Uniform field naming
+- **Simplification**: Single field instead of two duplicate fields
+- **Readability**: More understandable data structure
+- **Maintainability**: Simplified API and database operations

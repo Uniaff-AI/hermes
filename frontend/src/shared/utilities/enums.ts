@@ -160,3 +160,10 @@ export enum StatusEnum {
   REJECT = 'Reject',
   TRASH = 'Trash',
 }
+
+export const StatusTranslations: Record<string, string> = {
+  New: 'Новый',
+  Sale: 'Продажа',
+  Reject: 'Отклонен',
+  Trash: 'Удален',
+};

@@ -3,19 +3,19 @@
 import { useState } from 'react';
 
 import LeadsView from '@/app/dashboard/LeadsManagement/page';
-import OffersView from '@/app/dashboard/OffersDashboard/page';
+import ProductsView from '@/app/dashboard/ProductsDashboard/page';
 import RedirectsView from '@/app/dashboard/Redirects/page';
 
-type TabKey = 'offers' | 'leads' | 'redirects';
+type TabKey = 'products' | 'leads' | 'redirects';
 
 const tabLabels: Record<TabKey, string> = {
-  offers: 'Offers Dashboard',
+  products: 'Products Dashboard',
   leads: 'Leads Management',
   redirects: 'Redirects',
 };
 
 const DashboardPage = () => {
-  const [activeTab, setActiveTab] = useState<TabKey>('offers');
+  const [activeTab, setActiveTab] = useState<TabKey>('products');
 
   const renderTabs = () => {
     try {
@@ -48,7 +48,7 @@ const DashboardPage = () => {
         {renderTabs()}
       </div>
 
-      {activeTab === 'offers' && <OffersView />}
+      {activeTab === 'products' && <ProductsView />}
       {activeTab === 'leads' && <LeadsView />}
       {activeTab === 'redirects' && <RedirectsView />}
     </main>

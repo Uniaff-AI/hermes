@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
   return (
     <Layout>
       <Head>
-        <title>Offers Dashboard - Hermes</title>
+        <title>Products Dashboard - Hermes</title>
       </Head>
 
       <ErrorBoundary>

@@ -3,12 +3,13 @@
 import { FC, useState } from 'react';
 import { Card } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
-import { Edit2, Copy, Trash2, Shield, Clock, Loader2 } from 'lucide-react';
+import { Edit2, Copy, Trash2, Shield, Clock, Loader2, Infinity } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { useRules, useDeleteRule } from '@/features/rules/model/hooks';
 import { Rule } from '@/features/rules/model/schemas';
 import RuleEditModal from './RuleEditModal';
 import RuleDeleteDialog from './RuleDeleteDialog';
+import { StatusTranslations } from '@/shared/utilities/enums';
 
 const formatFrequency = (minInterval: number, maxInterval: number) => {
   return `${minInterval}–${maxInterval} минут`;
@@ -37,7 +38,6 @@ const AllRulesView: FC = () => {
     try {
       await deleteRuleMutation.mutateAsync(ruleToDelete.id);
     } catch (error) {
-      // Ошибка обрабатывается в хуке через toast
       console.error('Ошибка при удалении правила:', error);
     } finally {
       setIsDeleteDialogOpen(false);
@@ -134,9 +134,8 @@ const AllRulesView: FC = () => {
             </div>
             <div className="flex items-center gap-3 mb-4">
               <span
-                className={`w-3 h-3 rounded-full ${
-                  rule.isActive ? 'bg-green-500' : 'bg-yellow-500'
-                }`}
+                className={`w-3 h-3 rounded-full ${rule.isActive ? 'bg-green-500' : 'bg-yellow-500'
+                  }`}
               />
               <h3 className="text-base font-medium text-gray-900">
                 {rule.name}
@@ -144,18 +143,24 @@ const AllRulesView: FC = () => {
               <Badge variant="outline" className="text-xs px-2 py-0.5">
                 {rule.isActive ? 'Активно' : 'Пауза'}
               </Badge>
+              {rule.isInfinite && (
+                <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                  <Infinity className="w-3 h-3 mr-1" />
+                  Бесконечно
+                </Badge>
+              )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 text-sm text-gray-600">
               <div>
-                <div className="uppercase text-xs mb-1">Оффер</div>
+                <div className="uppercase text-xs mb-1">Продукт</div>
                 <div className="font-medium text-gray-900">
-                  {rule.offerName}
+                  {rule.productName}
                 </div>
               </div>
               <div>
-                <div className="uppercase text-xs mb-1">ID Оффера</div>
+                <div className="uppercase text-xs mb-1">ID Продукта</div>
                 <div className="font-medium text-gray-900 font-mono text-xs">
-                  {rule.offerId.slice(0, 8)}...
+                  {rule.productId.slice(0, 8)}...
                 </div>
               </div>
               <div>
@@ -171,13 +176,50 @@ const AllRulesView: FC = () => {
                 </div>
               </div>
             </div>
+
+            {(rule.vertical || rule.country || rule.status) && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-100">
+                {rule.vertical && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">Вертикаль</div>
+                    <div className="font-medium text-gray-900">
+                      {rule.vertical}
+                    </div>
+                  </div>
+                )}
+                {rule.country && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">Страна</div>
+                    <div className="font-medium text-gray-900">
+                      {rule.country}
+                    </div>
+                  </div>
+                )}
+                {rule.status && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">Статус лида</div>
+                    <div className="font-medium text-gray-900">
+                      {StatusTranslations[rule.status] || rule.status}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center justify-between mt-6 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-gray-400" />
                 <span>Лимит в день:</span>
-                <Badge variant="outline" className="text-xs px-2 py-0.5">
-                  {rule.dailyLimit} лидов
-                </Badge>
+                {rule.isInfinite ? (
+                  <Badge variant="outline" className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 border-blue-200">
+                    <Infinity className="w-3 h-3 mr-1" />
+                    Бесконечно
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs px-2 py-0.5">
+                    {rule.dailyCapLimit} лидов
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-gray-400" />

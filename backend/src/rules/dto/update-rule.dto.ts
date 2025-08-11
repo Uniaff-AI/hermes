@@ -15,7 +15,11 @@ export class UpdateRuleDto {
 
   @IsString()
   @IsOptional()
-  offerName?: string;
+  productId?: string;
+
+  @IsString()
+  @IsOptional()
+  productName?: string;
 
   @IsInt()
   @Min(1)
@@ -35,9 +39,9 @@ export class UpdateRuleDto {
 
   @IsInt()
   @Min(1)
-  @Max(10_000, { message: 'dailyLimit seems too large' })
+  @Max(10_000, { message: 'dailyCapLimit seems too large' })
   @IsOptional()
-  dailyLimit?: number;
+  dailyCapLimit?: number;
 
   @Matches(/^\d{2}:\d{2}$/, {
     message: 'sendWindowStart must be in format HH:MM',
@@ -54,4 +58,34 @@ export class UpdateRuleDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isInfinite?: boolean;
+
+  @IsOptional()
+  @IsString()
+  vertical?: string;
+
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'dateFrom must be in YYYY-MM-DD format',
+  })
+  dateFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'dateTo must be in YYYY-MM-DD format',
+  })
+  dateTo?: string;
 }

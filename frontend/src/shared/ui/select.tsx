@@ -12,6 +12,7 @@ interface SelectProps {
   options: Option[];
   value?: string;
   onChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -19,6 +20,7 @@ export const Select: React.FC<SelectProps> = ({
   options,
   value,
   onChange,
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -35,8 +37,16 @@ export const Select: React.FC<SelectProps> = ({
   };
 
   const handleSelect = (val: string) => {
-    onChange?.(val);
-    setIsOpen(false);
+    if (!disabled) {
+      onChange?.(val);
+      setIsOpen(false);
+    }
+  };
+
+  const handleToggle = () => {
+    if (!disabled) {
+      setIsOpen((prev) => !prev);
+    }
   };
 
   React.useEffect(() => {
@@ -47,13 +57,16 @@ export const Select: React.FC<SelectProps> = ({
   return (
     <div ref={containerRef} className="relative w-full text-sm">
       <div
-        className="w-full border border-gray-300 px-3 py-2 rounded-md bg-white cursor-pointer text-gray-700 hover:border-gray-400"
-        onClick={() => setIsOpen((prev) => !prev)}
+        className={`w-full border border-gray-300 px-3 py-2 rounded-md bg-white text-gray-700 transition-colors ${disabled
+          ? 'cursor-not-allowed bg-gray-50 text-gray-400'
+          : 'cursor-pointer hover:border-gray-400 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500'
+          }`}
+        onClick={handleToggle}
       >
         {selectedLabel || <span className="text-gray-400">{placeholder}</span>}
       </div>
-      {isOpen && (
-        <div className="absolute z-20 w-full mt-1 border border-gray-300 rounded-md shadow bg-white">
+      {isOpen && !disabled && (
+        <div className="absolute z-50 w-full mt-1 border border-gray-300 rounded-md shadow-lg bg-white max-h-60 overflow-y-auto">
           {options.map((opt) => (
             <div
               key={opt.value}

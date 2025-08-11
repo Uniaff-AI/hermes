@@ -2,19 +2,26 @@
  * Парсит строку "HH:MM" и возвращает [час, минута].
  * Бросает Error, если формат неверный.
  */
-export function parseTimeHM(value: string): [number, number] {
-  const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
-  if (!match) {
-    throw new Error(`Invalid time format: "${value}". Expected "HH:MM".`);
+export function parseTimeHM(timeStr: string): [number, number] {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  if (
+    isNaN(hours) ||
+    isNaN(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    throw new Error(`Invalid time format: ${timeStr}`);
   }
-  return [Number(match[1]), Number(match[2])];
+  return [hours, minutes];
 }
 
 /**
  * Возвращает timestamp сегодня в указанное время.
  */
-export function getTodayTimestamp(hour: number, minute: number): number {
-  const d = new Date();
-  d.setHours(hour, minute, 0, 0);
-  return d.getTime();
+export function getTodayTimestamp(hours: number, minutes: number): number {
+  const today = new Date();
+  today.setHours(hours, minutes, 0, 0);
+  return today.getTime();
 }
