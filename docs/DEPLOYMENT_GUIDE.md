@@ -94,7 +94,7 @@ NODE_ENV=development
 # =============================================================================
 # Внешний API для продуктов и лидов
 NEXT_PUBLIC_API_URL=https://api.hermes.uniaffcrm.com/api
-NEXT_PUBLIC_BACKEND_URL=http://localhost:3004/api
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3004
 NEXT_PUBLIC_FRONTEND_URL=http://localhost:3003
 NEXT_PUBLIC_BASE_URL=/api
 NEXT_PUBLIC_API_ENDPOINT=https://api.hermes.uniaffcrm.com

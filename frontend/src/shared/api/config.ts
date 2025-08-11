@@ -8,7 +8,7 @@ export const API_CONFIG = {
 } as const;
 
 export const INTERNAL_API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3004/api',
+  BASE_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3004',
 } as const;
 
 export const getExternalAPIHeaders = (): Record<string, string> => {

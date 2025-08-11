@@ -3,9 +3,8 @@ export const ENV_CONFIG = {
   NODE_ENV: process.env.NODE_ENV || 'development',
 
   // Backend API configuration
-  BACKEND_URL:
-    process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3004/api',
-  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004/api',
+  BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3004',
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004',
 
   // External API configuration
   EXTERNAL_API_URL:

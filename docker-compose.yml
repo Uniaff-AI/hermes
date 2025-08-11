@@ -121,7 +121,7 @@ services:
       NEXT_PUBLIC_API_ENDPOINT: https://api.hermes.uniaffcrm.com
       API_SCHEME_URL: https://api.hermes.uniaffcrm.com
       # Local backend URL (for rules management) - DOCKER INTERNAL NETWORKING
-      NEXT_PUBLIC_BACKEND_URL: http://backend:3000/api
+      NEXT_PUBLIC_BACKEND_URL: http://backend:3000
       NEXT_PUBLIC_FRONTEND_URL: http://localhost:${FRONTEND_PORT}
       NEXT_PUBLIC_BASE_URL: /api
       EXTERNAL_API_KEY: ${EXTERNAL_API_KEY}
