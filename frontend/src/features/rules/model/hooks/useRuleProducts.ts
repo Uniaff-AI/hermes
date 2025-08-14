@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useProducts } from '@/features/products/model/hooks';
-import { useRuleCreationStore } from '../store';
+import { useRuleCreationStore } from '../state';
 
 export const useRuleCreationProducts = () => {
   const { data: products = [] } = useProducts();

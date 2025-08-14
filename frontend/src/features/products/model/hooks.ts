@@ -29,7 +29,26 @@ export const useProducts = () => {
           return [];
         }
 
-        return Array.isArray(data) ? data : [];
+        // Generate uniqueProductKey for each product if it doesn't exist
+        const productsWithKeys = data.map((product) => {
+          if (!product.uniqueProductKey) {
+            const productId = String(product.productId || '');
+            const country = String(product.country || '').toUpperCase();
+            const vertical = String(product.vertical || '');
+            const aff = String(product.aff || '');
+
+            // Generate unique composite key
+            const uniqueProductKey = `${productId}-${vertical}-${country}-${aff}`;
+
+            return {
+              ...product,
+              uniqueProductKey,
+            };
+          }
+          return product;
+        });
+
+        return Array.isArray(productsWithKeys) ? productsWithKeys : [];
       } catch (error) {
         console.error('Error fetching products:', error);
         return [];

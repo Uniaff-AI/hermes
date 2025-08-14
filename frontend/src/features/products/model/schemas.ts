@@ -7,6 +7,7 @@ export const ProductSchema = z.object({
   vertical: z.nativeEnum(VerticalEnum),
   aff: z.nativeEnum(AffEnum),
   productId: z.string(),
+  uniqueProductKey: z.string().optional(),
 });
 
 export const ProductsFiltersSchema = z.object({

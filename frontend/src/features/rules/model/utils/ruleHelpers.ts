@@ -20,12 +20,11 @@ export const createSubmitData = (formData: {
 
   return {
     name: formData.name.trim(),
-    productId: formData.productId,
-    productName: formData.productName.trim(),
-    periodMinutes: 1440, // Фиксированное значение 24 часа (1440 минут)
-    minInterval: fromValue,
-    maxInterval: toValue,
-    isActive: true, // По умолчанию активно
+    targetProductId: formData.productId,
+    targetProductName: formData.productName.trim(),
+    minIntervalMinutes: fromValue,
+    maxIntervalMinutes: toValue,
+    isActive: true,
     isInfinite: formData.isInfinite,
     dailyCapLimit: dailyCapLimitValue,
     ...(formData.isInfinite
@@ -34,54 +33,52 @@ export const createSubmitData = (formData: {
           sendWindowStart: formData.startTime,
           sendWindowEnd: formData.endTime,
         }),
-    vertical: formData.selectedVertical || undefined,
-    country: formData.selectedCountry || undefined,
-    status: formData.leadStatus || undefined,
+    leadVertical: formData.selectedVertical || undefined,
+    leadCountry: formData.selectedCountry || undefined,
+    leadStatus: formData.leadStatus || undefined,
   };
 };
 
 export const ruleToFormData = (rule: Rule): UpdateRule => {
   return {
     name: rule.name,
-    productName: rule.productName,
-    periodMinutes: rule.periodMinutes,
-    minInterval: rule.minInterval,
-    maxInterval: rule.maxInterval,
+    targetProductName: rule.targetProductName,
+    minIntervalMinutes: rule.minIntervalMinutes,
+    maxIntervalMinutes: rule.maxIntervalMinutes,
     dailyCapLimit: rule.dailyCapLimit,
     sendWindowStart: rule.sendWindowStart,
     sendWindowEnd: rule.sendWindowEnd,
     isActive: rule.isActive,
     isInfinite: rule.isInfinite,
-    vertical: rule.vertical,
-    country: rule.country,
-    status: rule.status,
+    leadVertical: rule.leadVertical,
+    leadCountry: rule.leadCountry,
+    leadStatus: rule.leadStatus,
   };
 };
 
 export const initializeEditForm = (rule: Rule, products: any[]) => {
   const foundProduct = products.find(
-    (product) => product.productId === rule.productId
+    (product) => product.productId === rule.targetProductId
   );
 
   return {
     formData: {
       name: rule.name,
-      periodMinutes: rule.periodMinutes,
-      minInterval: rule.minInterval,
-      maxInterval: rule.maxInterval,
+      minIntervalMinutes: rule.minIntervalMinutes,
+      maxIntervalMinutes: rule.maxIntervalMinutes,
       dailyCapLimit: rule.dailyCapLimit,
       sendWindowStart: rule.sendWindowStart,
       sendWindowEnd: rule.sendWindowEnd,
       isActive: rule.isActive,
       isInfinite: rule.isInfinite,
-      vertical: rule.vertical,
-      country: rule.country,
-      status: rule.status,
-      productName: rule.productName,
+      leadVertical: rule.leadVertical,
+      leadCountry: rule.leadCountry,
+      leadStatus: rule.leadStatus,
+      targetProductName: rule.targetProductName,
     },
     selectedPartner: foundProduct?.aff || '',
-    selectedCountry: rule.country || '',
-    selectedProduct: rule.productId,
+    selectedCountry: rule.leadCountry || '',
+    selectedProduct: rule.targetProductId,
     selectedTemplate: '',
   };
 };

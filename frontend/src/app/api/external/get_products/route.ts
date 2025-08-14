@@ -6,6 +6,8 @@ import {
   createSuccessResponse,
 } from '@/shared/api/config';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const url = createExternalAPIUrl('get_products');
@@ -20,9 +22,9 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    const responseData = Array.isArray(data) ? data : data.data || data;
+    const products = Array.isArray(data) ? data : data.data || data;
 
-    return createSuccessResponse(responseData);
+    return createSuccessResponse(products);
   } catch (error) {
     return handleAPIError(error, 'fetch products');
   }

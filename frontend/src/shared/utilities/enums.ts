@@ -155,6 +155,7 @@ export enum AffEnum {
 }
 
 export enum StatusEnum {
+  ALL = 'ALL',
   NEW = 'New',
   SALE = 'Sale',
   REJECT = 'Reject',
@@ -162,6 +163,7 @@ export enum StatusEnum {
 }
 
 export const StatusTranslations: Record<string, string> = {
+  ALL: 'ВСЕ',
   New: 'Новый',
   Sale: 'Продажа',
   Reject: 'Отклонен',

@@ -13,6 +13,7 @@ export type Product = {
   vertical: string;
   aff: string;
   productId: string;
+  uniqueProductKey: string; // Composite key: productId-vertical-country-aff
 };
 
 export type Lead = {
@@ -61,7 +62,7 @@ export class ExternalApiService {
 
     try {
       const resp = await firstValueFrom(
-        this.http.get<Product[]>(this.endpoints.getProducts, cfg),
+        this.http.get<any[]>(this.endpoints.getProducts, cfg),
       );
 
       if (resp.status !== 200) {
@@ -71,7 +72,36 @@ export class ExternalApiService {
         return [];
       }
 
-      return Array.isArray(resp.data) ? resp.data : [];
+      const rawProducts = Array.isArray(resp.data) ? resp.data : [];
+
+      // Transform raw products to include unique composite keys
+      const products: Product[] = rawProducts.map((raw) => {
+        const productId = String(
+          raw.productId || raw.product_id || raw.id || '',
+        );
+
+        const productName = String(
+          raw.productName || raw.product_name || raw.name || '',
+        );
+        const country = String(raw.country || '').toUpperCase();
+        const vertical = String(raw.vertical || '');
+        const aff = String(raw.aff || raw.affiliate || '');
+
+        // Generate unique composite key
+        const uniqueProductKey = `${productId}-${vertical}-${country}-${aff}`;
+
+        return {
+          productId,
+          productName,
+          country,
+          vertical,
+          aff,
+          uniqueProductKey,
+        };
+      });
+
+      this.logger.log(`Fetched ${products.length} products with unique keys`);
+      return products;
     } catch (err: any) {
       const status = err?.response?.status;
       const details = err?.response?.data ?? err?.message ?? err;
@@ -107,7 +137,7 @@ export class ExternalApiService {
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          // Строим query параметры для GET запроса
+          // Build query parameters for the GET request
           const queryParams = new URLSearchParams();
           Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
@@ -157,34 +187,49 @@ export class ExternalApiService {
       }
 
       const raw: any[] = Array.isArray(resp.data) ? resp.data : [];
+      // Safe logging without sensitive data
       this.logger.debug?.(
-        `Raw leads: ${this.utils.stringify(raw).slice(0, 4000)}`,
+        `Raw leads count: ${raw.length}, sample: ${raw
+          .slice(0, 2)
+          .map((lead) => ({
+            subid: lead.subid || 'N/A',
+            country: lead.country || 'N/A',
+            status: lead.status || 'N/A',
+          }))
+          .map((l) => JSON.stringify(l))
+          .join(', ')}`,
       );
 
       return raw;
     } catch (err: any) {
       const status = err?.response?.status;
       const details = err?.response?.data ?? err?.message ?? err;
+      // Safe logging of errors
+      const safeDetails =
+        details && typeof details === 'object' && details.message
+          ? details.message
+          : 'External API error';
       this.logger.error(
-        `Failed to fetch leads: ${status ?? ''} ${this.utils.stringify(details)}`,
+        `Failed to fetch leads: HTTP ${status ?? 'unknown'} - ${safeDetails}`,
       );
       throw err;
     }
   }
 
   async addLead(payload: {
+    // Product fields (API schema)
     productName: string;
     country: string;
     vertical: string;
     aff: string;
     productId: string;
+    // LeadToAdd fields (API schema)
     subid: string;
-    status: string;
     leadName: string;
     phone: string;
-    email: string;
     ip: string;
     ua: string;
+    // DO NOT include email and status - they are not in the API schema
   }): Promise<{ status: number; data: any }> {
     const cfgPost: AxiosRequestConfig = {
       headers: { 'X-API-KEY': this.apiKey, 'Content-Type': 'application/json' },
@@ -246,7 +291,7 @@ export class ExternalApiService {
       endpoints: {},
     };
 
-    // Тест products endpoint
+    // Test products endpoint
     try {
       const products = await this.getProducts();
       results.endpoints['products'] = {
@@ -264,7 +309,7 @@ export class ExternalApiService {
       };
     }
 
-    // Тест leads endpoint с минимальным запросом
+    // Test leads endpoint with minimal request
     try {
       const testUrl = `${this.endpoints.getLeads}?limit=1`;
       const cfgLeads = {

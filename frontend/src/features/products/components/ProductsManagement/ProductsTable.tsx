@@ -75,7 +75,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ searchQuery, filters }) => {
   if (!isClient || isLoading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
-        <div className="text-center text-gray-500">Загрузка офферов...</div>
+        <div className="text-center text-gray-500">Загрузка продуктов...</div>
       </div>
     );
   }
@@ -84,7 +84,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ searchQuery, filters }) => {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
         <div className="text-center text-red-500">
-          Ошибка загрузки офферов: {error.message}
+          Ошибка загрузки продуктов: {error.message}
         </div>
       </div>
     );

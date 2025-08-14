@@ -1,98 +1,167 @@
-import { UpdateRule } from '../schemas';
+import { z } from 'zod';
 
-export const validateCreationForm = (formData: {
-  name: string;
-  productId: string;
-  productName: string;
-  from: string;
-  to: string;
-  dailyCapLimitFilter: string;
-  isInfinite: boolean;
-  startTime: string;
-  endTime: string;
-}): string[] => {
-  const errors: string[] = [];
+export interface ValidationError {
+  field: string;
+  message: string;
+  details?: string;
+}
 
-  if (!formData.name.trim()) {
-    errors.push('Название правила обязательно');
-  }
-  if (!formData.productId.trim()) {
-    errors.push('ID продукта обязателен');
-  }
-  if (!formData.productName.trim()) {
-    errors.push('Название оффера обязательно');
-  }
+export function validateRuleConsistency(data: {
+  leadCountry?: string | null;
+  targetProductCountry?: string | null;
+  leadAffiliate?: string | null;
+  targetProductAffiliate?: string | null;
+}): ValidationError[] {
+  const errors: ValidationError[] = [];
 
-  const fromValue = parseInt(formData.from);
-  const toValue = parseInt(formData.to);
-  const dailyCapLimitValue = parseInt(formData.dailyCapLimitFilter);
+  const hasLeadCountry = data.leadCountry && data.leadCountry.trim() !== '';
+  const hasTargetCountry =
+    data.targetProductCountry && data.targetProductCountry.trim() !== '';
 
-  if (isNaN(fromValue) || fromValue < 0) {
-    errors.push('Поле "От" должно быть числом >= 0');
-  }
-  if (isNaN(toValue) || toValue < 0) {
-    errors.push('Поле "До" должно быть числом >= 0');
-  }
-  if (fromValue >= toValue) {
-    errors.push('Значение "От" должно быть меньше значения "До"');
-  }
-  if (isNaN(dailyCapLimitValue) || dailyCapLimitValue < 1) {
-    errors.push('Кап фильтр должен быть числом >= 1');
+  if (
+    hasLeadCountry &&
+    hasTargetCountry &&
+    data.leadCountry !== data.targetProductCountry
+  ) {
+    errors.push({
+      field: 'geographic_mismatch',
+      message: 'Geographic mismatch detected',
+      details: `Cannot redirect leads from ${data.leadCountry} to product for ${data.targetProductCountry}. Countries must match for proper lead redirection.`,
+    });
   }
 
-  const timeRegex = /^\d{2}:\d{2}$/;
-  if (!formData.isInfinite) {
-    if (!timeRegex.test(formData.startTime)) {
-      errors.push('Неверный формат времени начала (HH:MM)');
+  const hasLeadAffiliate =
+    data.leadAffiliate && data.leadAffiliate.trim() !== '';
+  const hasTargetAffiliate =
+    data.targetProductAffiliate && data.targetProductAffiliate.trim() !== '';
+
+  if (
+    hasLeadAffiliate &&
+    hasTargetAffiliate &&
+    data.leadAffiliate !== data.targetProductAffiliate
+  ) {
+    errors.push({
+      field: 'affiliate_mismatch',
+      message: 'Affiliate mismatch detected',
+      details: `Cannot redirect leads from affiliate "${data.leadAffiliate}" to product for affiliate "${data.targetProductAffiliate}". Affiliates must match for proper lead redirection.`,
+    });
+  }
+
+  return errors;
+}
+
+export function getValidationErrorMessage(errors: ValidationError[]): string {
+  if (errors.length === 0) return '';
+
+  const messages = errors.map((error) => {
+    if (error.details) {
+      return `${error.message}: ${error.details}`;
     }
-    if (!timeRegex.test(formData.endTime)) {
-      errors.push('Неверный формат времени окончания (HH:MM)');
+    return error.message;
+  });
+
+  return messages.join('. ');
+}
+
+export function validateTimeWindows(data: {
+  isInfinite?: boolean;
+  sendWindowStart?: string | null;
+  sendWindowEnd?: string | null;
+}): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  if (data.isInfinite !== true) {
+    if (!data.sendWindowStart || !data.sendWindowEnd) {
+      errors.push({
+        field: 'time_windows',
+        message: 'Time windows are required for non-infinite rules',
+        details:
+          'When isInfinite is false, both sendWindowStart and sendWindowEnd must be specified.',
+      });
+    } else {
+      const timeRegex = /^\d{2}:\d{2}$/;
+      if (
+        !timeRegex.test(data.sendWindowStart) ||
+        !timeRegex.test(data.sendWindowEnd)
+      ) {
+        errors.push({
+          field: 'time_format',
+          message: 'Invalid time format',
+          details:
+            'Time windows must be in HH:MM format (e.g., "09:00", "18:30").',
+        });
+      }
     }
   }
 
   return errors;
-};
+}
 
-export const validateEditForm = (formData: UpdateRule): string[] => {
-  const errors: string[] = [];
+export function validateDateRanges(data: {
+  leadDateFrom?: string | null;
+  leadDateTo?: string | null;
+  sendDateFrom?: string | null;
+  sendDateTo?: string | null;
+}): ValidationError[] {
+  const errors: ValidationError[] = [];
 
-  if (!formData.name?.trim()) {
-    errors.push('Название правила обязательно');
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+  if (data.leadDateFrom && !dateRegex.test(data.leadDateFrom)) {
+    errors.push({
+      field: 'leadDateFrom',
+      message: 'Invalid lead date from format',
+      details: 'Lead date from must be in YYYY-MM-DD format.',
+    });
   }
 
-  const minInterval = formData.minInterval;
-  const maxInterval = formData.maxInterval;
-  const dailyCapLimit = formData.dailyCapLimit;
+  if (data.leadDateTo && !dateRegex.test(data.leadDateTo)) {
+    errors.push({
+      field: 'leadDateTo',
+      message: 'Invalid lead date to format',
+      details: 'Lead date to must be in YYYY-MM-DD format.',
+    });
+  }
 
-  if (minInterval !== undefined && (isNaN(minInterval) || minInterval < 0)) {
-    errors.push('Поле "От" должно быть числом >= 0');
+  if (data.sendDateFrom && !dateRegex.test(data.sendDateFrom)) {
+    errors.push({
+      field: 'sendDateFrom',
+      message: 'Invalid send date from format',
+      details: 'Send date from must be in YYYY-MM-DD format.',
+    });
   }
-  if (maxInterval !== undefined && (isNaN(maxInterval) || maxInterval < 0)) {
-    errors.push('Поле "До" должно быть числом >= 0');
+
+  if (data.sendDateTo && !dateRegex.test(data.sendDateTo)) {
+    errors.push({
+      field: 'sendDateTo',
+      message: 'Invalid send date to format',
+      details: 'Send date to must be in YYYY-MM-DD format.',
+    });
   }
+
   if (
-    minInterval !== undefined &&
-    maxInterval !== undefined &&
-    minInterval >= maxInterval
+    data.leadDateFrom &&
+    data.leadDateTo &&
+    data.leadDateFrom > data.leadDateTo
   ) {
-    errors.push('Значение "От" должно быть меньше значения "До"');
-  }
-  if (
-    dailyCapLimit !== undefined &&
-    (isNaN(dailyCapLimit) || dailyCapLimit < 1)
-  ) {
-    errors.push('Кап фильтр должен быть числом >= 1');
+    errors.push({
+      field: 'lead_date_range',
+      message: 'Invalid lead date range',
+      details: 'Lead date from cannot be later than lead date to.',
+    });
   }
 
-  const timeRegex = /^\d{2}:\d{2}$/;
-  if (formData.isInfinite !== true) {
-    if (formData.sendWindowStart && !timeRegex.test(formData.sendWindowStart)) {
-      errors.push('Неверный формат времени начала (HH:MM)');
-    }
-    if (formData.sendWindowEnd && !timeRegex.test(formData.sendWindowEnd)) {
-      errors.push('Неверный формат времени окончания (HH:MM)');
-    }
+  if (
+    data.sendDateFrom &&
+    data.sendDateTo &&
+    data.sendDateFrom > data.sendDateTo
+  ) {
+    errors.push({
+      field: 'send_date_range',
+      message: 'Invalid send date range',
+      details: 'Send date from cannot be later than send date to.',
+    });
   }
 
   return errors;
-};
+}

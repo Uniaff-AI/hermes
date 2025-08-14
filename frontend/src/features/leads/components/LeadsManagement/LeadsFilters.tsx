@@ -20,6 +20,7 @@ import {
   StatusTranslations,
 } from '@/shared/utilities/enums';
 import { LeadsFilters } from '../../model/schemas';
+import { formatDateToYYYYMMDD } from '../../../../lib/utils';
 
 type LeadsFiltersProps = {
   searchQuery: string;
@@ -354,7 +355,7 @@ const FilterDateRange: FC<{
   };
 
   const handleDateSelect = (date: Date | null, type: 'from' | 'to') => {
-    const dateString = date ? date.toISOString().split('T')[0] : undefined;
+    const dateString = date ? formatDateToYYYYMMDD(date) : undefined;
     if (type === 'from') {
       onFromDateChange(dateString || '');
     } else {

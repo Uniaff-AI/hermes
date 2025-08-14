@@ -10,20 +10,8 @@ import { Rule } from '@/features/rules/model/schemas';
 import RuleEditModal from './RuleEditModal';
 import { StatusTranslations } from '@/shared/utilities/enums';
 
-const formatFrequency = (minInterval: number, maxInterval: number) => {
-  return `${minInterval}–${maxInterval} минут`;
-};
-
-const formatPeriod = (periodMinutes: number) => {
-  if (periodMinutes >= 1440) {
-    const days = Math.floor(periodMinutes / 1440);
-    return `${days} ${days === 1 ? 'день' : 'дней'}`;
-  }
-  if (periodMinutes >= 60) {
-    const hours = Math.floor(periodMinutes / 60);
-    return `${hours} ${hours === 1 ? 'час' : 'часов'}`;
-  }
-  return `${periodMinutes} минут`;
+const formatFrequency = (minIntervalMinutes: number, maxIntervalMinutes: number) => {
+  return `${minIntervalMinutes}–${maxIntervalMinutes} минут`;
 };
 
 const RedirectRulesView: FC = () => {
@@ -156,29 +144,70 @@ const RedirectRulesView: FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-x-8 gap-y-4 text-sm text-gray-600">
+            {/* Секция 3: Целевой Продукт */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 gap-y-4 text-sm text-gray-600 mb-4">
               <div>
-                <div className="uppercase text-xs mb-1">Продукт</div>
+                <div className="uppercase text-xs mb-1">Целевой Продукт</div>
                 <div className="font-medium text-gray-900">
-                  {rule.productName}
+                  {rule.targetProductName}
                 </div>
               </div>
               <div>
                 <div className="uppercase text-xs mb-1">ID Продукта</div>
                 <div className="font-medium text-gray-900 font-mono text-xs">
-                  {rule.productId.slice(0, 8)}...
+                  {rule.targetProductId?.slice(0, 8)}...
                 </div>
               </div>
               <div>
-                <div className="uppercase text-xs mb-1">Период</div>
+                <div className="uppercase text-xs mb-1">Вертикаль</div>
                 <div className="font-medium text-gray-900">
-                  {formatPeriod(rule.periodMinutes)}
+                  {rule.targetProductVertical || 'Не указана'}
                 </div>
               </div>
+              <div>
+                <div className="uppercase text-xs mb-1">Страна</div>
+                <div className="font-medium text-gray-900">
+                  {rule.targetProductCountry || 'Не указана'}
+                </div>
+              </div>
+            </div>
+
+            {/* Секция 2: Фильтры Лидов */}
+            {(rule.leadStatus || rule.leadVertical || rule.leadCountry || rule.leadAffiliate) && (
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-8 gap-y-4 text-sm text-gray-600 mb-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <div className="uppercase text-xs mb-1 text-gray-500">Статус лида</div>
+                  <div className="font-medium text-gray-900">
+                    {rule.leadStatus ? StatusTranslations[rule.leadStatus] || rule.leadStatus : 'Любой'}
+                  </div>
+                </div>
+                <div>
+                  <div className="uppercase text-xs mb-1 text-gray-500">Вертикаль</div>
+                  <div className="font-medium text-gray-900">
+                    {rule.leadVertical || 'Любая'}
+                  </div>
+                </div>
+                <div>
+                  <div className="uppercase text-xs mb-1 text-gray-500">Страна</div>
+                  <div className="font-medium text-gray-900">
+                    {rule.leadCountry || 'Любая'}
+                  </div>
+                </div>
+                <div>
+                  <div className="uppercase text-xs mb-1 text-gray-500">ПП</div>
+                  <div className="font-medium text-gray-900">
+                    {rule.leadAffiliate || 'Любой'}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Настройки отправки */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-4 text-sm text-gray-600">
               <div>
                 <div className="uppercase text-xs mb-1">Частота</div>
                 <div className="font-medium text-gray-900">
-                  {formatFrequency(rule.minInterval, rule.maxInterval)}
+                  {formatFrequency(rule.minIntervalMinutes, rule.maxIntervalMinutes)}
                 </div>
               </div>
               <div>
@@ -194,37 +223,16 @@ const RedirectRulesView: FC = () => {
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Новые поля фильтрации */}
-            {(rule.vertical || rule.country || rule.status) && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-4 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-100">
-                {rule.vertical && (
-                  <div>
-                    <div className="uppercase text-xs mb-1">Вертикаль</div>
-                    <div className="font-medium text-gray-900">
-                      {rule.vertical}
-                    </div>
-                  </div>
-                )}
-                {rule.country && (
-                  <div>
-                    <div className="uppercase text-xs mb-1">Страна</div>
-                    <div className="font-medium text-gray-900">
-                      {rule.country}
-                    </div>
-                  </div>
-                )}
-                {rule.status && (
-                  <div>
-                    <div className="uppercase text-xs mb-1">Статус лида</div>
-                    <div className="font-medium text-gray-900">
-                      {StatusTranslations[rule.status] || rule.status}
-                    </div>
-                  </div>
-                )}
+              <div>
+                <div className="uppercase text-xs mb-1">Период</div>
+                <div className="font-medium text-gray-900">
+                  {rule.leadDateFrom && rule.leadDateTo
+                    ? `${rule.leadDateFrom} — ${rule.leadDateTo}`
+                    : 'Весь период'
+                  }
+                </div>
               </div>
-            )}
+            </div>
 
             <div className="mt-6 flex items-center text-xs text-gray-500">
               <span className="mr-1">🕒</span>

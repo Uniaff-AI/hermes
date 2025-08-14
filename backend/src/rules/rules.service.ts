@@ -7,7 +7,7 @@ import { Queue } from 'bull';
 import { Rule } from './domain/rule.entity';
 import { CreateRuleDto } from './dto/create-rule.dto';
 
-// Импортируем новые сервисы
+// Import new services
 import { ExternalApiService, Product } from './services/external-api.service';
 import { LeadSchedulingService } from './services/lead-scheduling.service';
 import { RulesAnalyticsService } from './services/rules-analytics.service';
@@ -55,7 +55,7 @@ export class RulesService {
     } as unknown as DeepPartial<Rule>);
     const rule = await this.repo.save(entity);
 
-    // Запускаем процессы асинхронно (не блокируем создание правила)
+    // Start processes asynchronously (do not block the rule creation)
     this.scheduleInitialProcesses(rule);
 
     return rule;
@@ -72,8 +72,60 @@ export class RulesService {
   async update(id: string, patch: Partial<Rule>): Promise<Rule> {
     const rule = await this.findOne(id);
     if (!rule) throw new Error(`Rule ${id} not found`);
-    Object.assign(rule, patch);
-    return this.repo.save(rule);
+
+    this.logger.debug(
+      `Updating rule ${id} with patch:`,
+      JSON.stringify(patch, null, 2),
+    );
+    this.logger.debug(
+      `Current rule status: ${rule.leadStatus} (type: ${typeof rule.leadStatus})`,
+    );
+
+    // Handle null values by converting them to undefined for TypeORM
+    const processedPatch = { ...patch };
+
+    // Fields that can be reset to null
+    const nullableFields = [
+      'leadDateFrom',
+      'leadDateTo',
+      'leadVertical',
+      'leadCountry',
+      'leadStatus',
+      'leadAffiliate',
+      'sendWindowStart',
+      'sendWindowEnd',
+      'sendDateFrom',
+      'sendDateTo',
+      'targetProductVertical',
+      'targetProductCountry',
+      'targetProductAffiliate',
+    ];
+
+    nullableFields.forEach((field) => {
+      if (processedPatch[field] === null) {
+        this.logger.debug(`Converting ${field} from null to undefined`);
+        processedPatch[field] = undefined;
+      }
+    });
+
+    this.logger.debug(
+      `Processed patch:`,
+      JSON.stringify(processedPatch, null, 2),
+    );
+
+    Object.assign(rule, processedPatch);
+
+    this.logger.debug(
+      `Rule before save - status: ${rule.leadStatus} (type: ${typeof rule.leadStatus})`,
+    );
+
+    const savedRule = await this.repo.save(rule);
+
+    this.logger.debug(
+      `Rule after save - leadStatus: ${savedRule.leadStatus} (type: ${typeof savedRule.leadStatus})`,
+    );
+
+    return savedRule;
   }
 
   async remove(id: string): Promise<void> {
@@ -109,14 +161,14 @@ export class RulesService {
     return this.monitoring.getRuleDebugLogs(id);
   }
 
-  // Публичный метод для планирования отправки лидов (для Bull processor)
+  // Public method for scheduling lead sending (for Bull processor)
   public async scheduleLeadsSending(rule: Rule): Promise<void> {
     return this.leadScheduling.scheduleLeadsSending(rule);
   }
 
   // ===== Private helper methods =====
   private scheduleInitialProcesses(rule: Rule): void {
-    // Запускаем получение лидов асинхронно
+    // Start the lead fetching asynchronously
     setImmediate(() => {
       this.leadScheduling
         .scheduleLeadsSending(rule)
@@ -127,17 +179,25 @@ export class RulesService {
         );
     });
 
-    // Ежедневный автозапуск (00:00) - тоже асинхронно
+    // Daily auto-start (00:00) - also asynchronously
     setImmediate(() => {
       this.leadScheduling.planNextDay(rule.id).catch(() => {});
     });
 
-    // Добавляем в очередь Bull асинхронно
+    // Add to BullMQ queue asynchronously
     setImmediate(async () => {
       try {
-        await this.leadSchedulerQueue.add('schedule', { ruleId: rule.id });
+        this.logger.log(`Adding rule ${rule.id} to BullMQ queue`);
+        const job = await this.leadSchedulerQueue.add('schedule', {
+          ruleId: rule.id,
+        });
+        this.logger.log(
+          `Successfully added job ${job.id} to BullMQ queue for rule ${rule.id}`,
+        );
       } catch (e: any) {
-        this.logger.warn(`Bull enqueue skipped: ${e?.message || e}`);
+        this.logger.error(
+          `Bull enqueue failed for rule ${rule.id}: ${e?.message || e}`,
+        );
       }
     });
   }

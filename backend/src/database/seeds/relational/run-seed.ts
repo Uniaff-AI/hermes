@@ -10,7 +10,6 @@ const runSeed = async () => {
   try {
     console.log('🌱 Starting seed data for rules...');
 
-    // Check if rules table exists and has data
     const rulesCount = await dataSource
       .getRepository(Rule)
       .createQueryBuilder('rule')
@@ -19,14 +18,12 @@ const runSeed = async () => {
     if (rulesCount === 0) {
       console.log('📝 No rules found, creating default rules...');
 
-      // Create default rule
       const defaultRule = dataSource.getRepository(Rule).create({
         name: 'Default Rule',
-        productId: 'default-product',
-        productName: 'Default Product',
-        periodMinutes: 60,
-        minInterval: 30,
-        maxInterval: 120,
+        targetProductId: 'default-product',
+        targetProductName: 'Default Product',
+        minIntervalMinutes: 30,
+        maxIntervalMinutes: 120,
         dailyCapLimit: 100,
         sendWindowStart: '09:00',
         sendWindowEnd: '18:00',

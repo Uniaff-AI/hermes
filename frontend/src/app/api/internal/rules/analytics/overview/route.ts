@@ -6,6 +6,9 @@ import {
   getInternalAPIHeaders,
 } from '@/shared/api/config';
 
+// Ensure this route is dynamic and doesn't cache
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const response = await fetch(
@@ -13,7 +16,7 @@ export async function GET(request: NextRequest) {
       {
         method: 'GET',
         headers: getInternalAPIHeaders(),
-        next: { revalidate: 60 }, // Cache for 60 seconds
+        cache: 'no-store', // Don't cache to get fresh data
       }
     );
 

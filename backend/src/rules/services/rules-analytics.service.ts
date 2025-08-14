@@ -17,7 +17,7 @@ export class RulesAnalyticsService {
 
   async cleanupOrphanedLeadSendings(): Promise<number> {
     try {
-      // Получаем все ID существующих активных правил
+      // Get all existing active rule IDs
       const existingRules = await this.ruleRepo.find({
         where: { isActive: true },
         select: ['id'],
@@ -29,7 +29,7 @@ export class RulesAnalyticsService {
       );
 
       if (existingRuleIds.length === 0) {
-        // Если нет активных правил, удаляем все записи LeadSending
+        // If there are no active rules, delete all LeadSending records
         const result = await this.leadSendingRepo
           .createQueryBuilder('sending')
           .delete()
@@ -41,7 +41,7 @@ export class RulesAnalyticsService {
         return result.affected || 0;
       }
 
-      // Удаляем записи LeadSending для несуществующих или неактивных правил
+      // Delete LeadSending records for non-existent or inactive rules
       const result = await this.leadSendingRepo
         .createQueryBuilder('sending')
         .delete()
@@ -70,13 +70,13 @@ export class RulesAnalyticsService {
     rules: any[];
   }> {
     try {
-      // Сначала очищаем старые записи LeadSending для удаленных правил
+      // First, clean up old LeadSending records for deleted rules
       await this.cleanupOrphanedLeadSendings();
 
-      // Получаем только существующие правила из базы данных
+      // Get only existing rules from the database
       const rules = await this.ruleRepo.find({
-        where: { isActive: true }, // Только активные правила
-        select: ['id', 'name', 'productName', 'isActive'],
+        where: { isActive: true }, // Only active rules
+        select: ['id', 'name', 'targetProductName', 'isActive'],
       });
 
       this.logger.debug(`Found ${rules.length} active rules in database`);
@@ -93,10 +93,10 @@ export class RulesAnalyticsService {
         };
       }
 
-      // Получаем аналитику только для существующих активных правил
+      // Get analytics only for existing active rules
       const analyticsPromises = rules.map(async (rule) => {
         try {
-          // Дополнительная проверка что правило существует
+          // Additional check that the rule exists
           const exists = await this.ruleRepo.findOneBy({
             id: rule.id,
             isActive: true,
@@ -118,7 +118,7 @@ export class RulesAnalyticsService {
 
       const rulesAnalyticsResults = await Promise.all(analyticsPromises);
 
-      // Фильтруем только успешные результаты аналитики
+      // Filter only successful analytics results
       const rulesAnalytics = rulesAnalyticsResults.filter(
         (result) => result !== null,
       );
@@ -179,14 +179,14 @@ export class RulesAnalyticsService {
         throw new Error(`Rule ${ruleId} not found`);
       }
 
-      // Получаем все отправки лидов для этого правила
+      // Get all lead sendings for this rule
       const sendings = await this.leadSendingRepo.find({
         where: { ruleId },
         order: { sentAt: 'DESC' },
-        take: 10, // Последние 10 отправок
+        take: 10, // Last 10 sendings
       });
 
-      // Подсчитываем статистику
+      // Count the statistics
       const totalSent = sendings.length;
       const totalSuccess = sendings.filter(
         (s) => s.status === LeadSendingStatus.SUCCESS,
@@ -206,13 +206,13 @@ export class RulesAnalyticsService {
           ? sendings[0].sentAt.toISOString()
           : new Date().toISOString();
 
-      // Форматируем последние отправки для фронтенда
+      // Format the last sendings for the frontend
       const recentSendings = sendings.map((sending) => ({
         id: sending.id,
-        subid: sending.subid,
+        subid: sending.leadSubid,
         leadName: sending.leadName,
-        phone: sending.phone,
-        email: sending.email,
+        phone: sending.leadPhone,
+        email: sending.leadEmail,
         status: sending.status,
         errorDetails: sending.errorDetails,
         sentAt: sending.sentAt.toISOString(),
@@ -222,7 +222,7 @@ export class RulesAnalyticsService {
         rule: {
           id: rule.id,
           name: rule.name,
-          productName: rule.productName || 'Не указан',
+          productName: rule.targetProductName || 'Не указан',
           isActive: rule.isActive,
         },
         stats: {

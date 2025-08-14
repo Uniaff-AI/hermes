@@ -11,12 +11,8 @@ import RuleEditModal from './RuleEditModal';
 import RuleDeleteDialog from './RuleDeleteDialog';
 import { StatusTranslations } from '@/shared/utilities/enums';
 
-const formatFrequency = (minInterval: number, maxInterval: number) => {
-  return `${minInterval}–${maxInterval} минут`;
-};
-
-const formatPeriod = (periodMinutes: number) => {
-  return `${periodMinutes} минут`;
+const formatFrequency = (minIntervalMinutes: number, maxIntervalMinutes: number) => {
+  return `${minIntervalMinutes}–${maxIntervalMinutes} минут`;
 };
 
 const AllRulesView: FC = () => {
@@ -154,52 +150,83 @@ const AllRulesView: FC = () => {
               <div>
                 <div className="uppercase text-xs mb-1">Продукт</div>
                 <div className="font-medium text-gray-900">
-                  {rule.productName}
+                  {rule.targetProductName}
                 </div>
               </div>
               <div>
                 <div className="uppercase text-xs mb-1">ID Продукта</div>
                 <div className="font-medium text-gray-900 font-mono text-xs">
-                  {rule.productId.slice(0, 8)}...
+                  {rule.targetProductId.slice(0, 8)}...
                 </div>
               </div>
               <div>
-                <div className="uppercase text-xs mb-1">Период</div>
+                <div className="uppercase text-xs mb-1">Интервал</div>
                 <div className="font-medium text-gray-900">
-                  {formatPeriod(rule.periodMinutes)}
+                  {formatFrequency(rule.minIntervalMinutes, rule.maxIntervalMinutes)}
                 </div>
               </div>
               <div>
-                <div className="uppercase text-xs mb-1">Частота</div>
+                <div className="uppercase text-xs mb-1">Лимит/день</div>
                 <div className="font-medium text-gray-900">
-                  {formatFrequency(rule.minInterval, rule.maxInterval)}
+                  {rule.dailyCapLimit} лидов
                 </div>
               </div>
             </div>
 
-            {(rule.vertical || rule.country || rule.status) && (
+            {/* Секция 2: Фильтры лидов */}
+            {(rule.leadVertical || rule.leadCountry || rule.leadStatus) && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-100">
-                {rule.vertical && (
+                {rule.leadVertical && (
                   <div>
-                    <div className="uppercase text-xs mb-1">Вертикаль</div>
+                    <div className="uppercase text-xs mb-1">Вертикаль лидов</div>
                     <div className="font-medium text-gray-900">
-                      {rule.vertical}
+                      {rule.leadVertical}
                     </div>
                   </div>
                 )}
-                {rule.country && (
+                {rule.leadCountry && (
                   <div>
-                    <div className="uppercase text-xs mb-1">Страна</div>
+                    <div className="uppercase text-xs mb-1">Страна лидов</div>
                     <div className="font-medium text-gray-900">
-                      {rule.country}
+                      {rule.leadCountry}
                     </div>
                   </div>
                 )}
-                {rule.status && (
+                {rule.leadStatus && (
                   <div>
                     <div className="uppercase text-xs mb-1">Статус лида</div>
                     <div className="font-medium text-gray-900">
-                      {StatusTranslations[rule.status] || rule.status}
+                      {StatusTranslations[rule.leadStatus] || rule.leadStatus}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Секция 3: Целевой продукт */}
+            {(rule.targetProductVertical || rule.targetProductCountry || rule.targetProductAffiliate) && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-gray-600 mt-4 pt-4 border-t border-gray-100">
+                {rule.targetProductVertical && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">Вертикаль продукта</div>
+                    <div className="font-medium text-gray-900">
+                      {rule.targetProductVertical}
+                    </div>
+                  </div>
+                )}
+                {rule.targetProductCountry && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">Страна продукта</div>
+                    <div className="font-medium text-gray-900">
+                      {rule.targetProductCountry}
+                    </div>
+                  </div>
+                )}
+                {rule.targetProductAffiliate && (
+                  <div>
+                    <div className="uppercase text-xs mb-1">ПП продукта</div>
+                    <div className="font-medium text-gray-900">
+                      {rule.targetProductAffiliate}
                     </div>
                   </div>
                 )}
