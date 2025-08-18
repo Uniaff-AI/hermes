@@ -51,20 +51,21 @@ export const createProductHandlers = (set: any, get: () => BaseRuleState) => ({
     set({ isProductsLoading: true, validationErrors: [] });
 
     try {
-      const response = await fetch('/api/external/get_products');
+      // Use server-side filtering with query parameters
+      const params = new URLSearchParams();
+      params.append('vertical', state.leadFilters.leadVertical);
+      params.append('country', state.leadFilters.leadCountry);
+
+      const response = await fetch(
+        `/api/external/get_products?${params.toString()}`
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      const allProducts = Array.isArray(data) ? data : data.data || data;
-
-      const filteredProducts = allProducts.filter(
-        (product: any) =>
-          product.vertical === state.leadFilters.leadVertical &&
-          product.country === state.leadFilters.leadCountry
-      );
+      const filteredProducts = Array.isArray(data) ? data : data.data || data;
 
       const productOptions = filteredProducts.map((product: any) => ({
         label: `${product.productName} (${product.vertical} - ${product.country} - ${product.aff})`,

@@ -147,6 +147,12 @@ export const useRuleEditStore = create<RuleEditState & RuleEditActions>()(
           endDate: rule.leadDateTo ? new Date(rule.leadDateTo) : null,
           validationErrors: [],
         });
+
+        setTimeout(() => {
+          if (rule.leadVertical && rule.leadCountry) {
+            get().updateAvailableAffiliates();
+          }
+        }, 100);
       },
     }),
     {

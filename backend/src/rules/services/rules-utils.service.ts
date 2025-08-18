@@ -17,7 +17,13 @@ export class RulesUtilsService {
   }
 
   minTimeout(defaultTimeout?: number): number {
-    return Math.max(defaultTimeout ?? 0, 15000); // Минимум 15s для внешних API
+    // Increase the minimum timeout for complex requests to external APIs
+    const minTime = 30000; // 30 seconds minimum
+    const result = Math.max(defaultTimeout ?? 0, minTime);
+    console.log(
+      `Setting timeout: ${result}ms (default: ${defaultTimeout}, min: ${minTime})`,
+    );
+    return result;
   }
 
   getField(obj: any, ...keys: string[]): string | undefined {

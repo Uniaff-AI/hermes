@@ -126,7 +126,7 @@ export class RulesMonitoringService {
       take: 10,
     });
 
-    // Lead availability analysis
+    // Lead availability analysis with fallback logic
     let leadAnalysis: any = null;
     try {
       const testFilters = {
@@ -141,23 +141,72 @@ export class RulesMonitoringService {
         ...(rule.leadAffiliate ? { aff: rule.leadAffiliate } : {}),
       };
 
-      const availableLeads = await this.externalApi.getLeads(testFilters);
+      this.logger.log(
+        `Testing lead availability with filters: ${JSON.stringify(testFilters)}`,
+      );
+
+      let availableLeads: any[] = [];
+      let usedFilters = testFilters;
+
+      try {
+        // Try with full filters first
+        availableLeads = await this.externalApi.getLeads(testFilters);
+        this.logger.log(
+          `Full filters result: ${availableLeads.length} leads found`,
+        );
+      } catch (fullFilterError: any) {
+        this.logger.warn(
+          `Full filters failed: ${fullFilterError?.message || fullFilterError}`,
+        );
+
+        // Try with relaxed filters (only vertical and country)
+        const relaxedFilters = {
+          limit: 5,
+          ...(rule.leadVertical ? { vertical: rule.leadVertical } : {}),
+          ...(rule.leadCountry ? { country: rule.leadCountry } : {}),
+        };
+
+        try {
+          this.logger.log(
+            `Trying relaxed filters: ${JSON.stringify(relaxedFilters)}`,
+          );
+          availableLeads = await this.externalApi.getLeads(relaxedFilters);
+          usedFilters = relaxedFilters;
+          this.logger.log(
+            `Relaxed filters result: ${availableLeads.length} leads found`,
+          );
+        } catch (relaxedError: any) {
+          this.logger.warn(
+            `Relaxed filters also failed: ${relaxedError?.message || relaxedError}`,
+          );
+          throw relaxedError;
+        }
+      }
+
       leadAnalysis = {
         available: availableLeads.length,
-        filters: testFilters,
+        filters: usedFilters,
+        originalFilters: testFilters,
         sampleLeads: availableLeads.slice(0, 3).map((lead: any) => ({
           name: lead.name || lead.leadName || 'N/A',
           phone: lead.phone ? lead.phone.substring(0, 4) + '***' : 'N/A', // Маскировка телефона
           country: lead.country || 'N/A',
           status: lead.status || 'N/A',
+          vertical: lead.vertical || 'N/A',
+          aff: lead.aff || lead.affiliate || 'N/A',
         })),
+        fallbackUsed: usedFilters !== testFilters,
       };
-    } catch (error) {
+    } catch (error: any) {
+      this.logger.error(
+        `Lead analysis failed completely: ${error?.message || error}`,
+      );
       leadAnalysis = {
         available: 0,
         error: error instanceof Error ? error.message : 'Unknown error',
         filters: null,
         sampleLeads: [],
+        fallbackUsed: false,
       };
     }
 
@@ -334,14 +383,34 @@ export class RulesMonitoringService {
       recommendations.push('Исправьте обнаруженные проблемы с конфигурацией');
     }
 
-    if (leadAnalysis?.available === 0) {
+    if (leadAnalysis?.error && leadAnalysis.error.includes('timeout')) {
       recommendations.push(
-        'Нет доступных лидов с текущими фильтрами - расширьте критерии поиска',
+        'Таймаут внешнего API: возможно, слишком строгие фильтры или API перегружен. Попробуйте расширить критерии поиска или повторите попытку позже.',
       );
+
+      if (rule.leadStatus === 'Reject') {
+        recommendations.push(
+          'Статус "Reject" может быть редким в базе лидов. Попробуйте изменить статус на "Lead" или "Sale" для увеличения результатов.',
+        );
+      }
     }
 
-    if (leadAnalysis?.error) {
-      recommendations.push('Проблемы с внешним API - проверьте подключение');
+    if (leadAnalysis?.available === 0 && !leadAnalysis?.error) {
+      if (leadAnalysis?.fallbackUsed) {
+        recommendations.push(
+          'Полные фильтры не дали результатов, но упрощенные фильтры тоже пусты. Проверьте доступность лидов для данной вертикали и страны.',
+        );
+      } else {
+        recommendations.push(
+          'Нет доступных лидов с текущими фильтрами. Рекомендации: 1) Измените статус лидов, 2) Расширьте географию, 3) Попробуйте другую вертикаль.',
+        );
+      }
+    }
+
+    if (leadAnalysis?.error && !leadAnalysis.error.includes('timeout')) {
+      recommendations.push(
+        'Проблемы с внешним API - проверьте подключение и настройки API',
+      );
     }
 
     if (validationIssues.includes('Вне временного окна отправки')) {
@@ -353,6 +422,13 @@ export class RulesMonitoringService {
     if (validationIssues.includes('Достигнут дневной лимит')) {
       recommendations.push(
         'Дневной лимит исчерпан - дождитесь следующего дня или увеличьте лимит',
+      );
+    }
+
+    // Специальные рекомендации для быстрых интервалов
+    if (rule.minIntervalMinutes < 5) {
+      recommendations.push(
+        `Интервал ${rule.minIntervalMinutes}-${rule.maxIntervalMinutes} минут очень короткий. Это может создать высокую нагрузку на внешний API.`,
       );
     }
 

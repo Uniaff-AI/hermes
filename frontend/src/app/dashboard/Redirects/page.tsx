@@ -5,8 +5,8 @@ import { FC, useState } from 'react';
 import RedirectRulesView from '@/features/rules/components/RulesManagement/RedirectRuleCard';
 import RuleCreationForm from '@/features/rules/components/RulesManagement/RuleCreationForm';
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs';
-import { TemplatesView } from '@/features/dashboard/messages/TemplatesView';
-import AnalyticsView from '@/features/dashboard/AnalyticsView';
+import { TemplatesView } from '@/features/dashboard/components/Messages/TemplatesView';
+import AnalyticsView from '@/features/dashboard/components/Analytics/AnalyticsView';
 
 const RedirectsView: FC = () => {
   const [subTab, setSubTab] = useState('active');

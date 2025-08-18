@@ -67,6 +67,7 @@ const RuleEditModalNew: FC<RuleEditModalNewProps> = ({ rule, isOpen, onClose }) 
     setValidationErrors,
     checkLeadExistence,
     resetLeadValidation,
+    refreshAvailableAffiliates,
 
     // Section 1: Name
     handleNameChange,
@@ -319,6 +320,17 @@ const RuleEditModalNew: FC<RuleEditModalNewProps> = ({ rule, isOpen, onClose }) 
                       options={leadFilterOptions.affiliates}
                     />
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={refreshAvailableAffiliates}
+                    disabled={!leadFilters.leadVertical || !leadFilters.leadCountry}
+                    className="px-2"
+                    title="Обновить список доступных аффилиатов"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </Button>
                   {leadFilters.leadAffiliate && (
                     <Button
                       type="button"
@@ -327,7 +339,7 @@ const RuleEditModalNew: FC<RuleEditModalNewProps> = ({ rule, isOpen, onClose }) 
                       onClick={() => handleLeadAffiliateChange('')}
                       className="px-2"
                     >
-                      <RotateCcw className="w-4 h-4" />
+                      <X className="w-4 h-4" />
                     </Button>
                   )}
                 </div>

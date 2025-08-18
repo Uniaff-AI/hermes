@@ -186,7 +186,35 @@ export class ExternalApiService {
         }
       }
 
-      const raw: any[] = Array.isArray(resp.data) ? resp.data : [];
+      let raw: any[] = [];
+
+      // Handle different response structures from external API
+      if (Array.isArray(resp.data)) {
+        raw = resp.data;
+        this.logger.debug?.('Direct array response structure');
+      } else if (resp.data && typeof resp.data === 'object') {
+        if (
+          resp.data.status === 'success' &&
+          resp.data.data &&
+          Array.isArray(resp.data.data.leads)
+        ) {
+          raw = resp.data.data.leads;
+          this.logger.debug?.('Nested data.leads structure detected');
+        } else if (resp.data.data && Array.isArray(resp.data.data)) {
+          raw = resp.data.data;
+          this.logger.debug?.('Nested data property structure');
+        } else if (resp.data.leads && Array.isArray(resp.data.leads)) {
+          raw = resp.data.leads;
+          this.logger.debug?.('Direct leads property structure');
+        } else {
+          this.logger.warn(
+            'Unknown response structure:',
+            JSON.stringify(resp.data).substring(0, 200),
+          );
+          raw = [];
+        }
+      }
+
       // Safe logging without sensitive data
       this.logger.debug?.(
         `Raw leads count: ${raw.length}, sample: ${raw

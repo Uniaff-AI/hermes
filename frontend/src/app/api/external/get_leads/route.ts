@@ -41,13 +41,45 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
+      console.error(
+        'get_leads route - External API error:',
+        response.status,
+        response.statusText
+      );
       throw new Error(
         `External API error: ${response.status} ${response.statusText}`
       );
     }
 
     const data = await response.json();
-    const responseData = Array.isArray(data) ? data : data.data || data;
+    console.log('get_leads route - External API response:', data);
+
+    let responseData: any;
+
+    // Handle different response formats from external API
+    if (Array.isArray(data)) {
+      responseData = data;
+    } else if (data && typeof data === 'object') {
+      // If data is an object, check for nested data or leads
+      if (data.data && Array.isArray(data.data)) {
+        responseData = data.data;
+      } else if (data.leads && Array.isArray(data.leads)) {
+        responseData = data.leads;
+      } else if (
+        data.data &&
+        data.data.leads &&
+        Array.isArray(data.data.leads)
+      ) {
+        responseData = data.data.leads;
+      } else {
+        // If no recognizable structure, return the whole object
+        responseData = data;
+      }
+    } else {
+      responseData = data;
+    }
+
+    console.log('get_leads route - Processed response data:', responseData);
 
     return createSuccessResponse(responseData);
   } catch (error) {

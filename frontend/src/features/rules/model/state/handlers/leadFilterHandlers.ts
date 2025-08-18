@@ -1,22 +1,34 @@
-import type { BaseRuleState } from '../shared/types';
+import type { BaseRuleState, BaseRuleActions } from '../shared/types';
 import { formatDateToYYYYMMDD } from '../../../../../lib/utils';
 import { initialLeadValidation } from '../shared/initialState';
 
 export const createLeadFilterHandlers = (
   set: any,
-  get: () => BaseRuleState
+  get: () => BaseRuleState & BaseRuleActions
 ) => ({
   handleLeadStatusChange: (value: string) => {
     set((state: BaseRuleState) => ({
-      leadFilters: { ...state.leadFilters, leadStatus: value },
+      leadFilters: {
+        ...state.leadFilters,
+        leadStatus: value,
+        leadAffiliate: '',
+      },
       validationErrors: [],
       leadValidation: initialLeadValidation,
     }));
+
+    if (get().leadFilters.leadVertical && get().leadFilters.leadCountry) {
+      get().updateAvailableAffiliates();
+    }
   },
 
   handleLeadVerticalChange: (value: string) => {
     set((state: BaseRuleState) => ({
-      leadFilters: { ...state.leadFilters, leadVertical: value },
+      leadFilters: {
+        ...state.leadFilters,
+        leadVertical: value,
+        leadAffiliate: '',
+      },
       targetProduct: {
         ...state.targetProduct,
         targetProductVertical: value,
@@ -26,11 +38,19 @@ export const createLeadFilterHandlers = (
       validationErrors: [],
       leadValidation: initialLeadValidation,
     }));
+
+    if (value && get().leadFilters.leadCountry) {
+      get().updateAvailableAffiliates();
+    }
   },
 
   handleLeadCountryChange: (value: string) => {
     set((state: BaseRuleState) => ({
-      leadFilters: { ...state.leadFilters, leadCountry: value },
+      leadFilters: {
+        ...state.leadFilters,
+        leadCountry: value,
+        leadAffiliate: '',
+      },
       targetProduct: {
         ...state.targetProduct,
         targetProductCountry: value,
@@ -40,6 +60,10 @@ export const createLeadFilterHandlers = (
       validationErrors: [],
       leadValidation: initialLeadValidation,
     }));
+
+    if (value && get().leadFilters.leadVertical) {
+      get().updateAvailableAffiliates();
+    }
   },
 
   handleLeadAffiliateChange: (value: string) => {
@@ -96,5 +120,9 @@ export const createLeadFilterHandlers = (
       validationErrors: [],
       leadValidation: initialLeadValidation,
     }));
+
+    setTimeout(() => {
+      get().updateAvailableAffiliates();
+    }, 100);
   },
 });

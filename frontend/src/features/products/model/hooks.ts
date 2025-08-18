@@ -1,19 +1,44 @@
 import { useQuery } from '@tanstack/react-query';
 import { frontendClient } from '@/shared/model/client';
-import { Product, ProductsResponseSchema } from './schemas';
+import {
+  Product,
+  ProductsResponseSchema,
+  type ProductsFilters,
+} from './schemas';
 
 export const PRODUCTS_QUERY_KEYS = {
   PRODUCTS: ['products'] as const,
+  PRODUCTS_FILTERED: ['products', 'filtered'] as const,
 } as const;
 
-export const useProducts = () => {
+const buildQueryParams = (filters?: ProductsFilters): string => {
+  if (!filters || typeof filters !== 'object') {
+    return '';
+  }
+
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      params.append(key, String(value));
+    }
+  });
+
+  return params.toString();
+};
+
+export const useProducts = (filters?: ProductsFilters) => {
   return useQuery({
-    queryKey: PRODUCTS_QUERY_KEYS.PRODUCTS,
+    queryKey: [...PRODUCTS_QUERY_KEYS.PRODUCTS_FILTERED, filters] as const,
     queryFn: async (): Promise<Product[]> => {
       if (typeof window === 'undefined') return [];
 
       try {
-        const response = await frontendClient.get('/api/external/get_products');
+        const queryParams = buildQueryParams(filters);
+        const url = queryParams
+          ? `/api/external/get_products?${queryParams}`
+          : '/api/external/get_products';
+
+        const response = await frontendClient.get(url);
 
         let data: Product[];
         if (Array.isArray(response.data)) {

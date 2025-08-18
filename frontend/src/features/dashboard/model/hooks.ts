@@ -63,7 +63,9 @@ export function useAnalyticsOverview() {
       const result = await response.json();
       return result.data || result;
     },
-    refetchInterval: 30000, // Обновляем каждые 30 секунд
+    refetchInterval: 15000,
+    staleTime: 10000,
+    gcTime: 30000,
   });
 }
 

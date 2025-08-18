@@ -11,7 +11,6 @@ export const ProductSchema = z.object({
 });
 
 export const ProductsFiltersSchema = z.object({
-  searchQuery: z.string().optional(),
   country: z.nativeEnum(CountryEnum).optional(),
   vertical: z.nativeEnum(VerticalEnum).optional(),
   aff: z.nativeEnum(AffEnum).optional(),

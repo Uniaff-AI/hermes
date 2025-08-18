@@ -4,7 +4,7 @@ import Head from 'next/head';
 import React from 'react';
 import ErrorBoundary from '@/shared/providers/ErrorBoundary';
 
-import Stats from '@/features/dashboard/Stats';
+import Stats from '@/features/dashboard/components/Statistics/Stats';
 import Layout from '@/app/layout/Layout';
 
 import DashboardPage from '@/app/dashboard/page';

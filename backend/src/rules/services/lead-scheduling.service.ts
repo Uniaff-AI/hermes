@@ -287,22 +287,70 @@ export class LeadSchedulingService {
     windowStart: number,
     rule: Rule,
   ): void {
-    leads.forEach((lead) => {
-      const rndMin = this.utils.randomInRange(
-        rule.minIntervalMinutes,
-        rule.maxIntervalMinutes,
+    this.logger.log(
+      `Scheduling ${leads.length} leads with intervals ${rule.minIntervalMinutes}-${rule.maxIntervalMinutes} minutes for rule ${ruleId}`,
+    );
+
+    const { windowEnd } = this.calculateTimeWindow(rule);
+    let currentScheduleTime = windowStart;
+    let leadsScheduled = 0;
+    let leadsSkipped = 0;
+
+    leads.forEach((lead, index) => {
+      // For the first lead, schedule immediately at windowStart
+      // For subsequent leads, add random interval from previous lead
+      if (index > 0) {
+        const intervalMinutes = this.utils.randomInRange(
+          rule.minIntervalMinutes,
+          rule.maxIntervalMinutes,
+        );
+        currentScheduleTime += intervalMinutes * 60_000; // Add interval in milliseconds
+      }
+
+      // Check if the scheduled time exceeds the time window (only for non-infinite rules)
+      if (!rule.isInfinite && currentScheduleTime > windowEnd) {
+        this.logger.warn(
+          `Lead ${index + 1}/${leads.length} (${lead.subid}) skipped - would exceed time window. Scheduled: ${new Date(currentScheduleTime).toLocaleTimeString()}, Window ends: ${new Date(windowEnd).toLocaleTimeString()}`,
+        );
+        leadsSkipped++;
+        return;
+      }
+
+      const delay = Math.max(currentScheduleTime - Date.now(), 0);
+      const scheduleDate = new Date(currentScheduleTime);
+
+      this.logger.log(
+        `Lead ${index + 1}/${leads.length} (${lead.subid}) scheduled for ${scheduleDate.toLocaleTimeString()} (in ${Math.round(delay / 1000 / 60)} minutes)`,
       );
-      const at = windowStart + rndMin * 60_000;
-      const delay = Math.max(at - Date.now(), 0);
 
       setTimeout(() => {
+        this.logger.log(
+          `Sending lead ${index + 1}/${leads.length} (${lead.subid}) for rule ${ruleId}`,
+        );
         this.sendOneLead(ruleId, lead).catch((err) =>
           this.logger.error(
             `rule ${ruleId}: send ${lead.subid} error: ${err?.message || err}`,
           ),
         );
       }, delay);
+
+      leadsScheduled++;
     });
+
+    // Log final schedule summary
+    const lastScheduleTime = new Date(currentScheduleTime);
+    const totalDuration = Math.round(
+      (currentScheduleTime - windowStart) / 1000 / 60,
+    );
+    this.logger.log(
+      `Rule ${ruleId}: ${leadsScheduled} leads scheduled, ${leadsSkipped} skipped (exceeds time window). Last lead at ${lastScheduleTime.toLocaleTimeString()} (total duration: ${totalDuration} minutes)`,
+    );
+
+    if (leadsSkipped > 0 && !rule.isInfinite) {
+      this.logger.warn(
+        `Rule ${ruleId}: ${leadsSkipped} leads were skipped because they would exceed the time window (${new Date(windowStart).toLocaleTimeString()} - ${new Date(windowEnd).toLocaleTimeString()}). Consider: 1) Reducing interval time, 2) Extending time window, 3) Reducing daily cap limit.`,
+      );
+    }
   }
 
   private async sendOneLead(ruleId: string, lead: Lead): Promise<void> {

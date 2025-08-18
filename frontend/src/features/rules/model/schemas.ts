@@ -245,14 +245,23 @@ export interface RuleDebugLogs {
   ruleConfig: {
     isActive: boolean;
     isInfinite: boolean;
+    productName?: string;
+    productId?: string;
+    country?: string;
+    vertical?: string;
+    status?: string;
+    dailyCapLimit?: number;
+    sendWindow?: string;
+    sendDateWindow?: string;
+    intervals?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    // Keep old fields for backward compatibility
     targetProductName?: string;
     targetProductId?: string;
     targetProductCountry?: string;
     targetProductVertical?: string;
     leadStatus?: string;
-    dailyCapLimit?: number;
-    sendWindow?: string;
-    intervals?: string;
     leadDateFrom?: string;
     leadDateTo?: string;
   };

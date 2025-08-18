@@ -18,20 +18,23 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isClient, setIsClient] = useState(false);
 
+  // Use server-side filtering for dropdown filters only, exclude search-related fields
   const serverFilters = useMemo(() => {
-    const { searchQuery: _, productName: __, ...serverFilters } = filters;
+    const { productName: _, ...serverFilters } = filters;
     return serverFilters;
   }, [filters]);
 
-  const { data: leads = [], isLoading, error } = useLeads(serverFilters);
+  const { data: allLeads = [], isLoading, error } = useLeads(serverFilters);
 
-  const filteredLeads = useMemo(() => {
-    if (!isClient || !Array.isArray(leads) || leads.length === 0) {
+  // Client-side filtering for search query and productName (as it was originally)
+  const leads = useMemo(() => {
+    if (!isClient || !Array.isArray(allLeads) || allLeads.length === 0) {
       return [];
     }
 
-    let filtered = [...leads];
+    let filtered = [...allLeads];
 
+    // Client-side search across multiple fields
     if (searchQuery && searchQuery.trim() !== '') {
       const searchLower = searchQuery.toLowerCase();
       filtered = filtered.filter((lead) => {
@@ -47,6 +50,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
       });
     }
 
+    // Client-side productName filtering
     if (filters.productName && filters.productName.trim() !== '') {
       const productNameLower = filters.productName.toLowerCase();
       filtered = filtered.filter((lead) => {
@@ -55,7 +59,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     }
 
     return filtered;
-  }, [isClient, leads, searchQuery, filters.productName]);
+  }, [isClient, allLeads, searchQuery, filters.productName]);
 
   useEffect(() => {
     setIsClient(true);
@@ -68,8 +72,8 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
-    if (checked && Array.isArray(filteredLeads)) {
-      setSelectedLeads(filteredLeads.map((lead) => lead.subid));
+    if (checked && Array.isArray(leads)) {
+      setSelectedLeads(leads.map((lead) => lead.subid));
     } else {
       setSelectedLeads([]);
     }
@@ -131,11 +135,11 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
     );
   }
 
-  if (!Array.isArray(filteredLeads) || filteredLeads.length === 0) {
+  if (!Array.isArray(leads) || leads.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
         <div className="text-center text-gray-500">
-          {hasActiveFilters()
+          {hasActiveFilters() || searchQuery?.trim()
             ? 'Лиды не найдены по вашему запросу.'
             : 'Лиды не найдены'}
         </div>
@@ -169,7 +173,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Лиды</h2>
         <p className="text-sm text-gray-500">
-          Показано {filteredLeads.length} лидов
+          Показано {leads.length} лидов
           {selectedLeads.length > 0 && ` • Выбрано: ${selectedLeads.length}`}
         </p>
       </div>
@@ -182,8 +186,8 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
               <th className="px-6 py-3 text-left">
                 <Checkbox
                   checked={
-                    selectedLeads.length === filteredLeads.length &&
-                    filteredLeads.length > 0
+                    selectedLeads.length === leads.length &&
+                    leads.length > 0
                   }
                   onChange={handleSelectAll}
                 />
@@ -227,8 +231,8 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredLeads.length > 0 ? (
-              filteredLeads.map((lead) => (
+            {leads.length > 0 ? (
+              leads.map((lead) => (
                 <tr key={lead.subid} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Checkbox
@@ -297,7 +301,7 @@ export const LeadsTable = ({ searchQuery, filters }: LeadsTableProps) => {
             ) : (
               <tr>
                 <td colSpan={13} className="text-center py-6 text-gray-500">
-                  {hasActiveFilters()
+                  {hasActiveFilters() || searchQuery?.trim()
                     ? 'Лиды не найдены по вашему запросу.'
                     : 'Лиды не найдены.'}
                 </td>

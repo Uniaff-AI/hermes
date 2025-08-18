@@ -8,13 +8,11 @@ import PageHeader from '@/shared/components/PageHeader';
 import { LeadsFilters } from '@/features/leads/model/schemas';
 
 const LeadsView = () => {
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [filters, setFilters] = useState<LeadsFilters>({});
 
   const handleSearchChange = (searchQuery: string) => {
-    setFilters(prev => ({
-      ...prev,
-      searchQuery: searchQuery || undefined,
-    }));
+    setSearchQuery(searchQuery);
   };
 
   const handleFiltersChange = (newFilters: LeadsFilters) => {
@@ -22,6 +20,7 @@ const LeadsView = () => {
   };
 
   const handleClearFilters = () => {
+    setSearchQuery('');
     setFilters({});
   };
 
@@ -35,13 +34,13 @@ const LeadsView = () => {
         isSecondButtonIcon={false}
       />
       <LeadsFiltersComponent
-        searchQuery={filters.searchQuery || ''}
+        searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         filters={filters}
         onFiltersChange={handleFiltersChange}
         onClearFilters={handleClearFilters}
       />
-      <LeadsTable searchQuery={filters.searchQuery || ''} filters={filters} />
+      <LeadsTable searchQuery={searchQuery} filters={filters} />
     </>
   );
 };

@@ -48,8 +48,17 @@ export const useLeads = (filters?: LeadsFilters) => {
           typeof response.data === 'object' &&
           'data' in response.data
         ) {
-          const parsed = LeadsResponseSchema.parse(response.data);
-          data = parsed.data;
+          if (
+            response.data.data &&
+            typeof response.data.data === 'object' &&
+            'leads' in response.data.data &&
+            Array.isArray(response.data.data.leads)
+          ) {
+            data = response.data.data.leads;
+          } else {
+            const parsed = LeadsResponseSchema.parse(response.data);
+            data = parsed.data;
+          }
         } else {
           return [];
         }
@@ -85,8 +94,18 @@ export const useLeadsStats = () => {
           typeof response.data === 'object' &&
           'data' in response.data
         ) {
-          const parsed = LeadsResponseSchema.parse(response.data);
-          data = parsed.data;
+          // Check if data is nested with leads property
+          if (
+            response.data.data &&
+            typeof response.data.data === 'object' &&
+            'leads' in response.data.data &&
+            Array.isArray(response.data.data.leads)
+          ) {
+            data = response.data.data.leads;
+          } else {
+            const parsed = LeadsResponseSchema.parse(response.data);
+            data = parsed.data;
+          }
         } else {
           return [];
         }

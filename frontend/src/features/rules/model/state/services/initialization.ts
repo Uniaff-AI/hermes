@@ -4,7 +4,7 @@ import type { Rule } from '../../schemas';
 
 export const createInitializationService = (
   set: any,
-  get: () => BaseRuleState
+  get: () => BaseRuleState & { updateAvailableAffiliates: () => Promise<void> }
 ) => ({
   initializeProducts: (products: any[]) => {
     const uniqueVerticals = [...new Set(products.map((p: any) => p.vertical))];
@@ -33,6 +33,10 @@ export const createInitializationService = (
         })),
       },
     });
+
+    setTimeout(() => {
+      get().updateAvailableAffiliates();
+    }, 100);
   },
 
   initializeFromRule: (rule: Rule, products: any[]) => {

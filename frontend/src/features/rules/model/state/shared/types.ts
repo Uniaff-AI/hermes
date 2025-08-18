@@ -88,6 +88,8 @@ export interface BaseRuleState {
 }
 
 export interface BaseRuleActions {
+  // State getter
+  get: () => BaseRuleState & BaseRuleActions;
   resetForm: () => void;
   setValidationErrors: (errors: string[]) => void;
   validateForm: () => Promise<boolean>;
@@ -129,6 +131,9 @@ export interface BaseRuleActions {
   // Lead validation
   checkLeadExistence: () => Promise<void>;
   resetLeadValidation: () => void;
+  updateAvailableAffiliates: () => Promise<void>;
+  refreshAvailableAffiliates: () => Promise<void>;
+  checkAvailableAffiliates: () => Promise<string[]>;
 
   // Rule testing
   testRule: () => Promise<void>;

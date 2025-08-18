@@ -196,7 +196,7 @@ const LeadsFiltersComponent: FC<LeadsFiltersProps> = ({
                 label="Статус"
                 value={filters.status}
                 onChange={(value) => handleFilterChange('status', value)}
-                options={(Object.values(StatusEnum) || []) as string[]}
+                options={(Object.values(StatusEnum).filter(status => status !== 'ALL') || []) as string[]}
                 placeholder="Выберите статус"
                 showTranslations={true}
               />
@@ -278,7 +278,7 @@ const FilterSelect: FC<{
         className="w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-sm text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <span className={value ? 'text-gray-900' : 'text-gray-500'}>
-          {value ? (showTranslations && StatusTranslations[value as StatusEnum] ? StatusTranslations[value as StatusEnum] : value) : placeholder}
+          {value ? (showTranslations && StatusTranslations[value as StatusEnum] ? StatusTranslations[value as StatusEnum] : value) : 'Все'}
         </span>
         <ChevronDown
           className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}

@@ -87,6 +87,7 @@ const RuleCreationFormNew: FC = () => {
     // Lead Validation
     checkLeadExistence,
     resetLeadValidation,
+    refreshAvailableAffiliates,
 
     // Initialization
     initializeProducts,
@@ -253,12 +254,27 @@ const RuleCreationFormNew: FC = () => {
 
           <div>
             <Label>Партнерская Программа</Label>
-            <Select
-              placeholder="Выберите ПП"
-              value={leadFilters.leadAffiliate}
-              onChange={handleLeadAffiliateChange}
-              options={leadFilterOptions.affiliates}
-            />
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Select
+                  placeholder="Выберите ПП"
+                  value={leadFilters.leadAffiliate}
+                  onChange={handleLeadAffiliateChange}
+                  options={leadFilterOptions.affiliates}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={refreshAvailableAffiliates}
+                disabled={!leadFilters.leadVertical || !leadFilters.leadCountry}
+                className="px-2"
+                title="Обновить список доступных аффилиатов"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+            </div>
             <p className="text-xs text-gray-500 mt-1">
               Источник лидов
             </p>

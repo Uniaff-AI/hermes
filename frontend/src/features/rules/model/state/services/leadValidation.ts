@@ -3,7 +3,10 @@ import { initialLeadValidation } from '../shared/initialState';
 
 export const createLeadValidationService = (
   set: any,
-  get: () => BaseRuleState
+  get: () => BaseRuleState & {
+    checkAvailableAffiliates: () => Promise<string[]>;
+    updateAvailableAffiliates: () => Promise<void>;
+  }
 ) => ({
   checkLeadExistence: async () => {
     const state = get();
@@ -61,73 +64,62 @@ export const createLeadValidationService = (
       }
 
       const data = await response.json();
+      console.log('checkLeadExistence - API response:', data);
+
+      let leads: any[] = [];
 
       if (data.success && data.data && Array.isArray(data.data)) {
-        const leadCount = data.data.length;
-
-        if (leadCount > 0) {
-          const sampleLeads = data.data.slice(0, 3).map((lead: any) => ({
-            name: lead.leadName,
-            phone: lead.phone,
-            country: lead.country,
-            status: lead.status,
-            vertical: lead.vertical,
-            affiliate: lead.aff,
-          }));
-
-          set({
-            leadValidation: {
-              isChecking: false,
-              result: 'success',
-              message: `Найдено ${leadCount} лидов, соответствующих фильтрам`,
-              leadCount,
-              sampleLeads,
-            },
-          });
-        } else {
-          set({
-            leadValidation: {
-              isChecking: false,
-              result: 'no-leads',
-              message: 'Лиды с указанными фильтрами не найдены',
-              leadCount: 0,
-            },
-          });
-        }
+        leads = data.data;
+      } else if (
+        data.success &&
+        data.data &&
+        data.data.leads &&
+        Array.isArray(data.data.leads)
+      ) {
+        leads = data.data.leads;
       } else if (data.leads && Array.isArray(data.leads)) {
-        const leadCount = data.leads.length;
-
-        if (leadCount > 0) {
-          const sampleLeads = data.leads.slice(0, 3).map((lead: any) => ({
-            name: lead.leadName,
-            phone: lead.phone,
-            country: lead.country,
-            status: lead.status,
-            vertical: lead.vertical,
-            affiliate: lead.aff,
-          }));
-
-          set({
-            leadValidation: {
-              isChecking: false,
-              result: 'success',
-              message: `Найдено ${leadCount} лидов, соответствующих фильтрам`,
-              leadCount,
-              sampleLeads,
-            },
-          });
-        } else {
-          set({
-            leadValidation: {
-              isChecking: false,
-              result: 'no-leads',
-              message: 'Лиды с указанными фильтрами не найдены',
-              leadCount: 0,
-            },
-          });
-        }
+        leads = data.leads;
+      } else if (Array.isArray(data)) {
+        leads = data;
       } else {
+        console.error(
+          'checkLeadExistence - Unexpected API response format:',
+          data
+        );
         throw new Error('Неверный формат ответа от API');
+      }
+
+      const leadCount = leads.length;
+      console.log('checkLeadExistence - Found leads count:', leadCount);
+
+      if (leadCount > 0) {
+        const sampleLeads = leads.slice(0, 3).map((lead: any) => ({
+          name: lead.leadName || lead.name || 'N/A',
+          phone: lead.phone || 'N/A',
+          country: lead.country || 'N/A',
+          status: lead.status || 'N/A',
+          vertical: lead.vertical || 'N/A',
+          affiliate: lead.aff || lead.affiliate || 'N/A',
+        }));
+
+        set({
+          leadValidation: {
+            isChecking: false,
+            result: 'success',
+            message: `Найдено ${leadCount} лидов, соответствующих фильтрам`,
+            leadCount,
+            sampleLeads,
+          },
+        });
+      } else {
+        set({
+          leadValidation: {
+            isChecking: false,
+            result: 'no-leads',
+            message: 'Лиды с указанными фильтрами не найдены',
+            leadCount: 0,
+          },
+        });
       }
     } catch (error) {
       console.error('Ошибка при проверке лидов:', error);
@@ -155,7 +147,8 @@ export const createLeadValidationService = (
 
       if (
         state.leadFilters.leadStatus &&
-        state.leadFilters.leadStatus !== 'ALL'
+        state.leadFilters.leadStatus !== 'ALL' &&
+        state.leadFilters.leadStatus !== ''
       ) {
         params.append('status', state.leadFilters.leadStatus);
       }
@@ -167,6 +160,11 @@ export const createLeadValidationService = (
       );
 
       if (!response.ok) {
+        console.error(
+          'API response not ok:',
+          response.status,
+          response.statusText
+        );
         return [];
       }
 
@@ -175,6 +173,13 @@ export const createLeadValidationService = (
 
       if (data.success && data.data && Array.isArray(data.data)) {
         leads = data.data;
+      } else if (
+        data.success &&
+        data.data &&
+        data.data.leads &&
+        Array.isArray(data.data.leads)
+      ) {
+        leads = data.data.leads;
       } else if (data.leads && Array.isArray(data.leads)) {
         leads = data.leads;
       } else if (Array.isArray(data)) {
@@ -189,7 +194,9 @@ export const createLeadValidationService = (
         }
       });
 
-      return Array.from(affiliates).sort();
+      const result = Array.from(affiliates).sort();
+      console.log('Available affiliates found:', result.length, result);
+      return result;
     } catch (error) {
       console.error('Ошибка при получении доступных affiliate:', error);
       return [];
@@ -200,5 +207,102 @@ export const createLeadValidationService = (
     set({
       leadValidation: initialLeadValidation,
     });
+  },
+
+  updateAvailableAffiliates: async () => {
+    const state = get();
+
+    set({
+      leadFilterOptions: {
+        ...state.leadFilterOptions,
+        affiliates: [
+          {
+            label: 'Загрузка доступных affiliate...',
+            value: '',
+          },
+        ],
+      },
+    });
+
+    if (!state.leadFilters.leadVertical || !state.leadFilters.leadCountry) {
+      const allAffiliates = [...new Set(state.products.map((p: any) => p.aff))];
+      set({
+        leadFilterOptions: {
+          ...state.leadFilterOptions,
+          affiliates: allAffiliates.map((aff: any) => ({
+            label: aff,
+            value: aff,
+          })),
+        },
+      });
+      console.log(
+        'updateAvailableAffiliates - No vertical/country, showing all affiliates:',
+        allAffiliates
+      );
+      return;
+    }
+
+    try {
+      const availableAffiliates = await get().checkAvailableAffiliates();
+
+      if (availableAffiliates.length === 0) {
+        set({
+          leadFilterOptions: {
+            ...state.leadFilterOptions,
+            affiliates: [
+              {
+                label: 'Нет доступных affiliate для выбранных параметров',
+                value: '',
+              },
+            ],
+          },
+        });
+        console.log(
+          'updateAvailableAffiliates - No affiliates found for:',
+          state.leadFilters.leadVertical,
+          state.leadFilters.leadCountry
+        );
+      } else {
+        set({
+          leadFilterOptions: {
+            ...state.leadFilterOptions,
+            affiliates: availableAffiliates.map((aff: string) => ({
+              label: aff,
+              value: aff,
+            })),
+          },
+        });
+        console.log(
+          'updateAvailableAffiliates - Found affiliates:',
+          availableAffiliates
+        );
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении доступных affiliate:', error);
+      set({
+        leadFilterOptions: {
+          ...state.leadFilterOptions,
+          affiliates: [
+            {
+              label: 'Ошибка загрузки affiliate',
+              value: '',
+            },
+          ],
+        },
+      });
+    }
+  },
+
+  refreshAvailableAffiliates: async () => {
+    const state = get();
+
+    set((state: BaseRuleState) => ({
+      leadFilters: {
+        ...state.leadFilters,
+        leadAffiliate: '',
+      },
+    }));
+
+    await get().updateAvailableAffiliates();
   },
 });

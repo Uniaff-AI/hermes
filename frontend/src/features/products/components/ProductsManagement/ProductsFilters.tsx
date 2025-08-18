@@ -63,7 +63,7 @@ const ProductsFilters: FC<ProductsFiltersProps> = ({
   };
 
   const hasActiveFilters = filters && typeof filters === 'object' && Object.values(filters).some(
-    (value) => value !== undefined && value !== '' && value !== null
+    (value) => value !== undefined && value !== null
   );
 
   return (
@@ -139,7 +139,7 @@ const ProductsFilters: FC<ProductsFiltersProps> = ({
           className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
         >
           <Filter className="w-4 h-4" />
-          <span>Расширенные фильтры по колонкам</span>
+          <span>Расширенные фильтры</span>
           <motion.div
             animate={{ rotate: isAdvancedVisible ? 180 : 0 }}
             transition={{ duration: 0.2 }}

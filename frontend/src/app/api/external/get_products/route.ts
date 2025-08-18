@@ -10,7 +10,23 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const url = createExternalAPIUrl('get_products');
+    const { searchParams } = new URL(request.url);
+
+    const queryParams = new URLSearchParams();
+
+    const vertical = searchParams.get('vertical');
+    if (vertical) queryParams.append('vertical', vertical);
+
+    const country = searchParams.get('country');
+    if (country) queryParams.append('country', country);
+
+    const aff = searchParams.get('aff');
+    if (aff) queryParams.append('aff', aff);
+
+    const baseUrl = createExternalAPIUrl('get_products');
+    const url = queryParams.toString()
+      ? `${baseUrl}?${queryParams.toString()}`
+      : baseUrl;
 
     const response = await fetch(url, {
       method: 'GET',

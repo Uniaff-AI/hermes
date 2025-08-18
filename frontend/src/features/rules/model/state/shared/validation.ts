@@ -106,5 +106,20 @@ export const validateForm = (state: BaseRuleState): string[] => {
 
   errors.push(...validateProductExists(state.targetProduct, state.products));
 
+  if (state.leadFilters.leadVertical && state.leadFilters.leadCountry) {
+    const availableAffiliates = state.leadFilterOptions.affiliates
+      .filter((aff) => aff.value !== '')
+      .map((aff) => aff.value);
+
+    if (
+      state.leadFilters.leadAffiliate &&
+      !availableAffiliates.includes(state.leadFilters.leadAffiliate)
+    ) {
+      errors.push(
+        'Выбранный аффилиат недоступен для указанных параметров фильтрации. Обновите список аффилиатов.'
+      );
+    }
+  }
+
   return errors;
 };

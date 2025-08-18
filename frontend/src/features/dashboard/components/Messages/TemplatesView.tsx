@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Select } from '@/shared/ui/select';
-import { CreateCategoryModal } from '@/features/dashboard/messages/CreateCategoryModal';
-import CreateTemplateModal from '@/features/dashboard/messages/CreateTemplateModal';
-import EditTemplateModal from '@/features/dashboard/messages/EditTemplateModal';
-import TemplateCard, { TemplateData } from './TemplateCard';
+import { CreateCategoryModal } from '@/features/dashboard/components/Messages/CreateCategoryModal';
+import CreateTemplateModal from '@/features/dashboard/components/Messages/CreateTemplateModal';
+import EditTemplateModal from '@/features/dashboard/components/Messages/EditTemplateModal';
+import TemplateCard, { TemplateData } from '@/features/dashboard/components/Messages/TemplateCard';
 
 const categoryOptions = [
   { label: 'Все категории', value: 'all' },

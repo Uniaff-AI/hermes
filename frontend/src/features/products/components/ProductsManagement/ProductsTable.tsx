@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useMemo, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useMemo } from 'react';
 import { useProducts } from '../../model/hooks';
 import type { ProductsFilters } from '../../model/schemas';
 
@@ -11,53 +11,38 @@ type ProductsTableProps = {
 
 const ProductsTable: FC<ProductsTableProps> = ({ searchQuery, filters }) => {
   const [isClient, setIsClient] = useState(false);
-  const { data: products = [], isLoading, error } = useProducts();
+
+  // Only use server-side filtering for dropdown filters, not for search
+  const { data: allProducts = [], isLoading, error } = useProducts(filters);
+
+  // Client-side search filtering (as it was originally)
+  const products = useMemo(() => {
+    if (!isClient || !Array.isArray(allProducts) || allProducts.length === 0) {
+      return [];
+    }
+
+    let filtered = [...allProducts];
+
+    // Client-side search across multiple fields
+    if (searchQuery?.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (product) =>
+          product?.productName?.toLowerCase()?.includes(lowerQuery) ||
+          product?.productId?.toLowerCase()?.includes(lowerQuery) ||
+          product?.country?.toLowerCase()?.includes(lowerQuery) ||
+          product?.vertical?.toLowerCase()?.includes(lowerQuery) ||
+          product?.aff?.toLowerCase()?.includes(lowerQuery)
+      );
+    }
+
+    return filtered;
+  }, [isClient, allProducts, searchQuery]);
 
   // Ensure this only runs on client side
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const filteredProducts = useMemo(() => {
-    if (!isClient || !products || !Array.isArray(products) || products.length === 0) {
-      return [];
-    }
-
-    try {
-      let filtered = [...products];
-
-      if (searchQuery?.trim()) {
-        const lowerQuery = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (product) =>
-            product?.productName?.toLowerCase()?.includes(lowerQuery) ||
-            product?.productId?.toLowerCase()?.includes(lowerQuery) ||
-            product?.country?.toLowerCase()?.includes(lowerQuery) ||
-            product?.vertical?.toLowerCase()?.includes(lowerQuery) ||
-            product?.aff?.toLowerCase()?.includes(lowerQuery)
-        );
-      }
-
-      if (filters?.country) {
-        filtered = filtered.filter((product) => product?.country === filters.country);
-      }
-
-      if (filters?.vertical) {
-        filtered = filtered.filter(
-          (product) => product?.vertical === filters.vertical
-        );
-      }
-
-      if (filters?.aff) {
-        filtered = filtered.filter((product) => product?.aff === filters.aff);
-      }
-
-      return filtered;
-    } catch (error) {
-      console.error('Error filtering products:', error);
-      return [];
-    }
-  }, [isClient, products, searchQuery, filters]);
 
   const hasActiveFilters = () => {
     try {
@@ -90,7 +75,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ searchQuery, filters }) => {
     );
   }
 
-  if (!Array.isArray(filteredProducts) || filteredProducts.length === 0) {
+  if (!Array.isArray(products) || products.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-8">
         <div className="text-center text-gray-500">
@@ -108,7 +93,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ searchQuery, filters }) => {
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Продукты</h2>
         <p className="text-sm text-gray-500">
-          Показано {filteredProducts.length} продуктов
+          Показано {products.length} продуктов
         </p>
       </div>
 
@@ -135,7 +120,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ searchQuery, filters }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredProducts.map((product, index) => (
+            {products.map((product, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {product.productName}

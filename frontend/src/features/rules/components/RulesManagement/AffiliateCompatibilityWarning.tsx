@@ -45,9 +45,10 @@ const AffiliateCompatibilityWarning: FC<AffiliateCompatibilityWarningProps> = ({
       const data = await response.json();
       let leads: any[] = [];
 
-
       if (data.success && data.data && Array.isArray(data.data)) {
         leads = data.data;
+      } else if (data.success && data.data && data.data.leads && Array.isArray(data.data.leads)) {
+        leads = data.data.leads;
       } else if (data.leads && Array.isArray(data.leads)) {
         leads = data.leads;
       } else if (Array.isArray(data)) {
@@ -65,6 +66,9 @@ const AffiliateCompatibilityWarning: FC<AffiliateCompatibilityWarningProps> = ({
 
       const availableList = Array.from(affiliates).sort();
       setAvailableAffiliates(availableList);
+
+      console.log('AffiliateCompatibilityWarning - Found affiliates:', availableList);
+      console.log('AffiliateCompatibilityWarning - Selected affiliate:', selectedAffiliate);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка проверки');
     } finally {
@@ -96,16 +100,22 @@ const AffiliateCompatibilityWarning: FC<AffiliateCompatibilityWarningProps> = ({
     return (
       <div className="flex items-center gap-2 text-sm text-green-600">
         <CheckCircle className="w-4 h-4" />
-        <span>Affiliate совместим - найдены лиды с "{selectedAffiliate}"</span>
+        <span>Affiliate совместим - найдены лиды с "{selectedAffiliate}" для {vertical} + {country}</span>
       </div>
     );
   }
 
   if (availableAffiliates.length === 0) {
     return (
-      <div className="flex items-center gap-2 text-sm text-orange-600">
-        <AlertTriangle className="w-4 h-4" />
-        <span>Для комбинации {vertical} + {country} лиды не найдены</span>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-sm text-orange-600">
+          <AlertTriangle className="w-4 h-4" />
+          <span>Внимание: Для комбинации {vertical} + {country} лиды не найдены</span>
+        </div>
+        <div className="text-xs text-gray-600">
+          <strong>Объяснение:</strong> Аффилиат "{selectedAffiliate}" выбран из списка продуктов, но в базе лидов нет записей с такими параметрами.
+          Это может означать, что лиды еще не загружены или параметры фильтрации слишком строгие.
+        </div>
       </div>
     );
   }
@@ -119,7 +129,10 @@ const AffiliateCompatibilityWarning: FC<AffiliateCompatibilityWarningProps> = ({
         </span>
       </div>
       <div className="text-xs text-gray-600">
-        <strong>Доступные affiliate:</strong> {availableAffiliates.join(', ')}
+        <strong>Доступные affiliate из лидов:</strong> {availableAffiliates.join(', ')}
+      </div>
+      <div className="text-xs text-gray-500">
+        <strong>Рекомендация:</strong> Выберите один из доступных аффилиатов или измените параметры фильтрации
       </div>
     </div>
   );

@@ -17,7 +17,6 @@ export const LeadSchema = z.object({
 });
 
 export const LeadsFiltersSchema = z.object({
-  searchQuery: z.string().optional(),
   vertical: z.string().optional(),
   country: z.string().optional(),
   status: z.string().optional(),
@@ -29,7 +28,12 @@ export const LeadsFiltersSchema = z.object({
 
 export const LeadsResponseSchema = z.object({
   success: z.boolean(),
-  data: z.array(LeadSchema),
+  data: z.union([
+    z.array(LeadSchema),
+    z.object({
+      leads: z.array(LeadSchema),
+    }),
+  ]),
 });
 
 export type Lead = z.infer<typeof LeadSchema>;
