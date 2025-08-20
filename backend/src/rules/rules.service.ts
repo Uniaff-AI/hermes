@@ -81,6 +81,28 @@ export class RulesService {
       `Current rule status: ${rule.leadStatus} (type: ${typeof rule.leadStatus})`,
     );
 
+    // Check if rule is being deactivated
+    const wasActive = rule.isActive;
+    const willBeActive =
+      patch.isActive !== undefined ? patch.isActive : wasActive;
+
+    // If rule is being deactivated, cancel scheduled leads
+    if (wasActive && !willBeActive) {
+      this.logger.log(
+        `Rule ${id} being deactivated, cancelling scheduled leads`,
+      );
+      try {
+        const cancelResult = this.leadScheduling.cancelScheduledLeads(id);
+        this.logger.log(
+          `Cancelled ${cancelResult.cancelledCount} scheduled leads for rule ${id}`,
+        );
+      } catch (error: any) {
+        this.logger.error(
+          `Failed to cancel scheduled leads for rule ${id}: ${error?.message || error}`,
+        );
+      }
+    }
+
     // Handle null values by converting them to undefined for TypeORM
     const processedPatch = { ...patch };
 
@@ -129,6 +151,19 @@ export class RulesService {
   }
 
   async remove(id: string): Promise<void> {
+    // Cancel any scheduled leads before deletion
+    this.logger.log(`Removing rule ${id}, cancelling scheduled leads`);
+    try {
+      const cancelResult = this.leadScheduling.cancelScheduledLeads(id);
+      this.logger.log(
+        `Cancelled ${cancelResult.cancelledCount} scheduled leads for rule ${id}`,
+      );
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to cancel scheduled leads for rule ${id}: ${error?.message || error}`,
+      );
+    }
+
     await this.repo.delete(id);
   }
 
@@ -159,6 +194,18 @@ export class RulesService {
 
   async getRuleDebugLogs(id: string) {
     return this.monitoring.getRuleDebugLogs(id);
+  }
+
+  cancelScheduledLeads(id: string) {
+    return this.leadScheduling.cancelScheduledLeads(id);
+  }
+
+  getScheduledLeadsStatus(id: string) {
+    return this.leadScheduling.getScheduledLeadsStatus(id);
+  }
+
+  cleanupExpiredTimeouts() {
+    return this.leadScheduling.cleanupExpiredTimeouts();
   }
 
   // Public method for scheduling lead sending (for Bull processor)

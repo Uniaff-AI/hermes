@@ -7,9 +7,19 @@ import { LeadSending, LeadSendingStatus } from '../domain/lead-sending.entity';
 import { ExternalApiService, Lead } from './external-api.service';
 import { RulesUtilsService } from './rules-utils.service';
 
+interface ScheduledTimeout {
+  timeoutId: NodeJS.Timeout;
+  ruleId: string;
+  leadSubid: string;
+  scheduleTime: number;
+  createdAt: number;
+}
+
 @Injectable()
 export class LeadSchedulingService {
   private readonly logger = new Logger(LeadSchedulingService.name);
+  private readonly activeExecutions = new Set<string>(); // Track active rule executions
+  private readonly scheduledTimeouts = new Map<string, ScheduledTimeout[]>(); // ruleId -> timeout[]
 
   constructor(
     @InjectRepository(Rule) private readonly ruleRepo: Repository<Rule>,
@@ -20,52 +30,86 @@ export class LeadSchedulingService {
   ) {}
 
   async scheduleLeadsSending(rule: Rule): Promise<void> {
-    this.logger.log(
-      `🚀 scheduleLeadsSending: Starting for rule ${rule.id} (${rule.name})`,
-    );
-    this.logger.log(
-      `🔧 Rule config: isActive=${rule.isActive}, isInfinite=${rule.isInfinite}`,
-    );
-
-    if (!rule.isActive) {
-      this.logger.log(`rule ${rule.id} paused — skip`);
+    // Check for concurrent execution
+    if (this.activeExecutions.has(rule.id)) {
+      this.logger.warn(
+        `🚫 Rule ${rule.id} (${rule.name}) is already being executed, skipping to prevent duplicate scheduling`,
+      );
       return;
     }
 
-    // 1) Get leads from the external API
-    this.logger.log(`🔍 Fetching leads for rule ${rule.id}...`);
-    const leads = await this.fetchLeadsForRule(rule);
-    this.logger.log(`📥 Fetched ${leads.length} leads for rule ${rule.id}`);
+    // Mark rule as being executed
+    this.activeExecutions.add(rule.id);
 
-    if (!leads.length) {
-      this.logger.warn(`❌ rule ${rule.id}: no leads to send - CHECK FILTERS!`);
-      return;
+    try {
+      this.logger.log(
+        `🚀 scheduleLeadsSending: Starting for rule ${rule.id} (${rule.name})`,
+      );
+      this.logger.log(
+        `🔧 Rule config: isActive=${rule.isActive}, isInfinite=${rule.isInfinite}, dailyCapLimit=${rule.dailyCapLimit}`,
+      );
+
+      if (!rule.isActive) {
+        this.logger.log(`rule ${rule.id} paused — skip`);
+        return;
+      }
+
+      // 1) Get leads from the external API
+      this.logger.log(`🔍 Fetching leads for rule ${rule.id}...`);
+      const leads = await this.fetchLeadsForRule(rule);
+      this.logger.log(`📥 Fetched ${leads.length} leads for rule ${rule.id}`);
+
+      if (!leads.length) {
+        this.logger.warn(
+          `❌ rule ${rule.id}: no leads to send - CHECK FILTERS!`,
+        );
+        return;
+      }
+
+      // Fix daily limit logic: ensure dailyCapLimit is properly respected
+      // Use explicit null check instead of falsy check to avoid 0 being treated as falsy
+      const effectiveDailyLimit = rule.isInfinite
+        ? leads.length
+        : rule.dailyCapLimit != null && rule.dailyCapLimit > 0
+          ? rule.dailyCapLimit
+          : 10; // Only use fallback if truly null/undefined or <= 0
+
+      const toSend = leads.slice(0, effectiveDailyLimit);
+
+      this.logger.log(
+        `🎯 Effective daily limit: ${effectiveDailyLimit}, leads to send: ${toSend.length}`,
+      );
+
+      // 2) Define the send time window
+      const { windowStart, windowEnd } = this.calculateTimeWindow(rule);
+      if (windowEnd <= windowStart && !rule.isInfinite) {
+        this.logger.warn(`rule ${rule.id}: empty/inverted window`);
+        return;
+      }
+
+      // 3) Plan sending leads with intervals
+      this.scheduleLeadsWithIntervals(rule.id, toSend, windowStart, rule);
+
+      this.logger.log(
+        `rule ${rule.id}: scheduled ${toSend.length} leads${rule.isInfinite ? ' (infinite mode)' : ''}`,
+      );
+    } finally {
+      // Always remove from active executions
+      this.activeExecutions.delete(rule.id);
+      this.logger.debug(
+        `Rule ${rule.id} execution completed, removed from active executions`,
+      );
     }
-
-    // If infinite sending, send all available leads
-    // If normal sending, limit by dailyCapLimit
-    const toSend = rule.isInfinite
-      ? leads
-      : leads.slice(0, rule.dailyCapLimit || 10);
-
-    // 2) Define the send time window
-    const { windowStart, windowEnd } = this.calculateTimeWindow(rule);
-    if (windowEnd <= windowStart && !rule.isInfinite) {
-      this.logger.warn(`rule ${rule.id}: empty/inverted window`);
-      return;
-    }
-
-    // 3) Plan sending leads with intervals
-    this.scheduleLeadsWithIntervals(rule.id, toSend, windowStart, rule);
-
-    this.logger.log(
-      `rule ${rule.id}: scheduled ${toSend.length} leads${rule.isInfinite ? ' (infinite mode)' : ''}`,
-    );
   }
 
   private async fetchLeadsForRule(rule: Rule): Promise<Lead[]> {
     // 1) Build filters for the lead request
-    const limit = rule.isInfinite ? 999999 : rule.dailyCapLimit || 10; // Use 10 as fallback
+    // Fix: Use proper null check for dailyCapLimit to avoid 0 being treated as falsy
+    const limit = rule.isInfinite
+      ? 999999
+      : rule.dailyCapLimit != null && rule.dailyCapLimit > 0
+        ? rule.dailyCapLimit
+        : 10; // Only use fallback if truly null/undefined or <= 0
     const filters = {
       limit,
       // DO NOT SEARCH by targetProductName - this is the target product where we send
@@ -97,6 +141,7 @@ export class LeadSchedulingService {
           `rule ${rule.id}: empty by filters, fallback request with relaxed filters`,
         );
         // Fallback: use only vertical or no filters at all
+        // Keep the same limit logic for consistency
         const fallbackFilters = {
           limit,
           ...(rule.leadVertical ? { vertical: rule.leadVertical } : {}),
@@ -295,8 +340,18 @@ export class LeadSchedulingService {
     let currentScheduleTime = windowStart;
     let leadsScheduled = 0;
     let leadsSkipped = 0;
+    const ruleTimeouts: ScheduledTimeout[] = [];
 
-    leads.forEach((lead, index) => {
+    // Pre-calculate schedule times and filter out leads that exceed the window
+    const scheduledLeads: Array<{
+      lead: Lead;
+      scheduleTime: number;
+      index: number;
+    }> = [];
+
+    for (let index = 0; index < leads.length; index++) {
+      const lead = leads[index];
+
       // For the first lead, schedule immediately at windowStart
       // For subsequent leads, add random interval from previous lead
       if (index > 0) {
@@ -313,20 +368,30 @@ export class LeadSchedulingService {
           `Lead ${index + 1}/${leads.length} (${lead.subid}) skipped - would exceed time window. Scheduled: ${new Date(currentScheduleTime).toLocaleTimeString()}, Window ends: ${new Date(windowEnd).toLocaleTimeString()}`,
         );
         leadsSkipped++;
-        return;
+        // Break the loop to prevent all subsequent leads from being skipped
+        break;
       }
 
-      const delay = Math.max(currentScheduleTime - Date.now(), 0);
-      const scheduleDate = new Date(currentScheduleTime);
+      scheduledLeads.push({ lead, scheduleTime: currentScheduleTime, index });
+    }
+
+    // Schedule the filtered leads
+    scheduledLeads.forEach(({ lead, scheduleTime, index }) => {
+      const delay = Math.max(scheduleTime - Date.now(), 0);
+      const scheduleDate = new Date(scheduleTime);
 
       this.logger.log(
         `Lead ${index + 1}/${leads.length} (${lead.subid}) scheduled for ${scheduleDate.toLocaleTimeString()} (in ${Math.round(delay / 1000 / 60)} minutes)`,
       );
 
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         this.logger.log(
           `Sending lead ${index + 1}/${leads.length} (${lead.subid}) for rule ${ruleId}`,
         );
+
+        // Remove this timeout from tracking when it executes
+        this.removeTimeoutFromTracking(ruleId, lead.subid);
+
         this.sendOneLead(ruleId, lead).catch((err) =>
           this.logger.error(
             `rule ${ruleId}: send ${lead.subid} error: ${err?.message || err}`,
@@ -334,14 +399,34 @@ export class LeadSchedulingService {
         );
       }, delay);
 
+      // Track this timeout for potential cleanup
+      const scheduledTimeout: ScheduledTimeout = {
+        timeoutId,
+        ruleId,
+        leadSubid: lead.subid,
+        scheduleTime,
+        createdAt: Date.now(),
+      };
+
+      ruleTimeouts.push(scheduledTimeout);
       leadsScheduled++;
     });
 
     // Log final schedule summary
-    const lastScheduleTime = new Date(currentScheduleTime);
-    const totalDuration = Math.round(
-      (currentScheduleTime - windowStart) / 1000 / 60,
-    );
+    const lastScheduleTime =
+      scheduledLeads.length > 0
+        ? new Date(scheduledLeads[scheduledLeads.length - 1].scheduleTime)
+        : new Date(windowStart);
+    const totalDuration =
+      scheduledLeads.length > 0
+        ? Math.round(
+            (scheduledLeads[scheduledLeads.length - 1].scheduleTime -
+              windowStart) /
+              1000 /
+              60,
+          )
+        : 0;
+
     this.logger.log(
       `Rule ${ruleId}: ${leadsScheduled} leads scheduled, ${leadsSkipped} skipped (exceeds time window). Last lead at ${lastScheduleTime.toLocaleTimeString()} (total duration: ${totalDuration} minutes)`,
     );
@@ -349,6 +434,18 @@ export class LeadSchedulingService {
     if (leadsSkipped > 0 && !rule.isInfinite) {
       this.logger.warn(
         `Rule ${ruleId}: ${leadsSkipped} leads were skipped because they would exceed the time window (${new Date(windowStart).toLocaleTimeString()} - ${new Date(windowEnd).toLocaleTimeString()}). Consider: 1) Reducing interval time, 2) Extending time window, 3) Reducing daily cap limit.`,
+      );
+    }
+
+    // Store timeouts for cleanup capability
+    if (ruleTimeouts.length > 0) {
+      this.scheduledTimeouts.set(ruleId, [
+        ...(this.scheduledTimeouts.get(ruleId) || []),
+        ...ruleTimeouts,
+      ]);
+
+      this.logger.log(
+        `Rule ${ruleId}: Created ${ruleTimeouts.length} scheduled timeouts (total tracked: ${this.scheduledTimeouts.get(ruleId)?.length || 0})`,
       );
     }
   }
@@ -473,5 +570,143 @@ export class LeadSchedulingService {
       timestamp: new Date().toISOString(),
       message: 'Rule execution started manually',
     };
+  }
+
+  /**
+   * Cancel all scheduled timeouts for a specific rule
+   * Useful when deactivating a rule or stopping lead sending
+   */
+  cancelScheduledLeads(ruleId: string): {
+    ruleId: string;
+    cancelledCount: number;
+    message: string;
+  } {
+    const timeouts = this.scheduledTimeouts.get(ruleId);
+
+    if (!timeouts || timeouts.length === 0) {
+      this.logger.log(`No scheduled timeouts found for rule ${ruleId}`);
+      return {
+        ruleId,
+        cancelledCount: 0,
+        message: 'No scheduled leads to cancel',
+      };
+    }
+
+    let cancelledCount = 0;
+    const now = Date.now();
+
+    // Cancel all pending timeouts
+    timeouts.forEach((scheduledTimeout) => {
+      // Only cancel if the timeout hasn't executed yet
+      if (scheduledTimeout.scheduleTime > now) {
+        clearTimeout(scheduledTimeout.timeoutId);
+        cancelledCount++;
+        this.logger.debug(
+          `Cancelled timeout for rule ${ruleId}, lead ${scheduledTimeout.leadSubid}`,
+        );
+      }
+    });
+
+    // Remove all timeouts for this rule
+    this.scheduledTimeouts.delete(ruleId);
+
+    this.logger.log(
+      `Rule ${ruleId}: Cancelled ${cancelledCount} scheduled lead timeouts`,
+    );
+
+    return {
+      ruleId,
+      cancelledCount,
+      message: `Cancelled ${cancelledCount} scheduled leads`,
+    };
+  }
+
+  /**
+   * Clean up expired timeouts and remove executed ones from tracking
+   */
+  private removeTimeoutFromTracking(ruleId: string, leadSubid: string): void {
+    const timeouts = this.scheduledTimeouts.get(ruleId);
+    if (!timeouts) return;
+
+    const updatedTimeouts = timeouts.filter(
+      (timeout) => timeout.leadSubid !== leadSubid,
+    );
+
+    if (updatedTimeouts.length === 0) {
+      this.scheduledTimeouts.delete(ruleId);
+    } else {
+      this.scheduledTimeouts.set(ruleId, updatedTimeouts);
+    }
+  }
+
+  /**
+   * Get status of scheduled timeouts for a rule
+   */
+  getScheduledLeadsStatus(ruleId: string): {
+    ruleId: string;
+    totalScheduled: number;
+    pendingCount: number;
+    nextScheduleTime?: string;
+    timeouts: Array<{
+      leadSubid: string;
+      scheduleTime: string;
+      delayMinutes: number;
+      isPending: boolean;
+    }>;
+  } {
+    const timeouts = this.scheduledTimeouts.get(ruleId) || [];
+    const now = Date.now();
+
+    const timeoutDetails = timeouts.map((timeout) => ({
+      leadSubid: timeout.leadSubid,
+      scheduleTime: new Date(timeout.scheduleTime).toISOString(),
+      delayMinutes: Math.round((timeout.scheduleTime - now) / 1000 / 60),
+      isPending: timeout.scheduleTime > now,
+    }));
+
+    const pendingTimeouts = timeoutDetails.filter((t) => t.isPending);
+    const nextTimeout = pendingTimeouts.sort(
+      (a, b) => a.delayMinutes - b.delayMinutes,
+    )[0];
+
+    return {
+      ruleId,
+      totalScheduled: timeouts.length,
+      pendingCount: pendingTimeouts.length,
+      nextScheduleTime: nextTimeout?.scheduleTime,
+      timeouts: timeoutDetails,
+    };
+  }
+
+  /**
+   * Clean up old/expired timeouts periodically to prevent memory leaks
+   */
+  cleanupExpiredTimeouts(): void {
+    const now = Date.now();
+    const expiredThreshold = 24 * 60 * 60 * 1000; // 24 hours
+    let totalCleaned = 0;
+
+    for (const [ruleId, timeouts] of this.scheduledTimeouts.entries()) {
+      const validTimeouts = timeouts.filter((timeout) => {
+        const isExpired = now - timeout.createdAt > expiredThreshold;
+        const isExecuted = timeout.scheduleTime <= now;
+
+        if (isExpired || isExecuted) {
+          totalCleaned++;
+          return false;
+        }
+        return true;
+      });
+
+      if (validTimeouts.length === 0) {
+        this.scheduledTimeouts.delete(ruleId);
+      } else if (validTimeouts.length !== timeouts.length) {
+        this.scheduledTimeouts.set(ruleId, validTimeouts);
+      }
+    }
+
+    if (totalCleaned > 0) {
+      this.logger.log(`Cleaned up ${totalCleaned} expired/executed timeouts`);
+    }
   }
 }

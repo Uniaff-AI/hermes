@@ -91,4 +91,24 @@ export class RulesController {
   async getRuleDebugLogs(@Param('id') id: string) {
     return await this.rules.getRuleDebugLogs(id);
   }
+
+  // Timeout management endpoints
+  @Post(':id/cancel-scheduled')
+  cancelScheduledLeads(@Param('id') id: string) {
+    this.logger.log(`Cancelling scheduled leads for rule ${id}`);
+    return this.rules.cancelScheduledLeads(id);
+  }
+
+  @Get(':id/scheduled-status')
+  getScheduledLeadsStatus(@Param('id') id: string) {
+    return this.rules.getScheduledLeadsStatus(id);
+  }
+
+  @Post('cleanup-timeouts')
+  @HttpCode(HttpStatus.OK)
+  cleanupExpiredTimeouts() {
+    this.logger.log('Manual cleanup of expired timeouts triggered');
+    this.rules.cleanupExpiredTimeouts();
+    return { message: 'Timeout cleanup initiated' };
+  }
 }
