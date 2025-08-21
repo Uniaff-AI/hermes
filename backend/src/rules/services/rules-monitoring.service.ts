@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Rule } from '../domain/rule.entity';
 import { LeadSending, LeadSendingStatus } from '../domain/lead-sending.entity';
 import { ExternalApiService } from './external-api.service';
+import { LeadSchedulingService } from './lead-scheduling.service';
 import { getCurrentDateString } from '../../utils/time.util';
 
 @Injectable()
@@ -16,6 +17,8 @@ export class RulesMonitoringService {
     @InjectRepository(LeadSending)
     private readonly leadSendingRepo: Repository<LeadSending>,
     private readonly externalApi: ExternalApiService,
+    @Inject(forwardRef(() => LeadSchedulingService))
+    private readonly leadScheduling: LeadSchedulingService,
   ) {}
 
   async testRuleExecution(ruleId: string) {
@@ -369,6 +372,7 @@ export class RulesMonitoringService {
           leadAnalysis,
           rule,
         ),
+        scheduledLeads: this.leadScheduling.getScheduledLeadsStatus(ruleId),
       },
       timestamp: new Date().toISOString(),
     };

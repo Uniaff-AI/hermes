@@ -88,7 +88,7 @@ export class LeadSchedulingService {
       this.scheduleLeadsWithIntervals(rule.id, toSend, windowStart, rule);
 
       this.logger.log(
-        `rule ${rule.id}: scheduled ${toSend.length} leads${rule.isInfinite ? ' (infinite mode)' : ''}`,
+        `rule ${rule.id}: scheduled ${toSend.length} leads${rule.isInfinite ? ' (infinite mode)' : ''} - first lead at ${new Date(windowStart).toLocaleString()}`,
       );
     } finally {
       // Always remove from active executions

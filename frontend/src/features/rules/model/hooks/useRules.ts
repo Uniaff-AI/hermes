@@ -61,8 +61,7 @@ export const useDeleteRule = () => {
           errorData.message || `HTTP ${response.status}: Failed to delete rule`
         );
       }
-
-      return response.json();
+      return;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rules'] });

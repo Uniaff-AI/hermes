@@ -152,6 +152,10 @@ export class RulesService {
       this.logger.log(
         `Rule ${id} updated and is active - restarting scheduling with new configurations`,
       );
+      this.logger.log(
+        `New config: dailyLimit=${savedRule.dailyCapLimit}, window=${savedRule.sendWindowStart}-${savedRule.sendWindowEnd}, intervals=${savedRule.minIntervalMinutes}-${savedRule.maxIntervalMinutes}min`,
+      );
+
       // Cancel any existing scheduled leads first
       try {
         const cancelResult = this.leadScheduling.cancelScheduledLeads(id);
@@ -165,7 +169,13 @@ export class RulesService {
       }
 
       // Start new scheduling processes asynchronously
+      this.logger.log(`Starting new scheduling for updated rule ${id}`);
       this.scheduleInitialProcesses(savedRule);
+      this.logger.log(`Rule ${id} scheduling restart completed`);
+    } else {
+      this.logger.log(
+        `Rule ${id} updated but is not active - no scheduling restart needed`,
+      );
     }
 
     return savedRule;
