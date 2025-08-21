@@ -147,6 +147,27 @@ export class RulesService {
       `Rule after save - leadStatus: ${savedRule.leadStatus} (type: ${typeof savedRule.leadStatus})`,
     );
 
+    // If rule is active after update, restart scheduling with new configurations
+    if (savedRule.isActive) {
+      this.logger.log(
+        `Rule ${id} updated and is active - restarting scheduling with new configurations`,
+      );
+      // Cancel any existing scheduled leads first
+      try {
+        const cancelResult = this.leadScheduling.cancelScheduledLeads(id);
+        this.logger.log(
+          `Cancelled ${cancelResult.cancelledCount} existing scheduled leads for rule ${id}`,
+        );
+      } catch (error: any) {
+        this.logger.error(
+          `Failed to cancel existing scheduled leads for rule ${id}: ${error?.message || error}`,
+        );
+      }
+
+      // Start new scheduling processes asynchronously
+      this.scheduleInitialProcesses(savedRule);
+    }
+
     return savedRule;
   }
 
