@@ -442,8 +442,8 @@ export class RulesMonitoringService {
       );
     }
 
-    // Специальные рекомендации для быстрых интервалов
-    if (rule.minIntervalMinutes < 5) {
+    // Special recommendations for very fast intervals (less than 1 minute)
+    if (rule.minIntervalMinutes < 1) {
       recommendations.push(
         `Интервал ${rule.minIntervalMinutes}-${rule.maxIntervalMinutes} минут очень короткий. Это может создать высокую нагрузку на внешний API.`,
       );

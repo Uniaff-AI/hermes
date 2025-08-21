@@ -297,7 +297,7 @@ const SystemMonitor: FC<SystemMonitorProps> = ({ className = '', ruleId, ruleNam
         {connectionData?.timestamp && (
           <div className="pt-4 border-t border-gray-200">
             <div className="text-xs text-gray-500">
-              Последняя проверка: {new Date(connectionData.timestamp).toLocaleString('ru-RU')}
+              Последняя проверка: {new Date(connectionData.timestamp).toLocaleString()}
             </div>
           </div>
         )}

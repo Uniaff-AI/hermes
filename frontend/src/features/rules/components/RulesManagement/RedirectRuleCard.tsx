@@ -9,6 +9,7 @@ import { useRules } from '@/features/rules/model/hooks';
 import { Rule } from '@/features/rules/model/schemas';
 import RuleEditModal from './RuleEditModal';
 import { StatusTranslations } from '@/shared/utilities/enums';
+import { formatTimeWindow } from '@/shared/utilities/timezone';
 
 const formatFrequency = (minIntervalMinutes: number, maxIntervalMinutes: number) => {
   return `${minIntervalMinutes}–${maxIntervalMinutes} минут`;
@@ -238,7 +239,7 @@ const RedirectRulesView: FC = () => {
               <span className="mr-1">🕒</span>
               <span>Время отправки:</span>
               <span className="ml-2 font-medium text-gray-900">
-                {rule.sendWindowStart}–{rule.sendWindowEnd}
+                {formatTimeWindow(rule.sendWindowStart, rule.sendWindowEnd)}
               </span>
             </div>
           </Card>

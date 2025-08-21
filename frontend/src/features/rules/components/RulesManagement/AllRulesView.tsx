@@ -10,6 +10,7 @@ import { Rule } from '@/features/rules/model/schemas';
 import RuleEditModal from './RuleEditModal';
 import RuleDeleteDialog from './RuleDeleteDialog';
 import { StatusTranslations } from '@/shared/utilities/enums';
+import { formatTimeWindow } from '@/shared/utilities/timezone';
 
 const formatFrequency = (minIntervalMinutes: number, maxIntervalMinutes: number) => {
   return `${minIntervalMinutes}–${maxIntervalMinutes} минут`;
@@ -252,7 +253,7 @@ const AllRulesView: FC = () => {
                 <Clock className="w-4 h-4 text-gray-400" />
                 <span>Время отправки:</span>
                 <span className="inline-block bg-gray-100 text-xs px-2 py-0.5 rounded">
-                  {rule.sendWindowStart}–{rule.sendWindowEnd}
+                  {formatTimeWindow(rule.sendWindowStart, rule.sendWindowEnd)}
                 </span>
               </div>
             </div>

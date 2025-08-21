@@ -35,6 +35,12 @@ import CompactValidationResult from './CompactValidationResult';
 import LeadValidationResult from './LeadValidationResult';
 import AffiliateCompatibilityWarning from './AffiliateCompatibilityWarning';
 import { convertTimeToHH_MM } from '@/features/rules/model/utils';
+import {
+  convertLocalTimeToUTC,
+  convertUTCTimeToLocal,
+  getTimezoneInfo,
+  formatTimeWindow
+} from '@/shared/utilities/timezone';
 
 interface RuleEditModalNewProps {
   rule: Rule | null;
@@ -45,6 +51,9 @@ interface RuleEditModalNewProps {
 const RuleEditModalNew: FC<RuleEditModalNewProps> = ({ rule, isOpen, onClose }) => {
   const updateRuleMutation = useUpdateRule();
   const { data: products = [] } = useProducts();
+
+  // Get timezone info for display
+  const timezoneInfo = getTimezoneInfo();
 
   const {
     name,
@@ -621,33 +630,35 @@ const RuleEditModalNew: FC<RuleEditModalNewProps> = ({ rule, isOpen, onClose }) 
             {!sendingSettings.isInfinite && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <Label>Время начала отправки</Label>
+                  <Label>Время начала отправки ({timezoneInfo.offsetString})</Label>
                   <Input
                     type="time"
-                    value={sendingSettings.sendWindowStart}
+                    value={sendingSettings.sendWindowStart ? convertUTCTimeToLocal(sendingSettings.sendWindowStart) : ''}
                     onChange={(e) => {
-                      // Автоматически конвертируем в 24-часовой формат при изменении
-                      const convertedTime = convertTimeToHH_MM(e.target.value);
-                      handleSendWindowStartChange(convertedTime);
+                      // Конвертируем локальное время в UTC для сохранения
+                      const localTime = convertTimeToHH_MM(e.target.value);
+                      const utcTime = convertLocalTimeToUTC(localTime);
+                      handleSendWindowStartChange(utcTime);
                     }}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Время автоматически конвертируется в 24-часовой формат
+                    Время в вашей зоне ({timezoneInfo.displayName}). Сохраняется в UTC.
                   </p>
                 </div>
                 <div>
-                  <Label>Время окончания отправки</Label>
+                  <Label>Время окончания отправки ({timezoneInfo.offsetString})</Label>
                   <Input
                     type="time"
-                    value={sendingSettings.sendWindowEnd}
+                    value={sendingSettings.sendWindowEnd ? convertUTCTimeToLocal(sendingSettings.sendWindowEnd) : ''}
                     onChange={(e) => {
-                      // Автоматически конвертируем в 24-часовой формат при изменении
-                      const convertedTime = convertTimeToHH_MM(e.target.value);
-                      handleSendWindowEndChange(convertedTime);
+                      // Конвертируем локальное время в UTC для сохранения
+                      const localTime = convertTimeToHH_MM(e.target.value);
+                      const utcTime = convertLocalTimeToUTC(localTime);
+                      handleSendWindowEndChange(utcTime);
                     }}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Время автоматически конвертируется в 24-часовой формат
+                    Время в вашей зоне ({timezoneInfo.displayName}). Сохраняется в UTC.
                   </p>
                 </div>
               </div>
