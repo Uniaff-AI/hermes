@@ -258,9 +258,11 @@ export class RulesMonitoringService {
         isInWindow = currentTime >= startTime && currentTime <= endTime;
       }
 
+      // Don't add as validation issue - this is just informational
+      // Time window issues are handled gracefully in scheduling
       if (!isInWindow) {
-        validationIssues.push(
-          `Вне временного окна отправки (${rule.sendWindowStart}-${rule.sendWindowEnd})`,
+        this.logger.debug(
+          `Rule ${ruleId} is outside time window (${rule.sendWindowStart}-${rule.sendWindowEnd}) but will be processed when window opens`,
         );
       }
     }
@@ -413,10 +415,21 @@ export class RulesMonitoringService {
       );
     }
 
-    if (validationIssues.includes('Вне временного окна отправки')) {
-      recommendations.push(
-        'Дождитесь наступления времени отправки или измените временное окно',
+    // Add time window recommendations based on current analysis
+    if (!rule.isInfinite && rule.sendWindowStart && rule.sendWindowEnd) {
+      const windowDurationMinutes = Math.abs(
+        this.calculateWindowDuration(rule.sendWindowStart, rule.sendWindowEnd),
       );
+      const avgInterval =
+        (rule.minIntervalMinutes + rule.maxIntervalMinutes) / 2;
+      const estimatedLeadsInWindow =
+        Math.floor(windowDurationMinutes / avgInterval) + 1;
+
+      if (estimatedLeadsInWindow < rule.dailyCapLimit) {
+        recommendations.push(
+          `Временное окно (${windowDurationMinutes} мин) может вместить ~${estimatedLeadsInWindow} лидов при интервале ${rule.minIntervalMinutes}-${rule.maxIntervalMinutes} мин. Для ${rule.dailyCapLimit} лидов рассмотрите: расширение окна или уменьшение интервала.`,
+        );
+      }
     }
 
     if (validationIssues.includes('Достигнут дневной лимит')) {
@@ -445,5 +458,20 @@ export class RulesMonitoringService {
     }
 
     return recommendations;
+  }
+
+  private calculateWindowDuration(startTime: string, endTime: string): number {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+
+    // Handle window crossing midnight
+    if (startMinutes > endMinutes) {
+      return 24 * 60 - startMinutes + endMinutes;
+    }
+
+    return endMinutes - startMinutes;
   }
 }

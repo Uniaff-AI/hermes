@@ -35,7 +35,7 @@ export class CreateRuleDto {
 
   @IsInt({ message: 'Daily cap limit must be an integer' })
   @Min(1, { message: 'Daily cap limit must be at least 1' })
-  @Max(10000, { message: 'Daily cap limit must not exceed 10000' })
+  @Max(500, { message: 'Daily cap limit must not exceed 500' })
   dailyCapLimit!: number;
 
   // === LEAD FILTERS (get_leads criteria) ===

@@ -486,10 +486,10 @@ const RuleCreationFormNew: FC = () => {
               value={sendingSettings.dailyCapLimit}
               onChange={(e) => handleDailyCapLimitChange(e.target.value)}
               min="1"
-              max="10000"
+              max="500"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Максимум лидов в день (1-10000)
+              Максимум лидов в день (1-500)
             </p>
           </div>
         </div>

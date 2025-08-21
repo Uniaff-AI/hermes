@@ -33,7 +33,7 @@ export class LeadSchedulingService {
     // Check for concurrent execution
     if (this.activeExecutions.has(rule.id)) {
       this.logger.warn(
-        `🚫 Rule ${rule.id} (${rule.name}) is already being executed, skipping to prevent duplicate scheduling`,
+        `Rule ${rule.id} (${rule.name}) is already being executed, skipping to prevent duplicate scheduling`,
       );
       return;
     }
@@ -43,10 +43,10 @@ export class LeadSchedulingService {
 
     try {
       this.logger.log(
-        `🚀 scheduleLeadsSending: Starting for rule ${rule.id} (${rule.name})`,
+        `scheduleLeadsSending: Starting for rule ${rule.id} (${rule.name})`,
       );
       this.logger.log(
-        `🔧 Rule config: isActive=${rule.isActive}, isInfinite=${rule.isInfinite}, dailyCapLimit=${rule.dailyCapLimit}`,
+        `Rule config: isActive=${rule.isActive}, isInfinite=${rule.isInfinite}, dailyCapLimit=${rule.dailyCapLimit}`,
       );
 
       if (!rule.isActive) {
@@ -55,36 +55,33 @@ export class LeadSchedulingService {
       }
 
       // 1) Get leads from the external API
-      this.logger.log(`🔍 Fetching leads for rule ${rule.id}...`);
+      this.logger.log(`Fetching leads for rule ${rule.id}...`);
       const leads = await this.fetchLeadsForRule(rule);
-      this.logger.log(`📥 Fetched ${leads.length} leads for rule ${rule.id}`);
+      this.logger.log(`Fetched ${leads.length} leads for rule ${rule.id}`);
 
       if (!leads.length) {
-        this.logger.warn(
-          `❌ rule ${rule.id}: no leads to send - CHECK FILTERS!`,
-        );
+        this.logger.warn(`rule ${rule.id}: no leads to send - CHECK FILTERS!`);
         return;
       }
 
-      // Fix daily limit logic: ensure dailyCapLimit is properly respected
-      // Use explicit null check instead of falsy check to avoid 0 being treated as falsy
+      // Use dailyCapLimit directly - it's guaranteed to be a valid number from DB (has default: 100)
       const effectiveDailyLimit = rule.isInfinite
         ? leads.length
-        : rule.dailyCapLimit != null && rule.dailyCapLimit > 0
-          ? rule.dailyCapLimit
-          : 10; // Only use fallback if truly null/undefined or <= 0
+        : rule.dailyCapLimit;
 
       const toSend = leads.slice(0, effectiveDailyLimit);
 
       this.logger.log(
-        `🎯 Effective daily limit: ${effectiveDailyLimit}, leads to send: ${toSend.length}`,
+        `Scheduling strategy: dailyLimit=${effectiveDailyLimit}, availableLeads=${toSend.length}, intervals=${rule.minIntervalMinutes}-${rule.maxIntervalMinutes}min, infinite=${rule.isInfinite}`,
       );
 
       // 2) Define the send time window
       const { windowStart, windowEnd } = this.calculateTimeWindow(rule);
       if (windowEnd <= windowStart && !rule.isInfinite) {
-        this.logger.warn(`rule ${rule.id}: empty/inverted window`);
-        return;
+        this.logger.warn(
+          `rule ${rule.id}: empty/inverted window - will schedule what fits`,
+        );
+        // Don't return - still try to schedule leads, they might fit
       }
 
       // 3) Plan sending leads with intervals
@@ -104,12 +101,8 @@ export class LeadSchedulingService {
 
   private async fetchLeadsForRule(rule: Rule): Promise<Lead[]> {
     // 1) Build filters for the lead request
-    // Fix: Use proper null check for dailyCapLimit to avoid 0 being treated as falsy
-    const limit = rule.isInfinite
-      ? 999999
-      : rule.dailyCapLimit != null && rule.dailyCapLimit > 0
-        ? rule.dailyCapLimit
-        : 10; // Only use fallback if truly null/undefined or <= 0
+    // Use dailyCapLimit directly - it's guaranteed to be a valid number from DB (has default: 100)
+    const limit = rule.isInfinite ? 999999 : rule.dailyCapLimit;
     const filters = {
       limit,
       // DO NOT SEARCH by targetProductName - this is the target product where we send
@@ -151,11 +144,11 @@ export class LeadSchedulingService {
 
       // Normalization and local filters (offerId/dailyCapLimit)
       this.logger.log(
-        `🔍 About to normalize ${raw.length} raw leads for rule ${rule.id}`,
+        `About to normalize ${raw.length} raw leads for rule ${rule.id}`,
       );
       const normalizedLeads = this.normalizeAndFilterLeads(raw, rule);
       this.logger.log(
-        `🔍 After normalization: ${normalizedLeads.length} leads for rule ${rule.id}`,
+        `After normalization: ${normalizedLeads.length} leads for rule ${rule.id}`,
       );
       return normalizedLeads;
     } catch (error) {
@@ -166,7 +159,7 @@ export class LeadSchedulingService {
 
   private normalizeAndFilterLeads(rawLeads: any[], rule: Rule): Lead[] {
     this.logger.log(
-      `🔍 normalizeAndFilterLeads: Processing ${rawLeads.length} raw leads for rule ${rule.id}`,
+      `normalizeAndFilterLeads: Processing ${rawLeads.length} raw leads for rule ${rule.id}`,
     );
 
     let filteredCount = 0;
@@ -282,15 +275,15 @@ export class LeadSchedulingService {
 
     // Log the filtering statistics
     this.logger.log(`📊 Filtering stats for rule ${rule.id}:`);
-    this.logger.log(`   📥 Raw leads received: ${rawLeads.length}`);
-    this.logger.log(`   ✅ Leads passed filters: ${filteredCount}`);
-    this.logger.log(`   🚫 No subid/productId: ${noSubidCount}`);
-    this.logger.log(`   🚫 Vertical mismatch: ${verticalMismatchCount}`);
-    this.logger.log(`   🚫 Country mismatch: ${countryMismatchCount}`);
-    this.logger.log(`   🚫 Affiliate mismatch: ${affiliateMismatchCount}`);
-    this.logger.log(`   🚫 Status mismatch: ${statusMismatchCount}`);
-    this.logger.log(`   🚫 Redirects limit: ${redirectsLimitCount}`);
-    this.logger.log(`   📤 Final leads to send: ${filtered.length}`);
+    this.logger.log(`📥 Raw leads received: ${rawLeads.length}`);
+    this.logger.log(`✅ Leads passed filters: ${filteredCount}`);
+    this.logger.log(`🚫 No subid/productId: ${noSubidCount}`);
+    this.logger.log(`🚫 Vertical mismatch: ${verticalMismatchCount}`);
+    this.logger.log(`🚫 Country mismatch: ${countryMismatchCount}`);
+    this.logger.log(`🚫 Affiliate mismatch: ${affiliateMismatchCount}`);
+    this.logger.log(`🚫 Status mismatch: ${statusMismatchCount}`);
+    this.logger.log(`🚫 Redirects limit: ${redirectsLimitCount}`);
+    this.logger.log(`📤 Final leads to send: ${filtered.length}`);
 
     return filtered;
   }
@@ -428,12 +421,15 @@ export class LeadSchedulingService {
         : 0;
 
     this.logger.log(
-      `Rule ${ruleId}: ${leadsScheduled} leads scheduled, ${leadsSkipped} skipped (exceeds time window). Last lead at ${lastScheduleTime.toLocaleTimeString()} (total duration: ${totalDuration} minutes)`,
+      `Rule ${ruleId}: ${leadsScheduled} leads scheduled successfully, ${leadsSkipped} skipped (time window constraint). Last lead at ${lastScheduleTime.toLocaleTimeString()} (total duration: ${totalDuration} minutes)`,
     );
 
     if (leadsSkipped > 0 && !rule.isInfinite) {
-      this.logger.warn(
-        `Rule ${ruleId}: ${leadsSkipped} leads were skipped because they would exceed the time window (${new Date(windowStart).toLocaleTimeString()} - ${new Date(windowEnd).toLocaleTimeString()}). Consider: 1) Reducing interval time, 2) Extending time window, 3) Reducing daily cap limit.`,
+      const windowDuration = Math.round((windowEnd - windowStart) / 1000 / 60);
+      const avgInterval =
+        (rule.minIntervalMinutes + rule.maxIntervalMinutes) / 2;
+      this.logger.log(
+        `Time window analysis for rule ${ruleId}: Window=${windowDuration}min, AvgInterval=${avgInterval}min, Capacity=~${Math.floor(windowDuration / avgInterval) + 1} leads. ${leadsSkipped} leads skipped due to time constraints (this is normal behavior).`,
       );
     }
 

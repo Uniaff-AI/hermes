@@ -4,7 +4,7 @@ export const RuleSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
   isActive: z.boolean(),
-  dailyCapLimit: z.number().min(1).max(10000),
+  dailyCapLimit: z.number().min(1).max(500),
 
   // Section 2: Lead filters
   leadStatus: z.string().optional(),
@@ -156,7 +156,7 @@ export const UpdateRuleSchema = z
     targetProductAffiliate: z.string().nullable().optional(),
 
     // Sending settings
-    dailyCapLimit: z.number().min(1).max(10000).optional(),
+    dailyCapLimit: z.number().min(1).max(500).optional(),
     minIntervalMinutes: z.number().min(1).optional(),
     maxIntervalMinutes: z.number().min(1).optional(),
     sendWindowStart: z
