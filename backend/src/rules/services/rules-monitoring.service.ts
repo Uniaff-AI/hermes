@@ -126,7 +126,7 @@ export class RulesMonitoringService {
     const recentSendings = await this.leadSendingRepo.find({
       where: { ruleId },
       order: { sentAt: 'DESC' },
-      take: 10,
+      take: 100, // Show up to 100 recent sendings for complete activity view
     });
 
     // Lead availability analysis with fallback logic

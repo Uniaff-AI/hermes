@@ -324,7 +324,7 @@ const RuleMonitoringPanel = ({ ruleId }: RuleMonitoringPanelProps) => {
           </div>
 
           {hasActivity ? (
-            <div className="space-y-2 max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-3">
+            <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
               {debugData.recentActivity.map((activity: any, index: number) => (
                 <motion.div
                   key={activity.id}

@@ -179,11 +179,11 @@ export class RulesAnalyticsService {
         throw new Error(`Rule ${ruleId} not found`);
       }
 
-      // Get all lead sendings for this rule
+      // Get all lead sendings for this rule (get all for proper analytics)
       const sendings = await this.leadSendingRepo.find({
         where: { ruleId },
         order: { sentAt: 'DESC' },
-        take: 10, // Last 10 sendings
+        take: 100, // Show up to 100 recent sendings for proper analytics
       });
 
       // Count the statistics

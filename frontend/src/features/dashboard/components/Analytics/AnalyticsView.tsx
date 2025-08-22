@@ -221,7 +221,7 @@ export default function AnalyticsView() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2"
+                        className="space-y-2 max-h-64 overflow-y-auto"
                       >
                         {ruleData.recentSendings.map((sending) => (
                           <motion.div

@@ -95,7 +95,7 @@ const ScheduledLeadsDisplay: FC<ScheduledLeadsDisplayProps> = ({
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-gray-700">Расписание отправки:</h4>
             <div className="max-h-40 overflow-y-auto space-y-1">
-              {scheduledLeads.timeouts.slice(0, 5).map((lead, index) => {
+              {scheduledLeads.timeouts.slice(0, 15).map((lead, index) => {
                 const localTime = convertUTCToLocalTime(lead.scheduleTime);
                 const minutesUntil = getMinutesUntilSchedule(lead.scheduleTime);
 
@@ -121,9 +121,9 @@ const ScheduledLeadsDisplay: FC<ScheduledLeadsDisplayProps> = ({
                   </div>
                 );
               })}
-              {scheduledLeads.timeouts.length > 5 && (
+              {scheduledLeads.timeouts.length > 15 && (
                 <div className="text-xs text-gray-500 text-center py-1">
-                  ... и еще {scheduledLeads.timeouts.length - 5} лидов
+                  ... и еще {scheduledLeads.timeouts.length - 15} лидов
                 </div>
               )}
             </div>

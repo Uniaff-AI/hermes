@@ -9,12 +9,15 @@ import { RulesController } from './rules.controller';
 import { RulesService } from './rules.service';
 import { LeadSchedulerProcessor } from './lead-scheduler.processor';
 
-// Новые сервисы
 import { RulesUtilsService } from './services/rules-utils.service';
 import { ExternalApiService } from './services/external-api.service';
 import { LeadSchedulingService } from './services/lead-scheduling.service';
 import { RulesAnalyticsService } from './services/rules-analytics.service';
 import { RulesMonitoringService } from './services/rules-monitoring.service';
+
+import { TimeoutManagerService } from './services/scheduling/timeout-manager.service';
+import { LeadSchedulerService } from './services/scheduling/lead-scheduler.service';
+import { LeadFetcherService } from './services/scheduling/lead-fetcher.service';
 
 @Module({
   imports: [
@@ -26,15 +29,17 @@ import { RulesMonitoringService } from './services/rules-monitoring.service';
   ],
   controllers: [RulesController],
   providers: [
-    // Основной сервис
     RulesService,
 
-    // Новые специализированные сервисы
     RulesUtilsService,
     ExternalApiService,
     LeadSchedulingService,
     RulesAnalyticsService,
     RulesMonitoringService,
+
+    TimeoutManagerService,
+    LeadSchedulerService,
+    LeadFetcherService,
 
     // Процессор очереди
     LeadSchedulerProcessor,

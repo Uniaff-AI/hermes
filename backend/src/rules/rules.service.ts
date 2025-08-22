@@ -246,7 +246,11 @@ export class RulesService {
 
   // ===== Private helper methods =====
   private scheduleInitialProcesses(rule: Rule): void {
-    // Start the lead fetching asynchronously
+    this.logger.log(
+      `Starting initial scheduling for rule ${rule.id}: ${rule.name}`,
+    );
+
+    // Use ONLY direct scheduling - avoid multiple scheduling sources that cause batch sending
     setImmediate(() => {
       this.leadScheduling
         .scheduleLeadsSending(rule)
@@ -257,26 +261,13 @@ export class RulesService {
         );
     });
 
-    // Daily auto-start (00:00) - also asynchronously
+    // Daily auto-start (00:00) - schedule next day planning
     setImmediate(() => {
       this.leadScheduling.planNextDay(rule.id).catch(() => {});
     });
 
-    // Add to BullMQ queue asynchronously
-    setImmediate(async () => {
-      try {
-        this.logger.log(`Adding rule ${rule.id} to BullMQ queue`);
-        const job = await this.leadSchedulerQueue.add('schedule', {
-          ruleId: rule.id,
-        });
-        this.logger.log(
-          `Successfully added job ${job.id} to BullMQ queue for rule ${rule.id}`,
-        );
-      } catch (e: any) {
-        this.logger.error(
-          `Bull enqueue failed for rule ${rule.id}: ${e?.message || e}`,
-        );
-      }
-    });
+    // NOTE: Removed BullMQ queue scheduling to prevent duplicate/parallel execution
+    // which was causing batch sending instead of sequential lead processing
+    this.logger.log(`Rule ${rule.id} scheduled using direct method only`);
   }
 }

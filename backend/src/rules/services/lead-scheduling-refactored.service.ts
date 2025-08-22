@@ -40,7 +40,7 @@ export class LeadSchedulingService {
     // Check for concurrent execution - CRITICAL for preventing batch sending
     if (this.activeExecutions.has(rule.id)) {
       this.logger.warn(
-        `🚨 BATCH PREVENTION: Rule ${rule.id} (${rule.name}) is already being executed, skipping to prevent duplicate scheduling`,
+        `BATCH PREVENTION: Rule ${rule.id} (${rule.name}) is already being executed, skipping to prevent duplicate scheduling`,
       );
       return;
     }
