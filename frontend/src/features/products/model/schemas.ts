@@ -1,19 +1,18 @@
 import { z } from 'zod';
-import { CountryEnum, VerticalEnum, AffEnum } from '@/shared/utilities/enums';
 
 export const ProductSchema = z.object({
   productName: z.string(),
-  country: z.nativeEnum(CountryEnum),
-  vertical: z.nativeEnum(VerticalEnum),
-  aff: z.nativeEnum(AffEnum),
+  country: z.string(),
+  vertical: z.string(),
+  aff: z.string(),
   productId: z.string(),
   uniqueProductKey: z.string().optional(),
 });
 
 export const ProductsFiltersSchema = z.object({
-  country: z.nativeEnum(CountryEnum).optional(),
-  vertical: z.nativeEnum(VerticalEnum).optional(),
-  aff: z.nativeEnum(AffEnum).optional(),
+  country: z.string().optional(),
+  vertical: z.string().optional(),
+  aff: z.string().optional(),
 });
 
 export const ProductsResponseSchema = z.object({

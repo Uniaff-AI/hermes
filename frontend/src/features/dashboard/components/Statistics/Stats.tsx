@@ -2,8 +2,9 @@ import { DollarSign, Target, TrendingUp, Users } from 'lucide-react';
 import { useLeadsStats } from '@/features/leads/model/hooks';
 import { useProducts } from '@/features/products/model/hooks';
 import { useRevenue } from '@/features/dashboard/model/hooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import ErrorBoundary from '@/shared/providers/ErrorBoundary';
+import { useLeads } from '@/features/leads/model/hooks';
 
 import StatsCard from './StatsCard';
 
@@ -13,6 +14,16 @@ const StatsContent = () => {
   const { data: revenueData, isLoading: revenueLoading, error: revenueError } = useRevenue();
   const [isClient, setIsClient] = useState(false);
 
+  const currentMonthLeads = useLeads({
+    dateFrom: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+    dateTo: new Date().toISOString().split('T')[0],
+  });
+
+  const previousMonthLeads = useLeads({
+    dateFrom: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString().split('T')[0],
+    dateTo: new Date(new Date().getFullYear(), new Date().getMonth(), 0).toISOString().split('T')[0],
+  });
+
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -20,21 +31,21 @@ const StatsContent = () => {
   const activeProducts = Array.isArray(products) ? products.length : 0;
   const totalLeads = Array.isArray(leads) ? leads.length : 0;
 
-  // Log errors for debugging
-  useEffect(() => {
-    if (leadsError) {
-      console.error('Leads API error:', leadsError);
+  // Calculate leads change
+  const leadsChange = useMemo(() => {
+    if (!currentMonthLeads.data || !previousMonthLeads.data) return '+0%';
+
+    const currentCount = currentMonthLeads.data.length;
+    const previousCount = previousMonthLeads.data.length;
+
+    if (previousCount === 0) {
+      return currentCount > 0 ? '+100%' : '+0%';
     }
-    if (productsError) {
-      console.error('Products API error:', productsError);
-    }
-    if (revenueError) {
-      console.error('Revenue API error:', revenueError);
-    }
-    if (revenueData) {
-      console.log('Revenue data in Stats:', revenueData);
-    }
-  }, [leadsError, productsError, revenueError, revenueData]);
+
+    const changePercent = ((currentCount - previousCount) / previousCount) * 100;
+    const sign = changePercent >= 0 ? '+' : '';
+    return `${sign}${changePercent.toFixed(1)}%`;
+  }, [currentMonthLeads.data, previousMonthLeads.data]);
 
   if (!isClient) {
     return (
@@ -52,14 +63,14 @@ const StatsContent = () => {
       <StatsCard
         title="Total Leads"
         value={leadsLoading ? '...' : leadsError ? 'Error' : totalLeads.toString()}
-        change="+12.3%"
+        change={leadsChange}
         icon={<Users className="w-6 h-6" />}
-        isLoading={leadsLoading}
+        isLoading={leadsLoading || currentMonthLeads.isLoading || previousMonthLeads.isLoading}
       />
       <StatsCard
         title="Active Products"
         value={productsLoading ? '...' : productsError ? 'Error' : activeProducts.toString()}
-        change="+2"
+        change=""
         icon={<Target className="w-6 h-6" />}
         isLoading={productsLoading}
       />

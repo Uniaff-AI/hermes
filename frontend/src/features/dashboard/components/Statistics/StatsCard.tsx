@@ -27,7 +27,9 @@ const StatsCard: FC<StatsCardProps> = ({
             <p className="text-2xl font-bold">{value}</p>
           )}
         </div>
-        <p className="text-sm text-green-600 mt-1">{change} vs last month</p>
+        {change && (
+          <p className="text-sm text-green-600 mt-1">{change} vs last month</p>
+        )}
       </div>
       <div className="text-white bg-gradient-to-r from-indigo-400 to-purple-500 p-2 rounded-md">
         {icon}
