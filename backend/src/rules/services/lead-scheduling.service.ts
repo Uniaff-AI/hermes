@@ -21,6 +21,9 @@ export class LeadSchedulingService {
   private readonly logger = new Logger(LeadSchedulingService.name);
   private readonly activeExecutions = new Set<string>(); // Track active rule executions
 
+  // Track currently sending leads to prevent parallel sends
+  private readonly activeSending = new Set<string>();
+
   constructor(
     @InjectRepository(Rule) private readonly ruleRepo: Repository<Rule>,
     @InjectRepository(LeadSending)
@@ -40,7 +43,7 @@ export class LeadSchedulingService {
     // Check for concurrent execution - CRITICAL for preventing batch sending
     if (this.activeExecutions.has(rule.id)) {
       this.logger.warn(
-        `🚨 BATCH PREVENTION: Rule ${rule.id} (${rule.name}) is already being executed, skipping to prevent duplicate scheduling`,
+        `BATCH PREVENTION: Rule ${rule.id} (${rule.name}) is already being executed, skipping to prevent duplicate scheduling`,
       );
       return;
     }
@@ -48,7 +51,7 @@ export class LeadSchedulingService {
     // Mark rule as being executed - prevents parallel executions that cause batch sending
     this.activeExecutions.add(rule.id);
     this.logger.log(
-      `🔒 EXECUTION LOCK: Rule ${rule.id} locked for sequential processing`,
+      `EXECUTION LOCK: Rule ${rule.id} locked for sequential processing`,
     );
 
     try {
@@ -86,16 +89,55 @@ export class LeadSchedulingService {
       );
 
       // 2) Define the send time window (using current time for infinite, rule window for finite)
-      const windowStart = rule.isInfinite
-        ? Date.now()
-        : this.utils.getTodayTimestamp(
-            ...this.utils.parseTimeHM(rule.sendWindowStart || '00:00'),
+      let windowStart: number;
+      let windowEnd: number;
+
+      if (rule.isInfinite) {
+        windowStart = Date.now();
+        windowEnd = Date.now() + 24 * 60 * 60 * 1000;
+      } else {
+        // Calculate the intended window times
+        const intendedStart = this.utils.getTodayTimestamp(
+          ...this.utils.parseTimeHM(rule.sendWindowStart || '00:00'),
+        );
+        const intendedEnd = this.utils.getTodayTimestamp(
+          ...this.utils.parseTimeHM(rule.sendWindowEnd || '23:59'),
+        );
+
+        const now = Date.now();
+
+        // If the window start time is in the past, schedule for tomorrow
+        if (intendedStart < now) {
+          this.logger.warn(
+            `Rule ${rule.id}: Window start time (${new Date(intendedStart).toLocaleString()}) is in the past. Scheduling for tomorrow at the same time.`,
           );
-      const windowEnd = rule.isInfinite
-        ? Date.now() + 24 * 60 * 60 * 1000
-        : this.utils.getTodayTimestamp(
-            ...this.utils.parseTimeHM(rule.sendWindowEnd || '23:59'),
+
+          // Calculate tomorrow's timestamp at the same time
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setHours(
+            parseInt(rule.sendWindowStart?.split(':')[0] || '0'),
+            parseInt(rule.sendWindowStart?.split(':')[1] || '0'),
+            0,
+            0,
           );
+
+          const tomorrowEnd = new Date();
+          tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
+          tomorrowEnd.setHours(
+            parseInt(rule.sendWindowEnd?.split(':')[0] || '23'),
+            parseInt(rule.sendWindowEnd?.split(':')[1] || '59'),
+            0,
+            0,
+          );
+
+          windowStart = tomorrow.getTime();
+          windowEnd = tomorrowEnd.getTime();
+        } else {
+          windowStart = intendedStart;
+          windowEnd = intendedEnd;
+        }
+      }
 
       if (windowEnd <= windowStart && !rule.isInfinite) {
         this.logger.warn(
@@ -105,6 +147,10 @@ export class LeadSchedulingService {
       }
 
       // 3) Plan sending leads with intervals using dedicated scheduler service
+      this.logger.log(
+        `Rule ${rule.id}: Final window: ${new Date(windowStart).toLocaleString()} - ${new Date(windowEnd).toLocaleString()} (duration: ${Math.round((windowEnd - windowStart) / 1000 / 60)} minutes)`,
+      );
+
       this.leadScheduler.scheduleLeadsWithIntervals(
         rule.id,
         toSend,
@@ -128,33 +174,50 @@ export class LeadSchedulingService {
   /**
    * Send a single lead to the external API
    * Called by the scheduler service when it's time to send a lead
+   * CRITICAL: Includes protection against parallel sending
    */
   private async sendOneLead(ruleId: string, lead: Lead): Promise<void> {
+    const leadKey = `${ruleId}:${lead.subid}`;
+
+    // CRITICAL: Prevent parallel sending of the same lead
+    if (this.activeSending.has(leadKey)) {
+      this.logger.warn(
+        `BATCH PREVENTION: Lead ${lead.subid} for rule ${ruleId} is already being sent, skipping duplicate`,
+      );
+      return;
+    }
+
+    // Mark lead as being sent
+    this.activeSending.add(leadKey);
+    this.logger.log(
+      `SEND LOCK: Lead ${lead.subid} locked for sending to prevent duplicates`,
+    );
+
     // Get the rule for access to the target product
     const rule = await this.ruleRepo.findOneBy({ id: ruleId });
     if (!rule) {
       throw new Error(`Rule ${ruleId} not found for lead sending`);
     }
 
-    // Create a payload with the target product according to the API schema
-    const payload = {
-      // Lead data (where we get them) - only fields from the LeadToAdd schema
-      subid: lead.subid,
-      leadName: lead.leadName ?? '',
-      phone: lead.phone ?? '',
-      ip: lead.ip ?? '',
-      ua: lead.ua ?? '',
-      // DO NOT send email and status - they are not in the API schema
-
-      // Target product (where we send) - fields from the Product schema
-      productId: rule.targetProductId,
-      productName: rule.targetProductName,
-      vertical: rule.targetProductVertical || rule.leadVertical || '',
-      country: rule.targetProductCountry || rule.leadCountry || '',
-      aff: rule.targetProductAffiliate || rule.leadAffiliate || '',
-    };
-
     try {
+      // Create a payload with the target product according to the API schema
+      const payload = {
+        // Lead data (where we get them) - only fields from the LeadToAdd schema
+        subid: lead.subid,
+        leadName: lead.leadName ?? '',
+        phone: lead.phone ?? '',
+        ip: lead.ip ?? '',
+        ua: lead.ua ?? '',
+        // DO NOT send email and status - they are not in the API schema
+
+        // Target product (where we send) - fields from the Product schema
+        productId: rule.targetProductId,
+        productName: rule.targetProductName,
+        vertical: rule.targetProductVertical || rule.leadVertical || '',
+        country: rule.targetProductCountry || rule.leadCountry || '',
+        aff: rule.targetProductAffiliate || rule.leadAffiliate || '',
+      };
+
       const result = await this.externalApi.addLead(payload);
 
       const ok = this.leadSendingRepo.create({
@@ -202,13 +265,19 @@ export class LeadSchedulingService {
       this.logger.error(
         `rule ${ruleId}: lead sending failed (HTTP ${status ?? 'unknown'}) - ${safeDetails}`,
       );
+    } finally {
+      // CRITICAL: Always unlock the lead sending to prevent permanent locks
+      this.activeSending.delete(leadKey);
+      this.logger.log(
+        `🔓 SEND UNLOCK: Lead ${lead.subid} unlocked after sending attempt`,
+      );
     }
   }
 
   /**
    * Plan next day scheduling for a rule
    */
-  async planNextDay(ruleId: string): Promise<void> {
+  public async planNextDay(ruleId: string): Promise<void> {
     const rule = await this.ruleRepo.findOneBy({ id: ruleId });
     if (!rule) return;
 

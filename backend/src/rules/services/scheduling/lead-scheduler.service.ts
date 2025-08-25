@@ -32,10 +32,24 @@ export class LeadSchedulerService {
       `Scheduling ${leads.length} leads with intervals ${rule.minIntervalMinutes}-${rule.maxIntervalMinutes} minutes for rule ${ruleId}`,
     );
 
+    // Use the provided windowStart, calculate windowEnd if needed
     const { windowEnd } = this.calculateTimeWindow(rule);
     let currentScheduleTime = windowStart;
     let leadsScheduled = 0;
     let leadsSkipped = 0;
+
+    // Log the actual window being used
+    this.logger.log(
+      `Using time window: ${new Date(windowStart).toLocaleString()} - ${new Date(windowEnd).toLocaleString()} (duration: ${Math.round((windowEnd - windowStart) / 1000 / 60)} minutes)`,
+    );
+
+    // Check if window is in the past
+    const now = Date.now();
+    if (windowStart < now) {
+      this.logger.warn(
+        `Time window start (${new Date(windowStart).toLocaleString()}) is in the past! Current time: ${new Date(now).toLocaleString()}. This will cause immediate sending.`,
+      );
+    }
 
     // Pre-calculate schedule times and filter out leads that exceed the window
     const scheduledLeads: Array<{
@@ -70,10 +84,39 @@ export class LeadSchedulerService {
       scheduledLeads.push({ lead, scheduleTime: currentScheduleTime, index });
     }
 
-    // Schedule the filtered leads
+    // Schedule the filtered leads with guaranteed minimum intervals
+    let lastScheduledTime = Date.now();
+    const minimumIntervalMs = rule.minIntervalMinutes * 60 * 1000; // Convert to milliseconds
+
     scheduledLeads.forEach(({ lead, scheduleTime, index }) => {
-      const delay = Math.max(scheduleTime - Date.now(), 0);
+      const now = Date.now();
+      let delay = Math.max(scheduleTime - now, 0);
       const scheduleDate = new Date(scheduleTime);
+
+      // If the scheduled time is in the past, skip this lead
+      if (scheduleTime < now) {
+        this.logger.warn(
+          `Lead ${index + 1}/${leads.length} (${lead.subid}) scheduled time ${scheduleDate.toLocaleTimeString()} is in the past - skipping this lead`,
+        );
+        return; // Skip this lead instead of sending immediately
+      }
+
+      // CRITICAL: Ensure minimum interval between consecutive setTimeout calls
+      // This prevents batch sending when multiple delays are small or zero
+      const timeSinceLastSchedule = Date.now() - lastScheduledTime;
+      if (
+        timeSinceLastSchedule < minimumIntervalMs &&
+        delay < minimumIntervalMs
+      ) {
+        // Adjust delay to maintain minimum interval between consecutive sends
+        const adjustedDelay = lastScheduledTime + minimumIntervalMs - now;
+        if (adjustedDelay > delay) {
+          this.logger.warn(
+            `Lead ${index + 1}/${leads.length} (${lead.subid}) delay adjusted from ${Math.round(delay / 1000 / 60)}min to ${Math.round(adjustedDelay / 1000 / 60)}min to prevent batch sending`,
+          );
+          delay = adjustedDelay;
+        }
+      }
 
       this.logger.log(
         `Lead ${index + 1}/${leads.length} (${lead.subid}) scheduled for ${scheduleDate.toLocaleTimeString()} (in ${Math.round(delay / 1000 / 60)} minutes)`,
@@ -99,12 +142,15 @@ export class LeadSchedulerService {
         timeoutId,
         ruleId,
         leadSubid: lead.subid,
-        scheduleTime,
+        scheduleTime: now + delay, // Update with actual send time
         createdAt: Date.now(),
       };
 
       this.timeoutManager.addScheduledTimeout(scheduledTimeout);
       leadsScheduled++;
+
+      // Update the last scheduled time for next iteration
+      lastScheduledTime = now + delay;
     });
 
     // Log final schedule summary

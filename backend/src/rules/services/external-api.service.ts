@@ -36,6 +36,10 @@ export type Lead = {
 @Injectable()
 export class ExternalApiService {
   private readonly logger = new Logger(ExternalApiService.name);
+
+  // Track recent API calls to prevent too frequent requests
+  private readonly recentCalls = new Map<string, number>();
+  private readonly MINIMUM_CALL_INTERVAL = 30000; // 30 seconds between same lead calls
   private readonly endpoints = { getLeads: '', getProducts: '', addLead: '' };
   private readonly apiKey: string;
   private readonly timeout: number;
@@ -259,6 +263,30 @@ export class ExternalApiService {
     ua: string;
     // DO NOT include email and status - they are not in the API schema
   }): Promise<{ status: number; data: any }> {
+    const leadKey = `${payload.subid}:${payload.productId}`;
+    const now = Date.now();
+
+    // CRITICAL: Prevent duplicate API calls for the same lead
+    const lastCall = this.recentCalls.get(leadKey);
+    if (lastCall && now - lastCall < this.MINIMUM_CALL_INTERVAL) {
+      this.logger.warn(
+        `🚨 BATCH PREVENTION: Lead ${payload.subid} was sent ${Math.round((now - lastCall) / 1000)}s ago, preventing duplicate API call`,
+      );
+      throw new Error(
+        `Lead ${payload.subid} sent too recently, preventing duplicate`,
+      );
+    }
+
+    // Track this call
+    this.recentCalls.set(leadKey, now);
+
+    // Cleanup old entries (older than 1 hour)
+    const oneHourAgo = now - 60 * 60 * 1000;
+    for (const [key, timestamp] of this.recentCalls.entries()) {
+      if (timestamp < oneHourAgo) {
+        this.recentCalls.delete(key);
+      }
+    }
     const cfgPost: AxiosRequestConfig = {
       headers: { 'X-API-KEY': this.apiKey, 'Content-Type': 'application/json' },
       timeout: this.utils.minTimeout(this.timeout),
