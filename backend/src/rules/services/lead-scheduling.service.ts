@@ -137,6 +137,24 @@ export class LeadSchedulingService {
           windowStart = intendedStart;
           windowEnd = intendedEnd;
         }
+
+        // Additional check: if rule has sendDateFrom/sendDateTo constraints
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        // Check if we're outside the valid send date range
+        if (rule.sendDateFrom && currentDate < rule.sendDateFrom) {
+          this.logger.warn(
+            `Rule ${rule.id}: Current date ${currentDate} is before sendDateFrom ${rule.sendDateFrom}. Skipping execution.`,
+          );
+          return;
+        }
+
+        if (rule.sendDateTo && currentDate > rule.sendDateTo) {
+          this.logger.warn(
+            `Rule ${rule.id}: Current date ${currentDate} is after sendDateTo ${rule.sendDateTo}. Skipping execution.`,
+          );
+          return;
+        }
       }
 
       if (windowEnd <= windowStart && !rule.isInfinite) {

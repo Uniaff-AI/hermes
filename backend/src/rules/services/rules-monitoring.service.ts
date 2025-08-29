@@ -6,7 +6,7 @@ import { Rule } from '../domain/rule.entity';
 import { LeadSending, LeadSendingStatus } from '../domain/lead-sending.entity';
 import { ExternalApiService } from './external-api.service';
 import { LeadSchedulingService } from './lead-scheduling.service';
-import { getCurrentDateString } from '../../utils/time.util';
+import { isDateInPast, isDateInFuture } from '../../utils/time.util';
 
 @Injectable()
 export class RulesMonitoringService {
@@ -272,15 +272,13 @@ export class RulesMonitoringService {
 
     // Check the lead date range (only for non-infinite sending)
     if (!rule.isInfinite && (rule.leadDateFrom || rule.leadDateTo)) {
-      const currentDate = getCurrentDateString(); // Use local time
-
-      if (rule.leadDateFrom && currentDate < rule.leadDateFrom) {
+      if (rule.leadDateFrom && isDateInFuture(rule.leadDateFrom)) {
         validationIssues.push(
           `Дата начала фильтрации лидов еще не наступила (${rule.leadDateFrom})`,
         );
       }
 
-      if (rule.leadDateTo && currentDate > rule.leadDateTo) {
+      if (rule.leadDateTo && isDateInPast(rule.leadDateTo)) {
         validationIssues.push(
           `Дата окончания фильтрации лидов уже прошла (${rule.leadDateTo})`,
         );
@@ -289,15 +287,16 @@ export class RulesMonitoringService {
 
     // Check the send date range
     if (rule.sendDateFrom || rule.sendDateTo) {
-      const currentDate = getCurrentDateString(); // Use local time
-
-      if (rule.sendDateFrom && currentDate < rule.sendDateFrom) {
+      // Only validate sendDateFrom if it's explicitly set
+      // If not set, it defaults to rule creation time (which is always valid)
+      if (rule.sendDateFrom && isDateInFuture(rule.sendDateFrom)) {
         validationIssues.push(
           `Дата начала отправки еще не наступила (${rule.sendDateFrom})`,
         );
       }
 
-      if (rule.sendDateTo && currentDate > rule.sendDateTo) {
+      // Only flag sendDateTo as past if it's actually in the past
+      if (rule.sendDateTo && isDateInPast(rule.sendDateTo)) {
         validationIssues.push(
           `Дата окончания отправки уже прошла (${rule.sendDateTo})`,
         );

@@ -664,6 +664,15 @@ const RuleEditModalNew: FC<RuleEditModalNewProps> = ({ rule, isOpen, onClose }) 
               </div>
             )}
 
+            {/* Time window preview */}
+            {!sendingSettings.isInfinite && sendingSettings.sendWindowStart && sendingSettings.sendWindowEnd && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  <strong>Предварительный просмотр:</strong> {formatTimeWindow(sendingSettings.sendWindowStart, sendingSettings.sendWindowEnd)}
+                </p>
+              </div>
+            )}
+
             {/* Даты отправки */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>

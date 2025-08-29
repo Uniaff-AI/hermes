@@ -106,6 +106,7 @@ export function validateDateRanges(data: {
   const errors: ValidationError[] = [];
 
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  const today = new Date().toISOString().split('T')[0];
 
   if (data.leadDateFrom && !dateRegex.test(data.leadDateFrom)) {
     errors.push({
@@ -139,6 +140,7 @@ export function validateDateRanges(data: {
     });
   }
 
+  // Validate date ranges (from < to)
   if (
     data.leadDateFrom &&
     data.leadDateTo &&
@@ -160,6 +162,17 @@ export function validateDateRanges(data: {
       field: 'send_date_range',
       message: 'Invalid send date range',
       details: 'Send date from cannot be later than send date to.',
+    });
+  }
+
+  // Warn if send dates are in the past, but don't block creation
+  // The backend will handle this gracefully
+  if (data.sendDateTo && data.sendDateTo < today) {
+    errors.push({
+      field: 'sendDateTo',
+      message: 'Send date to is in the past',
+      details:
+        'The end date for sending is in the past. The rule may not execute as expected.',
     });
   }
 

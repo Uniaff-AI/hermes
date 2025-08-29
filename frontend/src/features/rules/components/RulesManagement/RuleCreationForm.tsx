@@ -596,6 +596,16 @@ const RuleCreationFormNew: FC = () => {
               </p>
             </div>
           </div>
+
+        )}
+
+        {/* Time window preview */}
+        {!sendingSettings.isInfinite && sendingSettings.sendWindowStart && sendingSettings.sendWindowEnd && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-sm text-blue-800">
+              <strong>Предварительный просмотр:</strong> {formatTimeWindow(sendingSettings.sendWindowStart, sendingSettings.sendWindowEnd)}
+            </p>
+          </div>
         )}
 
         {/* Даты отправки */}
@@ -609,7 +619,7 @@ const RuleCreationFormNew: FC = () => {
               placeholder="Дата начала отправки"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Оставьте пустым для отправки с сегодняшнего дня
+              Оставьте пустым для начала отправки немедленно (с момента создания правила)
             </p>
           </div>
           <div>

@@ -49,10 +49,16 @@ export class RulesService {
       }
     }
 
-    const entity = this.repo.create({
+    // Handle default values for sendDateFrom when not provided
+    const ruleData = {
       isActive: true,
       ...dto,
-    } as unknown as DeepPartial<Rule>);
+      // If sendDateFrom is not provided (null/undefined), default to today
+      // This ensures rules start working immediately when created
+      sendDateFrom: dto.sendDateFrom || new Date().toISOString().split('T')[0],
+    };
+
+    const entity = this.repo.create(ruleData as unknown as DeepPartial<Rule>);
     const rule = await this.repo.save(entity);
 
     // Start processes asynchronously (do not block the rule creation)
