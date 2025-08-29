@@ -1,5 +1,3 @@
-// src/app.module.ts
-
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
@@ -9,12 +7,11 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 
 import databaseConfig from './database/config/database.config';
 import appConfig from './config/app.config';
-import fileConfig from './files/config/file.config';
+
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { MongooseConfigService } from './database/mongoose-config.service';
 import { DatabaseConfig } from './database/config/database-config.type';
 
-import { FilesModule } from './files/files.module';
 import { RulesModule } from './rules/rules.module';
 import { HealthController } from './health/health.controller';
 
@@ -38,7 +35,7 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [databaseConfig, appConfig, fileConfig],
+      load: [databaseConfig, appConfig],
     }),
 
     infrastructureDatabaseModule,
@@ -51,7 +48,6 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
         password: process.env.REDIS_PASSWORD || undefined,
       },
     }),
-    FilesModule,
     RulesModule,
   ],
   controllers: [HealthController],
